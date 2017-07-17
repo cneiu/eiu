@@ -167,19 +167,21 @@ class ExceptionProvider extends Provider
             ob_end_flush();
         }
         
-        if ($this->view->exist($path))
-        {
-            $this->view->severity = $severity;
-            $this->view->message  = $message;
-            $this->view->filepath = $filePath;
-            $this->view->line     = $line;
-            $this->view->display($path, false, 500);
-        }
-        else
-        {
-            $this->logger->error("Exception template not found in: $path");
-            $this->view->text("$message in $filePath: $line", 500);
-        }
+        echo $message;
+        
+//        if ($this->view->exist($path))
+//        {
+//            $this->view->severity = $severity;
+//            $this->view->message  = $message;
+//            $this->view->filepath = $filePath;
+//            $this->view->line     = $line;
+//            $this->view->display($path, false, 500);
+//        }
+//        else
+//        {
+//            $this->logger->error("Exception template not found in: $path");
+//            $this->view->text("$message in $filePath: $line", 500);
+//        }
         
         exit(1);
     }
