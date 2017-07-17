@@ -274,6 +274,8 @@ class RouterProvider extends Provider
         
         $fullClassName = $namespace . '\\' . $className;
         
+        trim($fullClassName, '\\');
+        
         // remove controller item
         $pathParams = array_splice($pathParams, count($classNameArr));
         
