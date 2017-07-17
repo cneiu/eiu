@@ -10,14 +10,14 @@
 namespace eiu\components\files;
 
 
-use eiu\core\service\Provider;
+use eiu\components\Component;
 use ErrorException;
 use FilesystemIterator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 
 
-class FilesComponent extends Provider
+class FilesComponent extends Component
 {
     /**
      * Get the returned value of a file.
