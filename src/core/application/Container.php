@@ -12,7 +12,6 @@ namespace eiu\core\application;
 
 use ArrayAccess;
 use Closure;
-use eiu\core\Container\BoundMethod;
 use Exception;
 use ReflectionClass;
 use ReflectionParameter;
