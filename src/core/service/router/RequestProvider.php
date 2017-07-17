@@ -7,7 +7,7 @@
  */
 
 
-namespace eiu\core\service\router\request;
+namespace eiu\core\service\router;
 
 
 use ArrayAccess;

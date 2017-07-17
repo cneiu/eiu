@@ -15,7 +15,7 @@ use eiu\core\service\event\EventProvider;
 use eiu\core\service\logger\LoggerProvider;
 use eiu\core\service\output\OutputProvider;
 use eiu\core\service\Provider;
-use eiu\core\service\router\request\RequestProvider;
+use eiu\core\service\router\RequestProvider;
 use eiu\core\service\router\RouterProvider;
 use eiu\core\service\security\SecurityProvider;
 use eiu\core\service\view\ViewProvider;
