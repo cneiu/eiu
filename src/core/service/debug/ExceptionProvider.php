@@ -107,7 +107,7 @@ class ExceptionProvider extends Provider
             return;
         }
         
-        $this->logger->error($message, $context);
+//        $this->logger->error($message, $context);
         
         // Should we display the error?
         if (str_ireplace(['off', 'none', 'no', 'false', 'null'], '', ini_get('display_errors')))
