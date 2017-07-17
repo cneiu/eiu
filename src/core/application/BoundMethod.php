@@ -7,7 +7,7 @@
  */
 
 
-namespace eiu\core\Container;
+namespace eiu\core\application;
 
 
 use Closure;
