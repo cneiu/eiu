@@ -7,7 +7,7 @@
  */
 
 
-namespace eiu\components\cryptography\encryption;
+namespace eiu\components\database;
 
 
 use Exception;

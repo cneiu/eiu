@@ -7,10 +7,11 @@
  */
 
 
-namespace eiu\components\database;
+namespace eiu\components\database\driver;
 
 
-use eiu\components\cryptography\encryption\DatabaseException;
+use eiu\components\database\DatabaseException;
+use eiu\components\database\IDatabaseDriver;
 use eiu\core\application\Application;
 use eiu\core\service\logger\Logger;
 use eiu\core\service\logger\LoggerProvider;
