@@ -11,6 +11,7 @@ namespace eiu\components\database;
 
 
 use eiu\components\Component;
+use eiu\components\database\driver\MySQLDriver;
 use eiu\core\application\Application;
 use eiu\core\service\config\ConfigProvider;
 use eiu\core\service\logger\Logger;
