@@ -13,7 +13,7 @@ namespace eiu\components\auth;
 use eiu\components\jwt\JwtComponent;
 use eiu\core\application\Application;
 use eiu\core\service\config\ConfigProvider;
-use eiu\core\service\router\request\RequestProvider;
+use eiu\core\service\router\RequestProvider;
 
 
 class JwtVerifier extends Verifier implements IVerifier

@@ -18,7 +18,7 @@ use eiu\core\application\Application;
 use eiu\core\service\config\ConfigProvider;
 use eiu\core\service\logger\Logger;
 use eiu\core\service\logger\LoggerProvider;
-use eiu\core\service\router\request\RequestProvider;
+use eiu\core\service\router\RequestProvider;
 use Exception;
 
 
