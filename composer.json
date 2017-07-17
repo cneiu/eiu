@@ -8,5 +8,10 @@
             "email": "ziee@qq.com"
         }
     ],
+    "autoload": {
+    	"psr-4": {
+    		"eiu\\": "src"
+    	}
+    },
     "require": {}
 }
