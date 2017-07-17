@@ -1,0 +1,12 @@
+{
+    "name": "goldker/eiu",
+    "description": "a php framework",
+    "license": "GUN",
+    "authors": [
+        {
+            "name": "Bobby",
+            "email": "ziee@qq.com"
+        }
+    ],
+    "require": {}
+}
