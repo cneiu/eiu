@@ -263,19 +263,10 @@ class RouterProvider extends Provider
         
         // parse controller name
         $classNameArr = $name;
-        $className    = null;
-        
-        foreach ($classNameArr as $n)
-        {
-            $className .= ucwords($n);
-        }
-        
-        $className .= 'Controller';
+        $className    = UcWords(array_pop($name)) . 'Controller';
         
         $fullClassName = $namespace . '\\' . $className;
-        
-        trim($fullClassName, '\\');
-        
+    
         // remove controller item
         $pathParams = array_splice($pathParams, count($classNameArr));
         
