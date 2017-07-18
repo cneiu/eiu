@@ -389,7 +389,7 @@ class StructResolver
                     }
                 }
                 
-                if (isset($config['default']))
+                if (isset($config['default']) and isset($config['type']))
                 {
                     switch ($config['type'])
                     {
