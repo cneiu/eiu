@@ -306,8 +306,9 @@ class RouterProvider extends Provider
         $this->requestPathParams = $pathParams;
         $this->requestPathInfo   = $pathInfo;
         $this->requestController = $controller;
-        
-        return compact('namespace', 'className', 'controller', 'method', 'pathParams', 'pathInfo');
+        $this->requestUri        = $pathInfoUri;
+    
+        return compact('namespace', 'className', 'controller', 'method', 'pathParams', 'pathInfo', 'pathInfoUri');
     }
     
     /**
