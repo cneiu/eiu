@@ -255,8 +255,6 @@ class RouterProvider extends Provider
         
         list($file, $name) = $this->_find_controller($pathParams);
         
-        //        require($file);
-        
         // parse namespace
         $namespace = str_replace([dirname(APP_PATH), substr($file, strripos($file, DS))], '', $file);
         $namespace = str_replace('/', '\\', $namespace);
@@ -266,7 +264,7 @@ class RouterProvider extends Provider
         $className    = UcWords(array_pop($name)) . 'Controller';
         
         $fullClassName = $namespace . '\\' . $className;
-    
+        
         // remove controller item
         $pathParams = array_splice($pathParams, count($classNameArr));
         
@@ -274,6 +272,8 @@ class RouterProvider extends Provider
         {
             trigger_error("Controller class \"$fullClassName\" isn't exist.", E_USER_ERROR);
         }
+        
+        $this->logger->info("Parse router is \"$fullClassName\"");
         
         // check controller father class
 //        if ('eiu\abstracts\controller\Controller' != get_parent_class($fullClassName))
@@ -335,7 +335,7 @@ class RouterProvider extends Provider
             
             // build path
             $path = $dir . implode(DS, $cur_uri) . DS;
-            $file = "{$path}{$end_uri}.controller.php";
+            $file = $path . ucwords($end_uri) . "Controller.php";
             
             // find out
             if (is_file($file))
@@ -359,7 +359,7 @@ class RouterProvider extends Provider
             
             // build
             $path = $dir . $cur_dir . DS;
-            $file = $path . $end_uri . ".controller.php";
+            $file = $path . ucwords($end_uri) . "Controller.php";
             
             // find out
             if (is_file($file))
@@ -369,8 +369,6 @@ class RouterProvider extends Provider
                 break;
             }
         }
-        
-        //        $this->log("Controller load finished, the file is: \"$file\"");
         
         return [$file, $name];
     }
