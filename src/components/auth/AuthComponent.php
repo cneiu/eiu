@@ -556,12 +556,14 @@ class AuthComponent extends Component
         if ($this->checkUserRoleById($userId, $roleId))
             return true;
         
+        $uuid = UtilComponent::uuid();
+        
         $sql = "
 			INSERT INTO
 			`sys_user_role`
-			(`ur_user_id`, `ur_role_id`)
+			(`ur_id`, `ur_user_id`, `ur_role_id`)
 			VALUES
-			('$userId', '$roleId')";
+			('$uuid', '$userId', '$roleId')";
         
         return !!$this->db->exec($sql);
     }
