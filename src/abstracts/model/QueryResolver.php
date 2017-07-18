@@ -686,7 +686,7 @@ class QueryResolver
                 }
                 
                 // 跳过可为空
-                if (!isset($struct['notnull']) or !$struct['notnull'] or !is_scalar($fields[$field]))
+                if (!isset($struct['notnull']) or !$struct['notnull'] or !isset($fields[$field]) or !is_scalar($fields[$field]))
                 {
                     continue;
                 }
