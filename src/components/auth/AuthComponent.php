@@ -561,7 +561,7 @@ class AuthComponent extends Component
 			`sys_user_role`
 			(`ur_user_id`, `ur_role_id`)
 			VALUES
-			($userId, $roleId)";
+			('$userId', '$roleId')";
         
         return !!$this->db->exec($sql);
     }
