@@ -724,6 +724,11 @@ class QueryResolver
             // 值类型强制转换
             if (isset($struct['type']))
             {
+                if (is_array($value) or is_object($value))
+                {
+                    trigger_error("{$action} field \"{$field}\" value cannot be array or object.", E_USER_ERROR);
+                }
+    
                 switch ($struct['type'])
                 {
                     case 'integer':
