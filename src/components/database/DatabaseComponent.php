@@ -31,6 +31,13 @@ class DatabaseComponent extends Component implements IDatabaseDriver
     private $driver = null;
     
     /**
+     * 是否事务中
+     *
+     * @var bool
+     */
+    private $transferred = false;
+    
+    /**
      * SessionComponent constructor.
      *
      * @param Application           $app
@@ -100,6 +107,8 @@ class DatabaseComponent extends Component implements IDatabaseDriver
      */
     public function begin()
     {
+        $this->transferred = true;
+        
         return $this->driver->begin();
     }
     
@@ -110,6 +119,8 @@ class DatabaseComponent extends Component implements IDatabaseDriver
      */
     public function commit()
     {
+        $this->transferred = false;
+        
         return $this->driver->commit();
     }
     
@@ -120,7 +131,19 @@ class DatabaseComponent extends Component implements IDatabaseDriver
      */
     public function rollBack()
     {
+        $this->transferred = false;
+        
         return $this->driver->rollBack();
+    }
+    
+    /**
+     * 是否事务中
+     *
+     * @return bool
+     */
+    public function transferred()
+    {
+        return $this->transferred;
     }
     
     /**
