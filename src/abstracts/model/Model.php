@@ -256,14 +256,23 @@ abstract class Model extends Module
         
         $sql = $this->qr->parseInsert($data);
         
+        // 开始事务
+        $this->db()->transferred() or $this->db()->begin();
+        
         $this->event->fire('model.insert.begin', [$this, $data, $sql]);
         
         if (!$this->db->exec($sql))
         {
+            // 回滚事务
+            $this->db()->transferred() or $this->db()->rollBack();
+            
             return false;
         }
-    
+        
         $this->event->fire('model.insert.after', [$this, $data, $sql]);
+        
+        // 提交事务
+        $this->db()->transferred() or $this->db()->commit();
         
         return $this->db->getInsertId() ?: true;
     }
@@ -279,12 +288,22 @@ abstract class Model extends Module
     public function update(array $data, array $query): int
     {
         $sql = $this->qr->parseUpdate($data, $query);
-    
+        
+        // 开始事务
+        $this->db()->transferred() or $this->db()->begin();
+        
         $this->event->fire('model.update.begin', [$this, $query, $data, $sql]);
         
-        $result = $this->db->exec($sql);
-    
+        if (!$result = $this->db->exec($sql))
+        {
+            // 回滚事务
+            $this->db()->transferred() or $this->db()->rollBack();
+        }
+        
         $this->event->fire('model.update.after', [$this, $query, $data, $sql]);
+        
+        // 提交事务
+        $this->db()->transferred() or $this->db()->commit();
         
         return $result >= 0 ? true : false;
     }
@@ -299,12 +318,22 @@ abstract class Model extends Module
     public function delete(array $query = []): int
     {
         $sql = $this->qr->parseDelete($query);
-    
+        
+        // 开始事务
+        $this->db()->transferred() or $this->db()->begin();
+        
         $this->event->fire('model.delete.begin', [$this, $query, $sql]);
         
-        $result = $this->db->exec($sql);
-    
+        if (!$result = $this->db->exec($sql))
+        {
+            // 回滚事务
+            $this->db()->transferred() or $this->db()->rollBack();
+        }
+        
         $this->event->fire('model.delete.after', [$this, $query, $sql]);
+        
+        // 提交事务
+        $this->db()->transferred() or $this->db()->commit();
         
         return $result >= 0 ? true : false;
     }
