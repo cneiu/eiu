@@ -262,6 +262,7 @@ abstract class Model extends Module
         $this->event->fire('model.insert.begin', [$this, $data, $sql]);
     
         $this->db->exec($sql);
+        
 //        if (!$this->db->exec($sql))
 //        {
 //            // 回滚事务
