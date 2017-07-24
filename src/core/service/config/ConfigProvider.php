@@ -79,6 +79,9 @@ class ConfigProvider extends Provider implements ArrayAccess
         // 设置本位币
         setlocale(LC_MONETARY, $_config['MONETARY']);
         
+        // 无限时脚本
+        set_time_limit(0);
+        
         $logger->info($this->className() . " is booted");
     }
     
