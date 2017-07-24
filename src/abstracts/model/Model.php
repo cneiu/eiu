@@ -295,6 +295,7 @@ abstract class Model extends Module
         $this->event->fire('model.update.begin', [$this, $query, $data, $sql]);
         
         $result = $this->db->exec($sql);
+        
 //        if (!$result = $this->db->exec($sql))
 //        {
 //            // 回滚事务
@@ -326,6 +327,7 @@ abstract class Model extends Module
         $this->event->fire('model.delete.begin', [$this, $query, $sql]);
     
         $result = $this->db->exec($sql);
+        
 //        if (!$result = $this->db->exec($sql))
 //        {
 //            // 回滚事务
