@@ -294,11 +294,12 @@ abstract class Model extends Module
         
         $this->event->fire('model.update.begin', [$this, $query, $data, $sql]);
         
-        if (!$result = $this->db->exec($sql))
-        {
-            // 回滚事务
-            $this->db()->transferred() or $this->db()->rollBack();
-        }
+        $result = $this->db->exec($sql);
+//        if (!$result = $this->db->exec($sql))
+//        {
+//            // 回滚事务
+//            $this->db()->transferred() or $this->db()->rollBack();
+//        }
         
         $this->event->fire('model.update.after', [$this, $query, $data, $sql]);
         
@@ -323,12 +324,13 @@ abstract class Model extends Module
         $this->db()->transferred() or $this->db()->begin();
         
         $this->event->fire('model.delete.begin', [$this, $query, $sql]);
-        
-        if (!$result = $this->db->exec($sql))
-        {
-            // 回滚事务
-            $this->db()->transferred() or $this->db()->rollBack();
-        }
+    
+        $result = $this->db->exec($sql);
+//        if (!$result = $this->db->exec($sql))
+//        {
+//            // 回滚事务
+//            $this->db()->transferred() or $this->db()->rollBack();
+//        }
         
         $this->event->fire('model.delete.after', [$this, $query, $sql]);
         
