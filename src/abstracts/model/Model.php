@@ -260,14 +260,15 @@ abstract class Model extends Module
         $this->db()->transferred() or $this->db()->begin();
         
         $this->event->fire('model.insert.begin', [$this, $data, $sql]);
-        
-        if (!$this->db->exec($sql))
-        {
-            // 回滚事务
-            $this->db()->transferred() or $this->db()->rollBack();
-            
-            return false;
-        }
+    
+        $this->db->exec($sql);
+//        if (!$this->db->exec($sql))
+//        {
+//            // 回滚事务
+//            $this->db()->transferred() or $this->db()->rollBack();
+//
+//            return false;
+//        }
         
         $this->event->fire('model.insert.after', [$this, $data, $sql]);
         
