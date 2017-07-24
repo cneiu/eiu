@@ -107,9 +107,14 @@ class DatabaseComponent extends Component implements IDatabaseDriver
      */
     public function begin()
     {
-        $this->transferred = true;
+        if (!$this->transferred)
+        {
+            $this->transferred = true;
+            
+            $this->driver->begin();
+        }
         
-        return $this->driver->begin();
+        return $this->transferred;
     }
     
     /**
@@ -119,9 +124,14 @@ class DatabaseComponent extends Component implements IDatabaseDriver
      */
     public function commit()
     {
-        $this->transferred = false;
+        if ($this->transferred)
+        {
+            $this->transferred = false;
+            
+            $this->driver->commit();
+        }
         
-        return $this->driver->commit();
+        return $this->transferred;
     }
     
     /**
@@ -131,9 +141,14 @@ class DatabaseComponent extends Component implements IDatabaseDriver
      */
     public function rollBack()
     {
-        $this->transferred = false;
+        if ($this->transferred)
+        {
+            $this->transferred = false;
+            
+            $this->driver->rollBack();
+        }
         
-        return $this->driver->rollBack();
+        return $this->transferred;
     }
     
     /**
