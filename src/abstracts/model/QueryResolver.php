@@ -470,9 +470,7 @@ class QueryResolver
                                 $field_val = [$field_val];
                             }
                             
-                            $field_val_it = count($field_val);
-                            
-                            foreach ($field_val_it as $_index => $_item)
+                            foreach ($field_val as $_index => $_item)
                             {
                                 $field_val[$_index] = $this->parseValue($field_val[$_index]);
                             }
