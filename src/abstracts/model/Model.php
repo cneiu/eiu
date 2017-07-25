@@ -609,7 +609,7 @@ abstract class Model extends Module
     {
         if (!isset(static::$parentField) or !static::$parentField)
         {
-            throw new \Exception("模型未定义父字段");
+            return null;
         }
         
         return static::$parentField;
