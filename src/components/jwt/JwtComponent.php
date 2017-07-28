@@ -103,20 +103,14 @@ class JwtComponent extends Component
     /**
      * Decodes a JWT string into a PHP object.
      *
-     * @param string        $jwt            The JWT
-     * @param string|array  $key            The key, or map of keys.
-     *                                      If the algorithm used is asymmetric, this is the public key
-     * @param array         $allowed_algs   List of supported verification algorithms
+     * @param string       $jwt             The JWT
+     * @param string|array $key             The key, or map of keys.
+     * @param array        $allowed_algs    List of supported verification algorithms
      *                                      Supported algorithms are 'HS256', 'HS384', 'HS512' and 'RS256'
      *
      * @return object The JWT's payload as a PHP object
      *
-     * @throws UnexpectedValueException     Provided JWT was invalid
-     * @throws SignatureInvalidException    Provided JWT was invalid because the signature verification failed
-     * @throws BeforeValidException         Provided JWT is trying to be used before it's eligible as defined by 'nbf'
-     * @throws BeforeValidException         Provided JWT is trying to be used before it's been created as defined by 'iat'
-     * @throws ExpiredException             Provided JWT has since expired, as defined by the 'exp' claim
-     *
+     * @throws \Exception
      * @uses jsonDecode
      * @uses urlsafeB64Decode
      */

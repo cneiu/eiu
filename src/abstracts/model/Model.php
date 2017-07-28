@@ -249,7 +249,7 @@ abstract class Model extends Module
         $pk = static::getStruct(static::$primaryKey);
         
         // 生成主键
-        if ('string' == $pk['type'] and !$pk['autoinc'] and !isset($data[$pk['name']]))
+        if ('string' == $pk['type'] and !isset($data[$pk['name']]))
         {
             $data[$pk['name']] = UtilComponent::uuid();
         }
