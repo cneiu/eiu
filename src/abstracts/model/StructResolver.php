@@ -367,6 +367,16 @@ class StructResolver
                 {
                     $config['view']['thumbnail_height'] = (int)$config['view']['thumbnail_height'];
                 }
+    
+                if (isset($config['view']['hide']))
+                {
+                    $config['view']['hide'] = (bool)$config['view']['hide'];
+                }
+    
+                if (isset($config['view']['hideAble']))
+                {
+                    $config['view']['hideAble'] = (bool)$config['view']['hideAble'];
+                }
                 
                 if (isset($config['list']))
                 {
