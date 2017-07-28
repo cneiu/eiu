@@ -273,8 +273,8 @@ class QueryResolver
             
             // 虚拟字段
             $struct = $this->_model->getStruct($field);
-            
-            if (isset($struct['virtual']) and $struct['virtual'])
+    
+            if (!$struct or (isset($struct['virtual']) and $struct['virtual']))
             {
                 continue;
             }
