@@ -133,24 +133,24 @@ class HttpKernel implements IKernel
         $this->event->fire('controller.execute.after');
         
         // 输出渲染
-//        $this->output->render();
-        
+        $this->output->render();
+    
         // 事件 输出渲染完成
-//        $this->event->fire('output.after');
-        
+        $this->event->fire('output.after');
+    
         // timer
-//        $this->app->timerTick('kernel.over');
-        
+        $this->app->timerTick('kernel.over');
+
         // 性能统计
-//        $memory       = $this->app->getMemory();
-//        $totalElapsed = (float)$this->app->timerElapsed('kernel.begin', 'kernel.over', 4);
-//        $execElapsed  = (float)$this->app->timerElapsed('controller.start', 'controller.over', 4);
-        
+        $memory       = $this->app->getMemory();
+        $totalElapsed = (float)$this->app->timerElapsed('kernel.begin', 'kernel.over', 4);
+        $execElapsed  = (float)$this->app->timerElapsed('controller.start', 'controller.over', 4);
+    
         // 事件 应用结束
-//        $this->event->fire('kernel.over', [$memory, $totalElapsed, $execElapsed]);
-        
+        $this->event->fire('kernel.over', [$memory, $totalElapsed, $execElapsed]);
+    
         // 遗言
-//        $this->logger->info("Total execution time: {$totalElapsed}s, Controller execution time: {$execElapsed}, Memory: {$memory}." . str_repeat(PHP_EOL, 3));
+        $this->logger->info("Total execution time: {$totalElapsed}s, Controller execution time: {$execElapsed}, Memory: {$memory}." . str_repeat(PHP_EOL, 3));
     }
     
     /**
@@ -174,30 +174,10 @@ class HttpKernel implements IKernel
      */
     public function shutdown()
     {
-        // 输出渲染
-        $this->output->render();
-        
-        // 事件 输出渲染完成
-        $this->event->fire('output.after');
-        
-        // timer
-        $this->app->timerTick('kernel.over');
-        
         // 异常检测
         if ($last_error = error_get_last() and ($last_error['type'] & (E_ERROR | E_PARSE | E_CORE_ERROR | E_CORE_WARNING | E_COMPILE_ERROR | E_COMPILE_WARNING)))
         {
-            $this->exception->errorHandler($last_error['type'], $last_error['message'], $last_error['file'], $last_error['line']);
+//            $this->exception->errorHandler($last_error['type'], $last_error['message'], $last_error['file'], $last_error['line']);
         }
-        
-        // 性能统计
-        $memory       = $this->app->getMemory();
-        $totalElapsed = (float)$this->app->timerElapsed('kernel.begin', 'kernel.over', 4);
-        $execElapsed  = (float)$this->app->timerElapsed('controller.start', 'controller.over', 4);
-        
-        // 事件 应用结束
-        $this->event->fire('kernel.over', [$memory, $totalElapsed, $execElapsed]);
-        
-        // 遗言
-        $this->logger->info("Total execution time: {$totalElapsed}s, Controller execution time: {$execElapsed}, Memory: {$memory}." . str_repeat(PHP_EOL, 3));
     }
 }

@@ -18,6 +18,7 @@ use eiu\core\service\logger\LoggerProvider;
 use eiu\core\service\output\OutputProvider;
 use eiu\core\service\Provider;
 use eiu\core\service\view\ViewProvider;
+use ErrorException;
 use Exception;
 
 
@@ -80,7 +81,7 @@ class ExceptionProvider extends Provider
         error_reporting(-1);
         ini_set('display_errors', 1);
         set_error_handler([&$this, 'errorHandler']);
-        set_exception_handler([&$this, 'exceptionHandler']);
+//        set_exception_handler([&$this, 'exceptionHandler']);
         
         $this->logger->info($this->className() . " is booted");
     }
@@ -149,41 +150,19 @@ class ExceptionProvider extends Provider
     /**
      * 输出 PHP 错误
      *
-     * @param    int    $severity 类型
-     * @param    string $message  消息
-     * @param    string $filePath 路径
-     * @param    int    $line     行
+     * @param int    $errno
+     * @param string $errstr
+     * @param string $errfile
+     * @param int    $errline
      *
-     * @return    string
+     * @return string
+     *
      */
-    public function showError(int $severity, string $message, string $filePath, int $line)
+    public function showError(int $errno ,string $errstr ,string $errfile, int $errline)
     {
-        $path = $this->config['app']['ERROR_VIEWS_PATH'] . DS;
-        $path .= (PHP_SAPI === 'cli' or defined('STDIN')) ? 'cli' . DS : 'html' . DS;
-        $path .= 'error_php';
-        
-        if (ob_get_level() > ob_get_level() + 1)
-        {
-            ob_end_flush();
-        }
-        
-        echo $message;
-        
-//        if ($this->view->exist($path))
-//        {
-//            $this->view->severity = $severity;
-//            $this->view->message  = $message;
-//            $this->view->filepath = $filePath;
-//            $this->view->line     = $line;
-//            $this->view->display($path, false, 500);
-//        }
-//        else
-//        {
-//            $this->logger->error("Exception template not found in: $path");
-//            $this->view->text("$message in $filePath: $line", 500);
-//        }
-        
-        exit(1);
+        $content = sprintf('%s. File: %s (line: %s)', $errstr, $errfile, $errno);
+        $exception = new ErrorException($content, $errno, 1, $errfile, $errline);
+        static::exceptionHandler($exception);
     }
     
     /**
@@ -196,7 +175,7 @@ class ExceptionProvider extends Provider
         $path = $this->config['app']['ERROR_VIEWS_PATH'] . DS;
         $path .= (PHP_SAPI === 'cli' or defined('STDIN')) ? 'cli' . DS : 'html' . DS;
         $path .= 'error_exception';
-        
+
         if (ob_get_level() > ob_get_level() + 1)
         {
             ob_end_flush();
@@ -213,7 +192,7 @@ class ExceptionProvider extends Provider
             $this->logger->error("Exception template not found in: $path");
             $this->view->text($exception->getMessage() . " in " . $exception->getFile() . ": " . $exception->getLine(), 500);
         }
-        
-        exit(1);
+    
+        $this->output->render();
     }
 }

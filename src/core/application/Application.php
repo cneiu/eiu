@@ -11,6 +11,7 @@ namespace eiu\core\application;
 
 
 use eiu\core\service\config\ConfigProvider;
+use eiu\core\service\debug\ExceptionProvider;
 use eiu\core\service\event\EventProvider;
 use eiu\core\service\logger\LoggerProvider;
 use eiu\core\service\output\OutputProvider;
@@ -98,15 +99,15 @@ class Application extends Container implements IApplication
     {
         // 注册配置服务
         $this->register(ConfigProvider::class);
+    
+        // 注册异常处理服务
+        $this->register(ExceptionProvider::class);
         
         // 注册事件服务
         $this->register(EventProvider::class);
         
         // 注册日志服务
         $this->register(LoggerProvider::class);
-        
-        // 注册异常处理服务
-//        $this->register(ExceptionProvider::class);
         
         // 注册安全服务
         $this->register(SecurityProvider::class);

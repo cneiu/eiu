@@ -60,12 +60,10 @@ class ViewProvider extends Provider
      *
      * @param ConfigProvider        $config
      * @param Logger|LoggerProvider $logger
-     * @param OutputProvider        $output
      */
-    public function boot(ConfigProvider $config, LoggerProvider $logger, OutputProvider $output)
+    public function boot(ConfigProvider $config, LoggerProvider $logger)
     {
         $this->config = $config;
-        $this->output = $output;
         $this->logger = $logger;
         
         $this->_template_vars = $this->config['view']['VIEW_VARS'];
@@ -130,6 +128,7 @@ class ViewProvider extends Provider
         }
         else
         {
+            $this->output = $this->app->make(OutputProvider::class);
             $this->output->setOutput($html ?: '');
         }
         
@@ -151,7 +150,8 @@ class ViewProvider extends Provider
         }
         
         $page = str_replace('/', DS, $page);
-        $page = VIEW_PATH . $page . (pathinfo($page, PATHINFO_EXTENSION) ? '' : '.tpl.php');
+        $page = 0 === stripos($page, VIEW_PATH) ? $page : VIEW_PATH . $page;
+        $page .= (pathinfo($page, PATHINFO_EXTENSION) ? '' : '.tpl.php');
         
         return $page;
     }
@@ -168,6 +168,7 @@ class ViewProvider extends Provider
      */
     public function text($text, int $status_code = 200, string $header_type = 'html', string $charset = null)
     {
+        $this->output = $this->app->make(OutputProvider::class);
         $this->output->setOutput($text);
         $this->output->setHeader('Access-Control-Allow-Origin: *');
         $this->output->setHeader('Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, PATCH, DELETE');
@@ -192,7 +193,8 @@ class ViewProvider extends Provider
         }
         
         $page = str_replace('/', DS, $page);
-        $page = VIEW_PATH . $page . (pathinfo($page, PATHINFO_EXTENSION) ? '' : '.tpl.php');
+        $page = 0 === stripos($page, VIEW_PATH) ? $page : VIEW_PATH . $page;
+        $page .= (pathinfo($page, PATHINFO_EXTENSION) ? '' : '.tpl.php');
         
         return is_file($page) ? $page : false;
     }

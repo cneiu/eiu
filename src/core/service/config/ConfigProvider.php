@@ -14,7 +14,7 @@ use ArrayAccess;
 use eiu\core\service\logger\Logger;
 use eiu\core\service\logger\LoggerProvider;
 use eiu\core\service\Provider;
-use mako\http\exceptions\FileNotFoundException;
+use RuntimeException;
 
 
 class ConfigProvider extends Provider implements ArrayAccess
@@ -47,8 +47,6 @@ class ConfigProvider extends Provider implements ArrayAccess
      * 服务启动
      *
      * @param Logger|LoggerProvider $logger
-     *
-     * @throws FileNotFoundException
      */
     public function boot(LoggerProvider $logger)
     {
@@ -56,12 +54,12 @@ class ConfigProvider extends Provider implements ArrayAccess
         
         if (!is_file($file = static::$path . 'app.config.php'))
         {
-            throw new FileNotFoundException($file);
+            throw new RuntimeException("The file \"{$file}\" does not exist.");
         }
         
         if (!is_array($_config = include($file)))
         {
-            throw new FileNotFoundException('Application configuration item invalid.');
+            throw new RuntimeException('Application configuration option is invalid.');
         }
         
         // 设置字符集
@@ -153,7 +151,7 @@ class ConfigProvider extends Provider implements ArrayAccess
             
             if (!is_file($file))
             {
-                throw new FileNotFoundException("The {$namespace} configuration file does not exist.");
+                throw new RuntimeException("The \"{$namespace}\" configuration file does not exist.");
             }
             
             self::$configs[$namespace] = include($file);
@@ -166,7 +164,7 @@ class ConfigProvider extends Provider implements ArrayAccess
         
         if (!isset(self::$configs[$namespace][$key]))
         {
-            throw new FileNotFoundException("The {$namespace} index {$key} item invalid.");
+            throw new RuntimeException("The \"{$key}\" option for the \"{$namespace}\" configuration file is invalid.");
         }
         
         return self::$configs[$namespace][$key];
