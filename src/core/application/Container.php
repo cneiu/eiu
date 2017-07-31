@@ -18,30 +18,31 @@ use ReflectionParameter;
 
 
 /**
- * The ContainerContract class.
- *
- * @since  1.0
+ * 核心容器
  */
 class Container implements ArrayAccess, IContainer
 {
     /**
-     * The current globally available container (if any).
+     * 当前容器实例
      *
      * @var static
      */
     protected static $instance;
+    
     /**
-     * The contextual binding map.
+     * 绑定上下文
      *
      * @var array
      */
     public $contextual = [];
+    
     /**
-     * An array of the types that have been resolved.
+     * 已实例化实体的数组
      *
      * @var array
      */
     protected $resolved = [];
+    
     /**
      * 容器绑定数组
      *
@@ -50,12 +51,14 @@ class Container implements ArrayAccess, IContainer
      * @var array
      */
     protected $bindings = [];
+    
     /**
-     * The container's method bindings.
+     * 绑定方法数组
      *
      * @var array
      */
     protected $methodBindings = [];
+    
     /**
      * 容器共享实例数组
      *
@@ -64,20 +67,23 @@ class Container implements ArrayAccess, IContainer
      * @var array
      */
     protected $instances = [];
+    
     /**
-     * The extension closures for services.
+     * 扩展闭包
      *
      * @var array
      */
     protected $extenders = [];
+    
     /**
-     * The stack of concretions currently being built.
+     * 当前上下文堆栈
      *
      * @var array
      */
     protected $buildStack = [];
+    
     /**
-     * The parameter override stack.
+     * 重写堆栈参数
      *
      * @var array
      */
@@ -241,8 +247,7 @@ class Container implements ArrayAccess, IContainer
          *
          * @return mixed
          */
-        return function ($container, $parameters = []) use ($abstract, $concrete)
-        {
+        return function ($container, $parameters = []) use ($abstract, $concrete) {
             if ($abstract == $concrete)
             {
                 return $container->build($concrete);
@@ -689,8 +694,7 @@ class Container implements ArrayAccess, IContainer
      */
     public function wrap(Closure $callback, array $parameters = [])
     {
-        return function () use ($callback, $parameters)
-        {
+        return function () use ($callback, $parameters) {
             return $this->call($callback, $parameters);
         };
     }
@@ -718,8 +722,7 @@ class Container implements ArrayAccess, IContainer
      */
     public function factory($abstract)
     {
-        return function () use ($abstract)
-        {
+        return function () use ($abstract) {
             return $this->make($abstract);
         };
     }
@@ -803,8 +806,7 @@ class Container implements ArrayAccess, IContainer
     public function offsetSet($key, $value)
     {
         $this->bind(
-            $key, $value instanceof Closure ? $value : function () use ($value)
-        {
+            $key, $value instanceof Closure ? $value : function () use ($value) {
             return $value;
         }
         );

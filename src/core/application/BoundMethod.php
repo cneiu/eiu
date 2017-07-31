@@ -16,13 +16,18 @@ use ReflectionFunction;
 use ReflectionMethod;
 
 
+/**
+ * 方法绑定器
+ *
+ * @package eiu\core\application
+ */
 class BoundMethod
 {
     /**
-     * Call the given Closure / class@method and inject its dependencies.
+     * 调用闭包或方法并注入依赖
      *
      * @param  \eiu\core\application\Container $container
-     * @param  callable|string                 $callback
+     * @param  callable|string                 $callback 闭包函数或"类名@方法名"形式字符串
      * @param  array                           $parameters
      * @param  string|null                     $defaultMethod
      *
@@ -35,8 +40,7 @@ class BoundMethod
             return static::callClass($container, $callback, $parameters, $defaultMethod);
         }
         
-        return static::callBoundMethod($container, $callback, function () use ($container, $callback, $parameters)
-        {
+        return static::callBoundMethod($container, $callback, function () use ($container, $callback, $parameters) {
             return call_user_func_array(
                 $callback, static::getMethodDependencies($container, $callback, $parameters)
             );
@@ -45,7 +49,7 @@ class BoundMethod
     }
     
     /**
-     * Determine if the given string is in Class@method syntax.
+     * 是否"类名@方法名"形式字符串调用
      *
      * @param  mixed $callback
      *
@@ -57,7 +61,7 @@ class BoundMethod
     }
     
     /**
-     * Call a string reference to a class using Class@method syntax.
+     * 调用"类名@方法名"形式方法
      *
      * @param  \eiu\core\application\Container $container
      * @param  string                          $target
@@ -88,7 +92,7 @@ class BoundMethod
     }
     
     /**
-     * Call a method that has been bound to the container.
+     * 调用已绑定方法
      *
      * @param  \eiu\core\application\Container $container
      * @param  callable                        $callback
@@ -117,7 +121,7 @@ class BoundMethod
     }
     
     /**
-     * Normalize the given callback into a Class@method string.
+     * 生成"类名@方法名"形式方法字符串
      *
      * @param  callable $callback
      *
@@ -131,7 +135,7 @@ class BoundMethod
     }
     
     /**
-     * Get all dependencies for a given method.
+     * 获取给定方法的依赖
      *
      * @param  \eiu\core\application\ContainerContract
      * @param  callable|string $callback
@@ -156,7 +160,7 @@ class BoundMethod
     }
     
     /**
-     * Get the proper reflection instance for the given callback.
+     * 根据给定回调获取相应的反射实例
      *
      * @param  callable|string $callback
      *
@@ -173,7 +177,7 @@ class BoundMethod
     }
     
     /**
-     * Get the dependency for the given call parameter.
+     * 为给定的回调参数生成依赖
      *
      * @param  \eiu\core\application\Container $container
      * @param  \ReflectionParameter            $parameter

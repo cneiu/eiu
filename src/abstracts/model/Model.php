@@ -160,10 +160,11 @@ abstract class Model extends Module
      * 查询
      *
      * @param array $query
+     * @param array $view
      *
      * @return array
      */
-    public function select(array $query = []): array
+    public function select(array $query = [], $view = []): array
     {
         // 获取所有字段
 //        if (!isset($query['field']) or !$query['field'])
@@ -183,6 +184,12 @@ abstract class Model extends Module
 //                }
 //            }
 //        }
+        
+        // 如果指定了视图则用指定视图
+        if ($view)
+        {
+            static::$structs = $view;
+        }
         
         $sql = $this->qr->parseSelect($query);
         

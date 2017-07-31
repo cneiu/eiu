@@ -273,8 +273,8 @@ class QueryResolver
             
             // 虚拟字段
             $struct = $this->_model->getStruct($field);
-    
-            if (!$struct or (isset($struct['virtual']) and $struct['virtual']))
+            
+            if (isset($struct['virtual']) and $struct['virtual'])
             {
                 continue;
             }
@@ -726,7 +726,7 @@ class QueryResolver
                 {
                     trigger_error("{$action} field \"{$field}\" value cannot be array or object.", E_USER_ERROR);
                 }
-    
+                
                 switch ($struct['type'])
                 {
                     case 'integer':

@@ -14,6 +14,7 @@ use ArrayAccess;
 use eiu\core\service\logger\Logger;
 use eiu\core\service\logger\LoggerProvider;
 use eiu\core\service\Provider;
+use mako\http\exceptions\FileNotFoundException;
 
 
 class ConfigProvider extends Provider implements ArrayAccess
@@ -46,6 +47,8 @@ class ConfigProvider extends Provider implements ArrayAccess
      * 服务启动
      *
      * @param Logger|LoggerProvider $logger
+     *
+     * @throws FileNotFoundException
      */
     public function boot(LoggerProvider $logger)
     {
@@ -53,14 +56,12 @@ class ConfigProvider extends Provider implements ArrayAccess
         
         if (!is_file($file = static::$path . 'app.config.php'))
         {
-            header('HTTP/1.1 503 Service Unavailable.', true, 503);
-            trigger_error('ApplicationContract configuration file does not exist.', E_USER_ERROR);
+            throw new FileNotFoundException($file);
         }
         
         if (!is_array($_config = include($file)))
         {
-            header('HTTP/1.1 503 Service Unavailable.', true, 503);
-            trigger_error('App configuration item invalid.', E_USER_ERROR);
+            throw new FileNotFoundException('Application configuration item invalid.');
         }
         
         // 设置字符集
@@ -152,8 +153,7 @@ class ConfigProvider extends Provider implements ArrayAccess
             
             if (!is_file($file))
             {
-                header('HTTP/1.1 503 Service Unavailable.', true, 503);
-                trigger_error("The $namespace configuration file does not exist.", E_USER_ERROR);
+                throw new FileNotFoundException("The {$namespace} configuration file does not exist.");
             }
             
             self::$configs[$namespace] = include($file);
@@ -166,8 +166,7 @@ class ConfigProvider extends Provider implements ArrayAccess
         
         if (!isset(self::$configs[$namespace][$key]))
         {
-            header('HTTP/1.1 503 Service Unavailable.', true, 503);
-            trigger_error("The $namespace index $key does not exist.", E_USER_ERROR);
+            throw new FileNotFoundException("The {$namespace} index {$key} item invalid.");
         }
         
         return self::$configs[$namespace][$key];

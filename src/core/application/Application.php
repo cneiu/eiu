@@ -21,6 +21,11 @@ use eiu\core\service\security\SecurityProvider;
 use eiu\core\service\view\ViewProvider;
 
 
+/**
+ * 核心应用
+ *
+ * @package eiu\core\application
+ */
 class Application extends Container implements IApplication
 {
     /**
@@ -28,25 +33,29 @@ class Application extends Container implements IApplication
      *
      * @var string
      */
-    const VERSION = '5.4.24';
+    const VERSION = '3.0.1';
+    
     /**
      * 计时器
      *
      * @var array
      */
     static private $timerTicks = [];
+    
     /**
      * 应用服务是否已启动
      *
      * @var bool
      */
     private $booted = false;
+    
     /**
      * 服务注册数组
      *
      * @var array
      */
     private $Providers = [];
+    
     /**
      * 服务加载标记数组
      *
@@ -166,8 +175,7 @@ class Application extends Container implements IApplication
         foreach ($this->Providers as $key => $value)
         {
             if (call_user_func(
-                function ($value) use ($name)
-                {
+                function ($value) use ($name) {
                     return $value instanceof $name;
                 }, $value, $key
             ))
@@ -245,8 +253,7 @@ class Application extends Container implements IApplication
         }
         
         array_walk(
-            $this->Providers, function ($p)
-        {
+            $this->Providers, function ($p) {
             $this->bootProvider($p);
         }
         );

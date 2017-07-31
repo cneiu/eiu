@@ -19,6 +19,11 @@ use eiu\core\service\router\RequestProvider;
 use eiu\core\service\router\RouterProvider;
 
 
+/**
+ * HTTP请求处理核心
+ *
+ * @package eiu\core\application
+ */
 class HttpKernel implements IKernel
 {
     /**
@@ -59,7 +64,7 @@ class HttpKernel implements IKernel
     private $exception;
     
     /**
-     * Create a new HTTP kernel instance.
+     * 创建一个新的HTTP请求处理核心实例
      *
      * @param \eiu\core\application\Container $app
      * @param Logger|LoggerProvider           $logger
@@ -81,7 +86,7 @@ class HttpKernel implements IKernel
     }
     
     /**
-     * Handle an incoming HTTP request.
+     * 处理一个请求
      *
      */
     public function handle()
@@ -165,7 +170,7 @@ class HttpKernel implements IKernel
     }
     
     /**
-     * shutdown
+     * 请求释放
      */
     public function shutdown()
     {
