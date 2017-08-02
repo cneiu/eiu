@@ -81,7 +81,7 @@ class ExceptionProvider extends Provider
         error_reporting(-1);
         ini_set('display_errors', 1);
         set_error_handler([&$this, 'errorHandler']);
-//        set_exception_handler([&$this, 'exceptionHandler']);
+        set_exception_handler([&$this, 'exceptionHandler']);
         
         $this->logger->info($this->className() . " is booted");
     }
@@ -91,60 +91,41 @@ class ExceptionProvider extends Provider
      */
     public function errorHandler(int $severity, string $message, string $file = '', int $line = 0, array $context = [])
     {
-        if ($is_error = (((E_ERROR | E_PARSE | E_COMPILE_ERROR | E_CORE_ERROR | E_USER_ERROR) & $severity) === $severity))
-        {
-            if (strpos(PHP_SAPI, 'cgi') === 0)
-            {
-                header('Status: ' . 500 . ' ' . 500, true);
-            }
-            else
-            {
-                header(isset($_SERVER['SERVER_PROTOCOL']) ? $_SERVER['SERVER_PROTOCOL'] : 'HTTP/1.1' . ' ' . 500 . ' ' . 'Internal Server Error', true, 500);
-            }
-        }
-        
-        if (($severity & error_reporting()) !== $severity)
-        {
-            return;
-        }
-        
-//        $this->logger->error($message, $context);
-        
-        // Should we display the error?
-        if (str_ireplace(['off', 'none', 'no', 'false', 'null'], '', ini_get('display_errors')))
-        {
-            $this->showError($severity, $message, $file, $line);
-        }
-        
-        $is_error and exit(1);
+        $exception = new ErrorException($message, $severity, 1, $file, $line);
+        $exception->context = $context;
+        static::exceptionHandler($exception);
     }
     
     /**
      * @inheritdoc
      */
-    public function exceptionHandler(Exception $ex)
+    public function exceptionHandler(Exception $e)
     {
-        $this->logger->error($ex->getMessage(), $ex->getTrace());
-        
-        if (!(PHP_SAPI === 'cli' or defined('STDIN')))
+        $this->logger->error($e->getMessage());
+    
+        $path = $this->config['app']['ERROR_VIEWS_PATH'] . DS;
+        $path .= (PHP_SAPI === 'cli' or defined('STDIN')) ? 'cli' . DS : 'html' . DS;
+        $path .= 'error_exception';
+    
+        if (ob_get_level() > ob_get_level() + 1)
         {
-            if (strpos(PHP_SAPI, 'cgi') === 0)
-            {
-                header('Status: ' . 500 . ' ' . 500, true);
-            }
-            else
-            {
-                header(isset($_SERVER['SERVER_PROTOCOL']) ? $_SERVER['SERVER_PROTOCOL'] : 'HTTP/1.1' . ' ' . 500 . ' ' . 'Internal Server Error', true, 500);
-            }
+            ob_end_flush();
         }
-        
-        // Should we display the error?
-        if (str_ireplace(['off', 'none', 'no', 'false', 'null'], '', ini_get('display_errors')))
+    
+        if ($this->view->exist($path))
         {
-            $this->showException($ex);
+            $this->view->exception = $e;
+            $this->view->message   = $e->getMessage();
+            $this->view->display($path, false, 500);
         }
-        
-        exit(1);
+        else
+        {
+            $this->logger->error("Exception template not found in: $path");
+            $this->view->text($e->getMessage() . " in " . $e->getFile() . ": " . $e->getLine(), 500);
+        }
+    
+        $this->output->render();
+        exit;
     }
     
     /**
@@ -163,36 +144,5 @@ class ExceptionProvider extends Provider
         $content = sprintf('%s. File: %s (line: %s)', $errstr, $errfile, $errno);
         $exception = new ErrorException($content, $errno, 1, $errfile, $errline);
         static::exceptionHandler($exception);
-    }
-    
-    /**
-     * 输出异常
-     *
-     * @param Exception $exception 异常对象
-     */
-    public function showException(Exception $exception)
-    {
-        $path = $this->config['app']['ERROR_VIEWS_PATH'] . DS;
-        $path .= (PHP_SAPI === 'cli' or defined('STDIN')) ? 'cli' . DS : 'html' . DS;
-        $path .= 'error_exception';
-
-        if (ob_get_level() > ob_get_level() + 1)
-        {
-            ob_end_flush();
-        }
-        
-        if ($this->view->exist($path))
-        {
-            $this->view->exception = $exception;
-            $this->view->message   = $exception->getMessage();
-            $this->view->display($path, false, 500);
-        }
-        else
-        {
-            $this->logger->error("Exception template not found in: $path");
-            $this->view->text($exception->getMessage() . " in " . $exception->getFile() . ": " . $exception->getLine(), 500);
-        }
-    
-        $this->output->render();
     }
 }
