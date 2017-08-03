@@ -619,7 +619,8 @@ class QueryResolver
         {
             if (!$this->_model->hasField($field))
             {
-                throw new ModelErrorException("Parse order: the \"{$field}\" field is undefined in the model config.");
+                continue;
+                //throw new ModelErrorException("Parse order: the \"{$field}\" field is undefined in the model config.");
             }
             
             if (!is_string($dir))
