@@ -230,22 +230,28 @@ class UtilComponent extends Component
         $stringLength = strlen($string);
         $keyLength    = strlen($key);
         
+        $j = 0;
+        
         for ($i = 0; $i < $stringLength; $i++)
         {
-            for ($j = 0; $j < $keyLength; $j++)
+            if ($j == $keyLength)
             {
-                if ($isDecode)
-                {
-                    //decrypt
-                    $string[$i] = $key[$j] ^ $string[$i];
-                    
-                }
-                else
-                {
-                    //crypt
-                    $string[$i] = $string[$i] ^ $key[$j];
-                }
+                $j = 0;
             }
+            
+            if ($isDecode)
+            {
+                //decrypt
+                $string[$i] = $key[$j] ^ $string[$i];
+                
+            }
+            else
+            {
+                //crypt
+                $string[$i] = $string[$i] ^ $key[$j];
+            }
+            
+            $j++;
         }
         
         return $string;
