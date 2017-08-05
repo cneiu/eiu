@@ -83,7 +83,7 @@ class UtilComponent extends Component
     public static function buildTree(array $data, $parentId, $parent_name, $self_name, $childrenName = '_children', $asName = [])
     {
         $tree = [];
-
+        
         foreach ($data as $index => $d)
         {
             if (!isset($data[$index][$parent_name]) || !isset($data[$index][$self_name]))
@@ -214,5 +214,40 @@ class UtilComponent extends Component
         $Param_temp = str_replace('_KEY_', '', $Param_temp);
         
         return $Param_temp;
+    }
+    
+    /**
+     * 异或混淆加解密
+     *
+     * @param string $string   需要加解密的字符串
+     * @param string $key      密钥
+     * @param bool   $isDecode 是否是解密
+     *
+     * @return mixed
+     */
+    public static function xorString(string $string, string $key, bool $isDecode = false)
+    {
+        $stringLength = strlen($string);
+        $keyLength    = strlen($key);
+        
+        for ($i = 0; $i < $stringLength; $i++)
+        {
+            for ($j = 0; $j < $keyLength; $j++)
+            {
+                if ($isDecode)
+                {
+                    //decrypt
+                    $string[$i] = $key[$j] ^ $string[$i];
+                    
+                }
+                else
+                {
+                    //crypt
+                    $string[$i] = $string[$i] ^ $key[$j];
+                }
+            }
+        }
+        
+        return $string;
     }
 }
