@@ -10,7 +10,6 @@
 namespace eiu\core\service\router;
 
 
-use app\modules\controllers\admin\AdminController;
 use eiu\core\service\config\ConfigProvider;
 use eiu\core\service\logger\Logger;
 use eiu\core\service\logger\LoggerProvider;
