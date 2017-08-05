@@ -51,7 +51,7 @@ return [
     // DEBUG     = 7;	调试
     
     // 日志记录阈值
-    'LOG_THRESHOLD'      => [0, 1, 2, 3, 4, 5, 6, 7],
+    'LOG_THRESHOLD'      => [0, 1, 2, 3, 4, 5],
     
     // 日志存储路径
     'LOG_PATH'           => APP_DATA . 'logs',
