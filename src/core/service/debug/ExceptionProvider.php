@@ -259,8 +259,6 @@ class ExceptionProvider extends Provider
         /** @var RouterProvider $router */
         $router = $this->app->make(RouterProvider::class);
         
-        echo $router->getRequestUri();
-        
         // 清空输出缓冲区
         if (ob_get_level() > ob_get_level() + 1)
         {
