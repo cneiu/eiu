@@ -295,7 +295,7 @@ class RouterProvider extends Provider
         }
         else
         {
-            throw new Exception("Controller \"$fullClassName\" missing action.");
+            throw new Exception("Controller \"$fullClassName\" missing action.", 404);
         }
         
         $pathInfo   = $pathInfo = join('/', $classNameArr) . '/' . $method;

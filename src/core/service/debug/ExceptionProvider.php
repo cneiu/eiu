@@ -291,7 +291,7 @@ class ExceptionProvider extends Provider
                 $view->line    = $line;
                 $view->context = $context;
                 $view->router  = $router;
-                $view->display($view_file);
+                $view->display($view_file, $status);
             }
             else
             {
