@@ -14,6 +14,7 @@ use ArrayAccess;
 use eiu\components\Component;
 use eiu\components\cryptography\encryption\EncrypterComponent;
 use eiu\components\cryptography\encryption\keys\Key;
+use eiu\components\files\FilesComponent;
 use eiu\core\application\Application;
 use eiu\core\service\config\ConfigProvider;
 use eiu\core\service\logger\Logger;
@@ -52,13 +53,24 @@ class SessionComponent extends Component implements ArrayAccess
      * @param ConfigProvider        $config
      * @param LoggerProvider|Logger $logger
      * @param EncrypterComponent    $encrypter
+     * @param FilesComponent        $filesComponent
+     *
+     * @throws Exception
      */
-    public function __construct(Application $app, ConfigProvider $config, LoggerProvider $logger, EncrypterComponent $encrypter)
+    public function __construct(Application $app, ConfigProvider $config, LoggerProvider $logger, EncrypterComponent $encrypter, FilesComponent $filesComponent)
     {
         parent::__construct($app);
         
         if (empty(session_id()))
         {
+            if (!$filesComponent->exists(APP_DATA . 'session'))
+            {
+                if (!$filesComponent->makeDirectory(APP_DATA . 'session', 0755, true))
+                {
+                    throw new \Exception('The session directory cannot be written.', 500);
+                }
+            }
+            
             session_save_path(APP_DATA . 'session');
             session_start();
             

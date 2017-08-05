@@ -84,6 +84,7 @@ class Logger
         {
             $this->setTimestampFormat($timestampFormat);
         }
+        
         if (null !== $writer)
         {
             $this->addWriter($writer);

@@ -10,6 +10,7 @@
 namespace eiu\core\service\logger;
 
 
+use eiu\components\files\FilesComponent;
 use eiu\core\service\config\ConfigProvider;
 use eiu\core\service\Provider;
 
@@ -59,7 +60,6 @@ class LoggerProvider extends Provider
      */
     public function register()
     {
-        
         $this->app->instance($this->alias(), $this);
         $this->app->instance(__CLASS__, $this);
     }
@@ -68,8 +68,11 @@ class LoggerProvider extends Provider
      * 服务启动
      *
      * @param ConfigProvider $config
+     * @param FilesComponent $filesComponent
+     *
+     * @throws \Exception
      */
-    public function boot(ConfigProvider $config)
+    public function boot(ConfigProvider $config, FilesComponent $filesComponent)
     {
         $this->config = $config;
         
@@ -78,6 +81,15 @@ class LoggerProvider extends Provider
             $path   = $this->config['app']['LOG_PATH'];
             $path   = DS == substr($path, -1) ? $path : $path . DS;
             $path   .= date('Y-m-d') . $this->config['app']['LOG_FILE_EXTENSION'];
+    
+            if (!$filesComponent->exists(dirname($path)))
+            {
+                if (!$filesComponent->makeDirectory(dirname($path), 0755, true))
+                {
+                    throw new \Exception('The log directory cannot be written.', 500);
+                }
+            }
+            
             $logger = new Logger(new writer\File($path));
             $logger->setTimestampFormat($this->config['app']['LOG_DATE_FORMAT']);
             

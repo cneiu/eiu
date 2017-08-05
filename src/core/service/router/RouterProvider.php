@@ -10,10 +10,12 @@
 namespace eiu\core\service\router;
 
 
+use app\modules\controllers\admin\AdminController;
 use eiu\core\service\config\ConfigProvider;
 use eiu\core\service\logger\Logger;
 use eiu\core\service\logger\LoggerProvider;
 use eiu\core\service\Provider;
+use Exception;
 
 
 class RouterProvider extends Provider
@@ -129,7 +131,6 @@ class RouterProvider extends Provider
         $this->pathInfoSuffix    = $config['router']['URL_SUFFIX'];
         $this->defaultController = $config['router']['DEFAULT_CONTROLLER'];
         $this->defaultAction     = $config['router']['DEFAULT_ACTION'];
-        
         $this->logger = $logger;
         $this->logger->info($this->className() . " is booted");
     }
@@ -247,6 +248,7 @@ class RouterProvider extends Provider
      * @param string $pathInfoUri 请求信息
      *
      * @return array
+     * @throws Exception
      */
     public function parseController($pathInfoUri = null)
     {
@@ -270,7 +272,7 @@ class RouterProvider extends Provider
         
         if (!class_exists($fullClassName))
         {
-            trigger_error("Controller class \"$fullClassName\" isn't exist.", E_USER_ERROR);
+            throw new Exception("Controller class \"$fullClassName\" isn't exist.", 404);
         }
         
         $this->logger->info("Parse router is \"$fullClassName\"");
@@ -280,7 +282,7 @@ class RouterProvider extends Provider
 //        {
 //            trigger_error("Controller class \"$fullClassName\" inherited error.", E_USER_ERROR);
 //        }
-        
+
         // find action
         $method = null;
         
@@ -294,7 +296,7 @@ class RouterProvider extends Provider
         }
         else
         {
-            trigger_error("Controller \"$fullClassName\" missing action.", E_USER_ERROR);
+            throw new Exception("Controller \"$fullClassName\" missing action.");
         }
         
         $pathInfo   = $pathInfo = join('/', $classNameArr) . '/' . $method;
@@ -317,6 +319,7 @@ class RouterProvider extends Provider
      * @param array $uri URI
      *
      * @return array
+     * @throws Exception
      */
     private function _find_controller(array $uri)
     {
@@ -355,7 +358,7 @@ class RouterProvider extends Provider
             // can not find
             if (!$cur_dir)
             {
-                trigger_error("Controller load failure, maybe it's not exist.", E_USER_ERROR);
+                throw new Exception("Controller load failure, maybe it's not exist.", 404);
             }
             
             // build
