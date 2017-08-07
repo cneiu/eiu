@@ -228,19 +228,21 @@ class UtilComponent extends Component
     {
         $result = "";
         $j      = 0;
-        
+    
         for ($i = 0; $i < strlen($string); $i++)
         {
+            $a      = self::_getCharcode($string, $i);
+            $b      = $a ^ self::_getCharcode($key, $j);
+            $result .= self::_fromCharCode($b);
+        
+            $j++;
+        
             if ($j == strlen($key))
             {
                 $j = 0;
             }
-            
-            $a      = self::_getCharcode($string, $i);
-            $b      = $a ^ self::_getCharcode($key, $j);
-            $result .= self::_fromCharCode($b);
         }
-        
+    
         return $result;
     }
     
