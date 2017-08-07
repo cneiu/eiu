@@ -219,41 +219,100 @@ class UtilComponent extends Component
     /**
      * 异或混淆加解密
      *
-     * @param string $string   需要加解密的字符串
-     * @param string $key      密钥
-     * @param bool   $isDecode 是否是解密
+     * @param string $string 需要加解密的字符串
+     * @param string $key    密钥
      *
      * @return mixed
      */
-    public static function xorString(string $string, string $key, bool $isDecode = false)
+    public static function xorStr($string, $key)
     {
-        $stringLength = strlen($string);
-        $keyLength    = strlen($key);
+        $result = "";
+        $j      = 0;
         
-        $j = 0;
-        
-        for ($i = 0; $i < $stringLength; $i++)
+        for ($i = 0; $i < strlen($string); $i++)
         {
-            if ($j == $keyLength)
+            if ($j == strlen($key))
             {
                 $j = 0;
             }
             
-            if ($isDecode)
-            {
-                //decrypt
-                $string[$i] = $key[$j] ^ $string[$i];
-                
-            }
-            else
-            {
-                //crypt
-                $string[$i] = $string[$i] ^ $key[$j];
-            }
-            
-            $j++;
+            $a      = self::_getCharcode($string, $i);
+            $b      = $a ^ self::_getCharcode($key, $j);
+            $result .= self::_fromCharCode($b);
         }
         
-        return $string;
+        return $result;
+    }
+    
+    /**
+     * PHP replacement for JavaScript charCodeAt.
+     *
+     * @access private
+     *
+     * @param mixed $str
+     * @param mixed $i
+     *
+     * @return string
+     */
+    private static function _getCharcode($str, $i)
+    {
+        return self::_uniord(substr($str, $i, 1));
+    }
+    
+    /**
+     * Gets character from code.
+     *
+     * @access private
+     * @return string
+     */
+    private static function _fromCharCode()
+    {
+        $output = '';
+        $chars  = func_get_args();
+        foreach ($chars as $char)
+        {
+            $output .= chr((int)$char);
+        }
+        
+        return $output;
+    }
+    
+    
+    /**
+     * Multi byte ord function.
+     *
+     * @access private
+     *
+     * @param mixed $c
+     *
+     * @return mixed
+     */
+    private static function _uniord($c)
+    {
+        $h = ord($c{0});
+        if ($h <= 0x7F)
+        {
+            return $h;
+        }
+        else if ($h < 0xC2)
+        {
+            return false;
+        }
+        else if ($h <= 0xDF)
+        {
+            return ($h & 0x1F) << 6 | (ord($c{1}) & 0x3F);
+        }
+        else if ($h <= 0xEF)
+        {
+            return ($h & 0x0F) << 12 | (ord($c{1}) & 0x3F) << 6 | (ord($c{2}) & 0x3F);
+        }
+        else if ($h <= 0xF4)
+        {
+            return ($h & 0x0F) << 18 | (ord($c{1}) & 0x3F) << 12 | (ord($c{2}) & 0x3F) << 6 | (ord($c{3}) & 0x3F);
+        }
+        else
+        {
+            return false;
+        }
     }
 }
