@@ -101,7 +101,7 @@ class Application extends Container implements IApplication
         $this->register(ConfigProvider::class);
     
         // 注册异常处理服务
-//        $this->register(ExceptionProvider::class);
+        $this->register(ExceptionProvider::class);
         
         // 注册事件服务
         $this->register(EventProvider::class);

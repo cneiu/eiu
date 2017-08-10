@@ -94,8 +94,9 @@ class ExceptionProvider extends Provider
     /**
      * @inheritdoc
      */
-    public function exceptionHandler(Exception $e)
+    public function exceptionHandler($e)
     {
+        /** @var Exception $e */
         $this->showException($e->getCode(), $e->getMessage(), $e->getFile(), $e->getLine(), $e->getTrace());
     }
     
