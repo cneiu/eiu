@@ -1,13 +1,10 @@
 <?php
-
-/*
- * Opulence
+/**
+ * EIU PHP FRAMEWORK
  *
- * @link      https://www.opulencephp.com
- * @copyright Copyright (C) 2017 David Young
- * @license   https://github.com/opulencephp/Opulence/blob/master/LICENSE.md
+ * @author        成都东联智胜软件有限公司
+ * @link          https://www.cneiu.com
  */
-
 
 namespace eiu\components\files;
 
