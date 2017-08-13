@@ -223,7 +223,7 @@ class CaptchaComponent extends Component implements ICaptchaBuilderInterface
      */
     public function destroy()
     {
-        @imagedestroy($this->image);
+        $this->image and @imagedestroy($this->image);
     }
     
     public function __destruct()
