@@ -8,13 +8,17 @@
 
 
 namespace eiu\components\captcha;
+use eiu\components\Component;
+use eiu\core\application\Application;
+use eiu\core\service\logger\LoggerProvider;
+
 
 /**
  * Captcha
  *
  * @package eiu\components\captcha
  */
-class CaptchaComponent implements ICaptchaBuilderInterface
+class CaptchaComponent extends Component implements ICaptchaBuilderInterface
 {
     /**
      * @var resource 验证码图片
@@ -68,9 +72,15 @@ class CaptchaComponent implements ICaptchaBuilderInterface
     private $isDrawNoise = true;
     
     
-    public function __construct()
+    public function __construct(Application $app, LoggerProvider $logger)
     {
+        parent::__construct($app);
+        
         $this->initialize([]);
+    
+        $app->instance(__CLASS__, $this);
+    
+        $logger->info(__CLASS__ . " is called");
     }
     
     /**
