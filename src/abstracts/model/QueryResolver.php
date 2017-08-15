@@ -622,7 +622,7 @@ class QueryResolver
         {
             if (!$this->_model->hasField($field))
             {
-                continue;
+//                continue;这里有个严重的BUG
             }
             
             if (!is_string($dir))
