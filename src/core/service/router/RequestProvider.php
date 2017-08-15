@@ -131,7 +131,7 @@ class RequestProvider extends Provider implements ArrayAccess
         $protocol = $this->isHttps() ? 'https://' : 'http://';
         $port     = $this->server('SERVER_PORT');
         $port     = ($port == 80 or !$port) ? '' : ":{$port}";
-        $host     = $this->server('SERVER_NAME');
+        $host     = $this->config['app']['SERVER_URL'];
         $host     = $full ? $protocol . $host . $port . APP_URL : APP_URL;
         
         if (!$pathInfo)

@@ -140,7 +140,7 @@ class CookieComponent extends Component implements ArrayAccess
     {
         // Set the cookie owner's IP address and domain.
         $this->ip     = $_SERVER['REMOTE_ADDR'];
-        $this->domain = $_SERVER['SERVER_NAME'] ?? $_SERVER['HTTP_HOST'];
+        $this->domain = $this->config['app']['SERVER_URL'];
         
         if (isset($options['expire']))
         {
