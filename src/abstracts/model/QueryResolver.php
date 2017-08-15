@@ -168,7 +168,10 @@ class QueryResolver
             }
             else if (is_array($query['order']))
             {
-                $orderStr = 'ORDER BY ' . $this->parseOrder($query['order']);
+                if ($_order = $this->parseOrder($query['order']))
+                {
+                    $orderStr = 'ORDER BY ' . $_order;
+                }
             }
             else
             {
@@ -620,7 +623,6 @@ class QueryResolver
             if (!$this->_model->hasField($field))
             {
                 continue;
-                //throw new ModelErrorException("Parse order: the \"{$field}\" field is undefined in the model config.");
             }
             
             if (!is_string($dir))
@@ -630,7 +632,7 @@ class QueryResolver
             
             $field      = $this->_db->setSpecialChar($field);
             $order      = strtoupper($dir) == 'DESC' ? 'DESC' : 'ASC';
-            $table = $this->_db->setSpecialChar($this->_model->table());
+            $table      = $this->_db->setSpecialChar($this->_model->table());
             $orderArr[] = "{$table}.{$field}" . ' ' . $order;
         }
         
