@@ -176,7 +176,7 @@ abstract class Model extends Module
 //
 //        foreach ($structs as $field => $config)
 //        {
-//            if (isset($config['view']['type']) and 'foreignKey' == $config['view']['type'])
+//            if (isset($config['templates']['type']) and 'foreignKey' == $config['templates']['type'])
 //            {
 //                if (in_array($field, $query['field']))
 //                {
@@ -278,8 +278,8 @@ abstract class Model extends Module
         
         // 提交事务
         $this->db()->commit();
-        
-        return $this->db->getInsertId() ?: true;
+    
+        return $this->db->getInsertId() ?: $data[$pk['name']] ?? true;
     }
     
     /**

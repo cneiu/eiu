@@ -68,7 +68,7 @@ class StructResolver
         'deleted' => false,
         'sort'    => 0,
         'default' => null,
-        'view'    => [
+        'templates'    => [
             'type'    => 'text',
             'control' => 'text',
         ],
@@ -179,19 +179,19 @@ class StructResolver
             {
                 $fields[$field]['create']  = false;
                 $fields[$field]['created'] = true;
-                $fields[$field]['view']    = [];
+                $fields[$field]['templates']    = [];
             }
             else if ("{$prefix}updated" == $field)
             {
                 $fields[$field]['update']  = false;
                 $fields[$field]['updated'] = true;
-                $fields[$field]['view']    = [];
+                $fields[$field]['templates']    = [];
             }
             else if ("{$prefix}deleted" == $field)
             {
                 $fields[$field]['create']  = false;
                 $fields[$field]['deleted'] = true;
-                $fields[$field]['view']    = [];
+                $fields[$field]['templates']    = [];
             }
             
             // 主键
@@ -281,101 +281,101 @@ class StructResolver
                     $config['create']  = false;
                     $config['update']  = false;
                     $config['created'] = true;
-                    $config['view']    = [];
+                    $config['templates']    = [];
                 }
                 else if ("{$prefix}updated" == $field)
                 {
                     $config['create']  = false;
                     $config['update']  = false;
                     $config['updated'] = true;
-                    $config['view']    = [];
+                    $config['templates']    = [];
                 }
                 else if ("{$prefix}deleted" == $field)
                 {
                     $config['create']  = false;
                     $config['update']  = false;
                     $config['deleted'] = true;
-                    $config['view']    = [];
+                    $config['templates']    = [];
                 }
                 
                 // 处理文本输入
-                if (isset($config['view']['type']) and $config['view']['type'] == 'text' and isset($config['view']['min']))
+                if (isset($config['templates']['type']) and $config['templates']['type'] == 'text' and isset($config['templates']['min']))
                 {
-                    $config['view']['min'] = (int)$config['view']['min'];
+                    $config['templates']['min'] = (int)$config['templates']['min'];
                 }
-                if (isset($config['view']['type']) and $config['view']['type'] == 'text' and isset($config['view']['max']))
+                if (isset($config['templates']['type']) and $config['templates']['type'] == 'text' and isset($config['templates']['max']))
                 {
-                    $config['view']['max'] = (int)$config['view']['max'];
-                }
-                
-                if (isset($config['view']['readonly']))
-                {
-                    $config['view']['readonly'] = (bool)$config['view']['readonly'];
+                    $config['templates']['max'] = (int)$config['templates']['max'];
                 }
                 
-                if (isset($config['view']['label']) and !$config['view']['label'])
+                if (isset($config['templates']['readonly']))
                 {
-                    $config['view']['label'] = $config['text'];
+                    $config['templates']['readonly'] = (bool)$config['templates']['readonly'];
                 }
                 
-                if (isset($config['view']['blank']))
+                if (isset($config['templates']['label']) and !$config['templates']['label'])
                 {
-                    $config['view']['blank'] = (bool)$config['view']['blank'];
+                    $config['templates']['label'] = $config['text'];
                 }
                 
-                if (isset($config['view']['resize']))
+                if (isset($config['templates']['blank']))
                 {
-                    $config['view']['resize'] = (bool)$config['view']['resize'];
+                    $config['templates']['blank'] = (bool)$config['templates']['blank'];
                 }
                 
-                if (isset($config['view']['thumbnail']))
+                if (isset($config['templates']['resize']))
                 {
-                    $config['view']['thumbnail'] = (bool)$config['view']['thumbnail'];
+                    $config['templates']['resize'] = (bool)$config['templates']['resize'];
                 }
                 
-                if (isset($config['view']['type']) and $config['view']['type'] == 'file' and isset($config['view']['min']))
+                if (isset($config['templates']['thumbnail']))
                 {
-                    $config['view']['min'] = (int)$config['view']['min'];
+                    $config['templates']['thumbnail'] = (bool)$config['templates']['thumbnail'];
                 }
                 
-                if (isset($config['view']['type']) and $config['view']['type'] == 'file' and isset($config['view']['max']))
+                if (isset($config['templates']['type']) and $config['templates']['type'] == 'file' and isset($config['templates']['min']))
                 {
-                    $config['view']['max'] = (int)$config['view']['max'];
+                    $config['templates']['min'] = (int)$config['templates']['min'];
                 }
                 
-                if (isset($config['view']['size']))
+                if (isset($config['templates']['type']) and $config['templates']['type'] == 'file' and isset($config['templates']['max']))
                 {
-                    $config['view']['size'] = (int)$config['view']['size'];
+                    $config['templates']['max'] = (int)$config['templates']['max'];
                 }
                 
-                if (isset($config['view']['resize_width']))
+                if (isset($config['templates']['size']))
                 {
-                    $config['view']['resize_width'] = (int)$config['view']['resize_width'];
+                    $config['templates']['size'] = (int)$config['templates']['size'];
                 }
                 
-                if (isset($config['view']['resize_height']))
+                if (isset($config['templates']['resize_width']))
                 {
-                    $config['view']['resize_height'] = (int)$config['view']['resize_height'];
+                    $config['templates']['resize_width'] = (int)$config['templates']['resize_width'];
                 }
                 
-                if (isset($config['view']['thumbnail_width']))
+                if (isset($config['templates']['resize_height']))
                 {
-                    $config['view']['thumbnail_width'] = (int)$config['view']['thumbnail_width'];
+                    $config['templates']['resize_height'] = (int)$config['templates']['resize_height'];
                 }
                 
-                if (isset($config['view']['thumbnail_height']))
+                if (isset($config['templates']['thumbnail_width']))
                 {
-                    $config['view']['thumbnail_height'] = (int)$config['view']['thumbnail_height'];
+                    $config['templates']['thumbnail_width'] = (int)$config['templates']['thumbnail_width'];
+                }
+                
+                if (isset($config['templates']['thumbnail_height']))
+                {
+                    $config['templates']['thumbnail_height'] = (int)$config['templates']['thumbnail_height'];
                 }
     
-                if (isset($config['view']['hide']))
+                if (isset($config['templates']['hide']))
                 {
-                    $config['view']['hide'] = (bool)$config['view']['hide'];
+                    $config['templates']['hide'] = (bool)$config['templates']['hide'];
                 }
     
-                if (isset($config['view']['hideAble']))
+                if (isset($config['templates']['hideAble']))
                 {
-                    $config['view']['hideAble'] = (bool)$config['view']['hideAble'];
+                    $config['templates']['hideAble'] = (bool)$config['templates']['hideAble'];
                 }
                 
                 if (isset($config['list']))
@@ -388,13 +388,13 @@ class StructResolver
                     $config['filter'] = (bool)$config['filter'];
                 }
                 
-                if (isset($config['view']['options']) and is_array($config['view']['options']))
+                if (isset($config['templates']['options']) and is_array($config['templates']['options']))
                 {
-                    for ($i = 0; $i < count($config['view']['options']); $i++)
+                    for ($i = 0; $i < count($config['templates']['options']); $i++)
                     {
-                        if (isset($config['view']['options'][$i]['value']) and is_numeric($config['view']['options'][$i]['value']))
+                        if (isset($config['templates']['options'][$i]['value']) and is_numeric($config['templates']['options'][$i]['value']))
                         {
-                            $config['view']['options'][$i]['value'] = (int)$config['view']['options'][$i]['value'];
+                            $config['templates']['options'][$i]['value'] = (int)$config['templates']['options'][$i]['value'];
                         }
                     }
                 }

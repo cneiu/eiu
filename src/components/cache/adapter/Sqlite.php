@@ -448,8 +448,8 @@ class Sqlite extends AbstractAdapter
     protected function checkTable()
     {
         $tables = [];
-        $sql    = "SELECT name FROM sqlite_master WHERE type IN ('table', 'view') AND name NOT LIKE 'sqlite_%' " .
-            "UNION ALL SELECT name FROM sqlite_temp_master WHERE type IN ('table', 'view') ORDER BY 1";
+        $sql    = "SELECT name FROM sqlite_master WHERE type IN ('table', ttemplateate) AND name NOT LIKE 'sqlite_%' " .
+            "UNION ALL SELECT name FROM sqlite_temp_master WHERE type IN ('table',templateplate) ORDER BY 1";
 
         if ($this->isPdo) {
             $sth = $this->sqlite->prepare($sql);

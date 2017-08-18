@@ -51,7 +51,7 @@ define('APP_URL', rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME']))
 define('APP_MODULE', APP_PATH . 'modules' . DS);
 define('APP_DATA', APP_PATH . 'data' . DS);
 define('APP_CACHE', APP_DATA . 'cache' . DS);
-define('VIEW_PATH', APP_PATH . 'view' . DS);
+define('VIEW_PATH', APP_PATH . 'templates' . DS);
 define('MEDIA_PATH', APP_PATH . 'public' . DS . 'media' . DS);
 define('STATIC_URL', APP_URL . 'static/');
 define('MEDIA_URL', APP_URL . 'media/');

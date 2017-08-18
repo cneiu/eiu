@@ -218,24 +218,24 @@ class QueryResolver
                 continue;
             }
             
-            if (isset($config['view']['type']) and 'foreignKey' == $config['view']['type'])
+            if (isset($config['templates']['type']) and 'foreignKey' == $config['templates']['type'])
             {
                 // 目标表、目标外键、目标查询的字段
-                $table   = $this->_db->setSpecialChar($config['view']['table']);
-                $tableAS = $this->_db->setSpecialChar("{$field}_" . $config['view']['table']);
-                $target  = $this->_db->setSpecialChar($config['view']['field']);
+                $table   = $this->_db->setSpecialChar($config['templates']['table']);
+                $tableAS = $this->_db->setSpecialChar("{$field}_" . $config['templates']['table']);
+                $target  = $this->_db->setSpecialChar($config['templates']['field']);
                 $value   = $this->_db->setSpecialChar($field);
                 $sTable  = $this->_db->setSpecialChar($this->_model::table());
                 $join[]  = "LEFT JOIN {$table} AS {$tableAS} ON {$tableAS}.{$target}={$sTable}.{$value}";
                 
-                if (isset($config['view']['fields']) and is_array($config['view']['fields']))
+                if (isset($config['templates']['fields']) and is_array($config['templates']['fields']))
                 {
-                    if ($config['view']['labelField'])
+                    if ($config['templates']['labelField'])
                     {
                         $list[] = "{$sTable}.{$value}";
                     }
                     
-                    foreach ($config['view']['fields'] as $_field)
+                    foreach ($config['templates']['fields'] as $_field)
                     {
                         // 连接字段写入全局字段
                         $this->_fields[] = $_field;
