@@ -15,6 +15,11 @@ use eiu\components\Component;
 use eiu\core\application\Application;
 
 
+/**
+ * Cache component
+ *
+ * @package eiu\components\cache
+ */
 class CacheComponent extends Component
 {
     /**
@@ -29,7 +34,7 @@ class CacheComponent extends Component
      *
      * Instantiate the cache object
      *
-     * @param Application               $app
+     * @param Application $app
      */
     public function __construct(Application $app)
     {
