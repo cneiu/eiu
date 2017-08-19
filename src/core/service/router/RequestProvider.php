@@ -47,12 +47,12 @@ class RequestProvider extends Provider implements ArrayAccess
     /**
      * @var SessionComponent
      */
-    private $session;
+    private $session = null;
     
     /**
      * @var CookieComponent
      */
-    private $cookie;
+    private $cookie = null;
     
     /**
      * 服务注册
@@ -70,16 +70,12 @@ class RequestProvider extends Provider implements ArrayAccess
      * @param ConfigProvider        $config
      * @param LoggerProvider|Logger $logger
      * @param SecurityProvider      $security
-     * @param SessionComponent      $session
-     * @param CookieComponent       $cookie
      */
-    public function boot(ConfigProvider $config, LoggerProvider $logger, SecurityProvider $security, SessionComponent $session, CookieComponent $cookie)
+    public function boot(ConfigProvider $config, LoggerProvider $logger, SecurityProvider $security)
     {
         $this->config   = $config;
         $this->logger   = $logger;
         $this->security = $security;
-        $this->session  = $session;
-        $this->cookie   = $cookie;
         
         $this->requestData             = [];
         $this->requestData['router']   = [];
@@ -374,6 +370,11 @@ class RequestProvider extends Provider implements ArrayAccess
      */
     public function cookie($index = null, $xss_clean = true)
     {
+        if (!$this->cookie())
+        {
+            $this->cookie = $this->app->make(CookieComponent::class);
+        }
+        
         $this->requestData['cookie'] = $this->_fetch_from_array($this->cookie, null, $xss_clean);
         
         return $index ? $this->requestData['cookie'][$index] ?? null : $this->requestData['cookie'];
@@ -388,6 +389,11 @@ class RequestProvider extends Provider implements ArrayAccess
      */
     public function session($index = null, $xss_clean = true)
     {
+        if (!$this->session)
+        {
+            $this->session = $this->app->make(SessionComponent::class);
+        }
+        
         $this->requestData['session'] = $this->_fetch_from_array($this->session, null, $xss_clean);
         
         return $index ? $this->requestData['session'][$index] ?? null : $this->requestData['session'];

@@ -8,10 +8,15 @@
  * @license    http://www.popphp.org/license     New BSD License
  */
 
+
 /**
  * @namespace
  */
+
+
 namespace eiu\components\cache\adapter;
+
+
 use Exception;
 
 
@@ -27,13 +32,14 @@ use Exception;
  */
 class Memcache extends AbstractAdapter
 {
-
+    
     /**
      * Memcache object
+     *
      * @var \Memcache
      */
     protected $memcache = null;
-
+    
     /**
      * Constructor
      *
@@ -42,21 +48,24 @@ class Memcache extends AbstractAdapter
      * @param  int    $ttl
      * @param  string $host
      * @param  int    $port
+     *
      * @throws Exception
      */
     public function __construct($ttl = 0, $host = 'localhost', $port = 11211)
     {
         parent::__construct($ttl);
-        if (!class_exists('Memcache', false)) {
+        if (!class_exists('Memcache', false))
+        {
             throw new Exception('Error: Memcache is not available.');
         }
-
+        
         $this->memcache = new \Memcache();
-        if (!$this->memcache->connect($host, (int)$port)) {
+        if (!$this->memcache->connect($host, (int)$port))
+        {
             throw new Exception('Error: Unable to connect to the memcache server.');
         }
     }
-
+    
     /**
      * Get the memcache object.
      *
@@ -66,7 +75,7 @@ class Memcache extends AbstractAdapter
     {
         return $this->memcache;
     }
-
+    
     /**
      * Get the current version of memcache.
      *
@@ -76,31 +85,34 @@ class Memcache extends AbstractAdapter
     {
         return $this->memcache->getVersion();
     }
-
+    
     /**
      * Get the time-to-live for an item in cache
      *
      * @param  string $id
+     *
      * @return int
      */
     public function getItemTtl($id)
     {
         $cacheValue = $this->memcache->get($id);
         $ttl        = 0;
-
-        if ($cacheValue !== false) {
+        
+        if ($cacheValue !== false)
+        {
             $ttl = $cacheValue['ttl'];
         }
-
+        
         return $ttl;
     }
-
+    
     /**
      * Save an item to cache
      *
      * @param  string $id
      * @param  mixed  $value
      * @param  int    $ttl
+     *
      * @return Memcache
      */
     public function saveItem($id, $value, $ttl = null)
@@ -108,55 +120,62 @@ class Memcache extends AbstractAdapter
         $cacheValue = [
             'start' => time(),
             'ttl'   => (null !== $ttl) ? (int)$ttl : $this->ttl,
-            'value' => $value
+            'value' => $value,
         ];
-
+        
         $this->memcache->set($id, $cacheValue, false, $cacheValue['ttl']);
+        
         return $this;
     }
-
+    
     /**
      * Get an item from cache
      *
      * @param  string $id
+     *
      * @return mixed
      */
     public function getItem($id)
     {
         $cacheValue = $this->memcache->get($id);
         $value      = false;
-
-        if ($cacheValue !== false) {
+        
+        if ($cacheValue !== false)
+        {
             $value = $cacheValue['value'];
         }
-
+        
         return $value;
     }
-
+    
     /**
      * Determine if the item exist in cache
      *
      * @param  string $id
+     *
      * @return boolean
      */
     public function hasItem($id)
     {
         $cacheValue = $this->memcache->get($id);
+        
         return ($cacheValue !== false);
     }
-
+    
     /**
      * Delete a value in cache
      *
      * @param  string $id
+     *
      * @return Memcache
      */
     public function deleteItem($id)
     {
         $this->memcache->delete($id);
+        
         return $this;
     }
-
+    
     /**
      * Clear all stored values from cache
      *
@@ -165,9 +184,10 @@ class Memcache extends AbstractAdapter
     public function clear()
     {
         $this->memcache->flush();
+        
         return $this;
     }
-
+    
     /**
      * Destroy cache resource
      *
@@ -177,7 +197,8 @@ class Memcache extends AbstractAdapter
     {
         $this->memcache->flush();
         $this->memcache = null;
+        
         return $this;
     }
-
+    
 }

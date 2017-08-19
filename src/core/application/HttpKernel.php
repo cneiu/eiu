@@ -10,6 +10,7 @@
 namespace eiu\core\application;
 
 
+use eiu\components\cache\CacheComponent;
 use eiu\core\service\debug\ExceptionProvider;
 use eiu\core\service\event\EventProvider;
 use eiu\core\service\logger\Logger;

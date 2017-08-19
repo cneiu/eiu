@@ -19,6 +19,7 @@ class CacheComponent extends Component
 {
     /**
      * Cache adapter
+     *
      * @var AdapterInterface
      */
     protected $adapter = null;
@@ -29,13 +30,35 @@ class CacheComponent extends Component
      * Instantiate the cache object
      *
      * @param Application               $app
-     * @param  Adapter\AdapterInterface $adapter
      */
-    public function __construct(Application $app, Adapter\AdapterInterface $adapter)
+    public function __construct(Application $app)
     {
         parent::__construct($app);
-        
+    }
+    
+    /**
+     * setup adapter
+     *
+     * @param AdapterInterface $adapter
+     */
+    public function setupAdapter(Adapter\AdapterInterface $adapter)
+    {
         $this->adapter = $adapter;
+    }
+    
+    /**
+     * Determine if an adapter is available
+     *
+     * @param  string $adapter
+     *
+     * @return boolean
+     */
+    public static function isAvailable($adapter)
+    {
+        $adapter  = strtolower($adapter);
+        $adapters = self::getAvailableAdapters();
+        
+        return (isset($adapters[$adapter]) && ($adapters[$adapter]));
     }
     
     /**
@@ -53,21 +76,8 @@ class CacheComponent extends Component
             'memcached' => (class_exists('Memcache', false)),
             'redis'     => (class_exists('Redis', false)),
             'session'   => (function_exists('session_start')),
-            'sqlite'    => (class_exists('Sqlite3') || in_array('sqlite', $pdoDrivers))
+            'sqlite'    => (class_exists('Sqlite3') || in_array('sqlite', $pdoDrivers)),
         ];
-    }
-    
-    /**
-     * Determine if an adapter is available
-     *
-     * @param  string $adapter
-     * @return boolean
-     */
-    public static function isAvailable($adapter)
-    {
-        $adapter  = strtolower($adapter);
-        $adapters = self::getAvailableAdapters();
-        return (isset($adapters[$adapter]) && ($adapters[$adapter]));
     }
     
     /**
@@ -94,6 +104,7 @@ class CacheComponent extends Component
      * Get item cache TTL
      *
      * @param  string $id
+     *
      * @return int
      */
     public function getItemTtl($id)
@@ -113,6 +124,7 @@ class CacheComponent extends Component
     public function saveItem($id, $value, $ttl = null)
     {
         $this->adapter->saveItem($id, $value, $ttl);
+        
         return $this;
     }
     
@@ -120,13 +132,16 @@ class CacheComponent extends Component
      * Save items to cache
      *
      * @param  array $items
+     *
      * @return CacheComponent
      */
     public function saveItems(array $items)
     {
-        foreach ($items as $id => $value) {
+        foreach ($items as $id => $value)
+        {
             $this->adapter->saveItem($id, $value);
         }
+        
         return $this;
     }
     
@@ -134,6 +149,7 @@ class CacheComponent extends Component
      * Get an item from cache
      *
      * @param  string $id
+     *
      * @return mixed
      */
     public function getItem($id)
@@ -145,6 +161,7 @@ class CacheComponent extends Component
      * Determine if the item is in cache
      *
      * @param  string $id
+     *
      * @return mixed
      */
     public function hasItem($id)
@@ -156,11 +173,13 @@ class CacheComponent extends Component
      * Delete an item in cache
      *
      * @param  string $id
+     *
      * @return CacheComponent
      */
     public function deleteItem($id)
     {
         $this->adapter->deleteItem($id);
+        
         return $this;
     }
     
@@ -168,13 +187,16 @@ class CacheComponent extends Component
      * Delete items in cache
      *
      * @param  array $ids
+     *
      * @return CacheComponent
      */
     public function deleteItems(array $ids)
     {
-        foreach ($ids as $id) {
+        foreach ($ids as $id)
+        {
             $this->adapter->deleteItem($id);
         }
+        
         return $this;
     }
     
@@ -186,6 +208,7 @@ class CacheComponent extends Component
     public function clear()
     {
         $this->adapter->clear();
+        
         return $this;
     }
     
@@ -197,13 +220,51 @@ class CacheComponent extends Component
     public function destroy()
     {
         $this->adapter->destroy();
+        
         return $this;
+    }
+    
+    /**
+     * ArrayAccess offsetExists
+     *
+     * @param  mixed $offset
+     *
+     * @return boolean
+     */
+    public function offsetExists($offset)
+    {
+        return $this->__isset($offset);
+    }
+    
+    /**
+     * Determine if the item is in cache
+     *
+     * @param  string $name
+     *
+     * @return boolean
+     */
+    public function __isset($name)
+    {
+        return $this->adapter->hasItem($name);
+    }
+    
+    /**
+     * ArrayAccess offsetGet
+     *
+     * @param  mixed $offset
+     *
+     * @return mixed
+     */
+    public function offsetGet($offset)
+    {
+        return $this->__get($offset);
     }
     
     /**
      * Magic get method to return an item from cache
      *
      * @param  string $name
+     *
      * @return mixed
      */
     public function __get($name)
@@ -215,7 +276,8 @@ class CacheComponent extends Component
      * Magic set method to save an item in the cache
      *
      * @param  string $name
-     * @param  mixed $value
+     * @param  mixed  $value
+     *
      * @throws Exception
      * @return void
      */
@@ -225,55 +287,11 @@ class CacheComponent extends Component
     }
     
     /**
-     * Determine if the item is in cache
-     *
-     * @param  string $name
-     * @return boolean
-     */
-    public function __isset($name)
-    {
-        return $this->adapter->hasItem($name);
-    }
-    
-    /**
-     * Delete value from cache
-     *
-     * @param  string $name
-     * @throws Exception
-     * @return void
-     */
-    public function __unset($name)
-    {
-        $this->adapter->deleteItem($name);
-    }
-    
-    /**
-     * ArrayAccess offsetExists
-     *
-     * @param  mixed $offset
-     * @return boolean
-     */
-    public function offsetExists($offset)
-    {
-        return $this->__isset($offset);
-    }
-    
-    /**
-     * ArrayAccess offsetGet
-     *
-     * @param  mixed $offset
-     * @return mixed
-     */
-    public function offsetGet($offset)
-    {
-        return $this->__get($offset);
-    }
-    
-    /**
      * ArrayAccess offsetSet
      *
      * @param  mixed $offset
      * @param  mixed $value
+     *
      * @return void
      */
     public function offsetSet($offset, $value)
@@ -285,10 +303,24 @@ class CacheComponent extends Component
      * ArrayAccess offsetUnset
      *
      * @param  mixed $offset
+     *
      * @return void
      */
     public function offsetUnset($offset)
     {
         $this->__unset($offset);
+    }
+    
+    /**
+     * Delete value from cache
+     *
+     * @param  string $name
+     *
+     * @throws Exception
+     * @return void
+     */
+    public function __unset($name)
+    {
+        $this->adapter->deleteItem($name);
     }
 }

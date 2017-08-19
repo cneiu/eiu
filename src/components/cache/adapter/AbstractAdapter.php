@@ -8,9 +8,12 @@
  * @license    http://www.popphp.org/license     New BSD License
  */
 
+
 /**
  * @namespace
  */
+
+
 namespace eiu\components\cache\adapter;
 
 /**
@@ -25,13 +28,14 @@ namespace eiu\components\cache\adapter;
  */
 abstract class AbstractAdapter implements AdapterInterface
 {
-
+    
     /**
      * Global time-to-live
+     *
      * @var int
      */
     protected $ttl = 0;
-
+    
     /**
      * Constructor
      *
@@ -43,19 +47,7 @@ abstract class AbstractAdapter implements AdapterInterface
     {
         $this->setTtl($ttl);
     }
-
-    /**
-     * Set the global time-to-live for the cache adapter
-     *
-     * @param  int $ttl
-     * @return AbstractAdapter
-     */
-    public function setTtl($ttl)
-    {
-        $this->ttl = (int)$ttl;
-        return $this;
-    }
-
+    
     /**
      * Get the global time-to-live for the cache object
      *
@@ -65,61 +57,80 @@ abstract class AbstractAdapter implements AdapterInterface
     {
         return $this->ttl;
     }
-
+    
+    /**
+     * Set the global time-to-live for the cache adapter
+     *
+     * @param  int $ttl
+     *
+     * @return AbstractAdapter
+     */
+    public function setTtl($ttl)
+    {
+        $this->ttl = (int)$ttl;
+        
+        return $this;
+    }
+    
     /**
      * Get the time-to-live for an item in cache
      *
      * @param  string $id
+     *
      * @return int
      */
     abstract public function getItemTtl($id);
-
+    
     /**
      * Save an item to cache
      *
      * @param  string $id
      * @param  mixed  $value
      * @param  int    $ttl
+     *
      * @return void
      */
     abstract public function saveItem($id, $value, $ttl = null);
-
+    
     /**
      * Get an item from cache
      *
      * @param  string $id
+     *
      * @return mixed
      */
     abstract public function getItem($id);
-
+    
     /**
      * Determine if the item exist in cache
      *
      * @param  string $id
+     *
      * @return boolean
      */
     abstract public function hasItem($id);
-
+    
     /**
      * Delete a value in cache
      *
      * @param  string $id
+     *
      * @return void
      */
     abstract public function deleteItem($id);
-
+    
     /**
      * Clear all stored values from cache
      *
      * @return void
      */
     abstract public function clear();
-
+    
     /**
      * Destroy cache resource
      *
      * @return void
      */
     abstract public function destroy();
-
+    
 }

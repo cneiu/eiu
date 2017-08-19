@@ -80,13 +80,10 @@ class Application extends Container implements IApplication
      */
     private function registerBaseBindings()
     {
-        
         static::setInstance($this);
         
         $this->instance('app', $this);
-        
         $this->instance(__CLASS__, $this);
-        
         $this->instance(Container::class, $this);
     }
     

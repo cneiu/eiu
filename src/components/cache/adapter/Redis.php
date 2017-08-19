@@ -8,10 +8,15 @@
  * @license    http://www.popphp.org/license     New BSD License
  */
 
+
 /**
  * @namespace
  */
+
+
 namespace eiu\components\cache\adapter;
+
+
 use Exception;
 
 
@@ -27,13 +32,14 @@ use Exception;
  */
 class Redis extends AbstractAdapter
 {
-
+    
     /**
      * Redis object
+     *
      * @var \Redis
      */
     protected $redis = null;
-
+    
     /**
      * Constructor
      *
@@ -42,21 +48,24 @@ class Redis extends AbstractAdapter
      * @param  int    $ttl
      * @param  string $host
      * @param  int    $port
+     *
      * @throws Exception
      */
     public function __construct($ttl = 0, $host = 'localhost', $port = 6379)
     {
         parent::__construct($ttl);
-        if (!class_exists('Redis', false)) {
+        if (!class_exists('Redis', false))
+        {
             throw new Exception('Error: Redis is not available.');
         }
-
+        
         $this->redis = new \Redis();
-        if (!$this->redis->connect($host, (int)$port)) {
+        if (!$this->redis->connect($host, (int)$port))
+        {
             throw new Exception('Error: Unable to connect to the redis server.');
         }
     }
-
+    
     /**
      * Get the redis object.
      *
@@ -66,7 +75,7 @@ class Redis extends AbstractAdapter
     {
         return $this->redis;
     }
-
+    
     /**
      * Get the current version of redis.
      *
@@ -76,32 +85,35 @@ class Redis extends AbstractAdapter
     {
         return $this->redis->info()['redis_version'];
     }
-
+    
     /**
      * Get the time-to-live for an item in cache
      *
      * @param  string $id
+     *
      * @return int
      */
     public function getItemTtl($id)
     {
         $cacheValue = $this->redis->get($id);
         $ttl        = false;
-
-        if ($cacheValue !== false) {
+        
+        if ($cacheValue !== false)
+        {
             $cacheValue = unserialize($cacheValue);
-            $ttl      = $cacheValue['ttl'];
+            $ttl        = $cacheValue['ttl'];
         }
-
+        
         return $ttl;
     }
-
+    
     /**
      * Save an item to cache
      *
      * @param  string $id
      * @param  mixed  $value
      * @param  int    $ttl
+     *
      * @return Redis
      */
     public function saveItem($id, $value, $ttl = null)
@@ -109,60 +121,70 @@ class Redis extends AbstractAdapter
         $cacheValue = [
             'start' => time(),
             'ttl'   => (null !== $ttl) ? (int)$ttl : $this->ttl,
-            'value' => $value
+            'value' => $value,
         ];
-
-        if ($cacheValue['ttl'] != 0) {
+        
+        if ($cacheValue['ttl'] != 0)
+        {
             $this->redis->set($id, serialize($cacheValue), $cacheValue['ttl']);
-        } else {
+        }
+        else
+        {
             $this->redis->set($id, serialize($cacheValue));
         }
+        
         return $this;
     }
-
+    
     /**
      * Get an item from cache
      *
      * @param  string $id
+     *
      * @return mixed
      */
     public function getItem($id)
     {
         $cacheValue = $this->redis->get($id);
         $value      = false;
-
-        if ($cacheValue !== false) {
+        
+        if ($cacheValue !== false)
+        {
             $cacheValue = unserialize($cacheValue);
             $value      = $cacheValue['value'];
         }
-
+        
         return $value;
     }
-
+    
     /**
      * Determine if the item exist in cache
      *
      * @param  string $id
+     *
      * @return boolean
      */
     public function hasItem($id)
     {
         $cacheValue = $this->redis->get($id);
+        
         return ($cacheValue !== false);
     }
-
+    
     /**
      * Delete a value in cache
      *
      * @param  string $id
+     *
      * @return Redis
      */
     public function deleteItem($id)
     {
         $this->redis->delete($id);
+        
         return $this;
     }
-
+    
     /**
      * Clear all stored values from cache
      *
@@ -171,9 +193,10 @@ class Redis extends AbstractAdapter
     public function clear()
     {
         $this->redis->flushDb();
+        
         return $this;
     }
-
+    
     /**
      * Destroy cache resource
      *
@@ -183,7 +206,8 @@ class Redis extends AbstractAdapter
     {
         $this->redis->flushDb();
         $this->redis = null;
+        
         return $this;
     }
-
+    
 }
