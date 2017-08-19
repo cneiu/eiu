@@ -307,7 +307,7 @@ class TemplateEngine
             }
             else
             {
-                // top-level block in a child templates; override the base's block
+                // top-level block in a child view; override the base's block
                 $hash[$name]['block'] = $block;
             }
         }
@@ -543,7 +543,7 @@ class TemplateEngine
             // remove trailing whitespace from end
             $i         = count($parts) - 1;
             $parts[$i] = rtrim($parts[$i]);
-            // if there are child templates blocks, preserve output after last one
+            // if there are child view blocks, preserve output after last one
             
             if ($end !== null)
             {

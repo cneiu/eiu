@@ -97,7 +97,7 @@ class ViewExt
      */
     public function extend(string $path)
     {
-        return $this->call('core', 'templates')->check_template($path);
+        return $this->call('core', 'view')->check_template($path);
     }
     
     /**

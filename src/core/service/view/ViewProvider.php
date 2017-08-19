@@ -66,7 +66,7 @@ class ViewProvider extends Provider
         $this->config = $config;
         $this->logger = $logger;
         
-        $this->_template_vars = $this->config['templates']['VIEW_VARS'];
+        $this->_template_vars = $this->config['view']['VIEW_VARS'];
         
         $this->logger->info($this->className() . " is booted");
     }
