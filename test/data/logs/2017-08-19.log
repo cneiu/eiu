@@ -680,3 +680,14 @@ Line: 115
 Class: eiu\core\application\HttpKernel
 Function: handle
 	
+2017-08-19 21:09:10	3	ERROR	Controller class "\test\modules\controllers\admin\AdminController" isn't exist. in /Users/bobby/Dev/www/eiu/src/core/service/router/RouterProvider.php:274	
+2017-08-19 21:09:10	3	ERROR	Tracking:
+File: /Users/bobby/Dev/www/eiu/src/core/application/HttpKernel.php
+Line: 113
+Class: eiu\core\service\router\RouterProvider
+Function: parseController
+File: /Users/bobby/Dev/www/eiu/test/public/index.php
+Line: 115
+Class: eiu\core\application\HttpKernel
+Function: handle
+	
