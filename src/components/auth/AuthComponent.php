@@ -188,6 +188,16 @@ class AuthComponent extends Component
     }
     
     /**
+     * 设置当前登录用户标识
+     *
+     * @param $key
+     */
+    public function setLoginKey($key)
+    {
+        $this->currentLoginKey = $key;
+    }
+    
+    /**
      * 检查登录状态
      *
      * @return bool
