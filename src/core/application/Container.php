@@ -253,7 +253,7 @@ class Container implements ArrayAccess, IContainer
                 return $container->build($concrete);
             }
             
-            return $container->makeWith($concrete, $parameters);
+            return $this->resolve($concrete, $parameters);
         };
     }
     
@@ -608,19 +608,6 @@ class Container implements ArrayAccess, IContainer
     public function isShared($abstract)
     {
         return isset($this->instances[$abstract]) || (isset($this->bindings[$abstract]['shared']) && $this->bindings[$abstract]['shared'] === true);
-    }
-    
-    /**
-     * 解析抽象类型并覆盖参数
-     *
-     * @param  string $abstract
-     * @param  array  $parameters
-     *
-     * @return mixed
-     */
-    public function makeWith($abstract, array $parameters)
-    {
-        return $this->resolve($abstract, $parameters);
     }
     
     /**
