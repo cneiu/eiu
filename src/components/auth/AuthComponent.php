@@ -64,11 +64,6 @@ class AuthComponent extends Component
     private $jwt;
     
     /**
-     * @var SessionVerifier
-     */
-    private $session;
-    
-    /**
      * @var DatabaseComponent
      */
     private $db;
@@ -89,14 +84,10 @@ class AuthComponent extends Component
      * @param RouterProvider        $router
      * @param RequestProvider       $request
      * @param JwtVerifier           $jwt
-     * @param SessionVerifier       $session
      * @param DatabaseComponent     $db
-     *
-     * @internal param SessionComponent $session
      */
     public function __construct(Application $app, ConfigProvider $config, LoggerProvider $logger,
-                                RouterProvider $router, RequestProvider $request, JwtVerifier $jwt,
-                                SessionVerifier $session, DatabaseComponent $db)
+                                RouterProvider $router, RequestProvider $request, JwtVerifier $jwt, DatabaseComponent $db)
     {
         parent::__construct($app);
         
@@ -104,7 +95,6 @@ class AuthComponent extends Component
         $this->router  = $router;
         $this->request = $request;
         $this->jwt     = $jwt;
-        $this->session = $session;
         $this->db      = $db;
         
         $this->_LOGIN_EXEMPT      = $config->get('auth', 'LOGIN_EXEMPT');
@@ -173,7 +163,7 @@ class AuthComponent extends Component
                 return $this->jwt->createToken($key, $exceed);
             
             case 'session':
-                return $this->session->createToken($key, $exceed);
+                return $this->app->make(SessionVerifier::class)->createToken($key, $exceed);
         }
     }
     
@@ -217,14 +207,14 @@ class AuthComponent extends Component
             return true;
         }
         
-        // 尝试基于SESSION的认证
-        if ($this->currentLoginKey = $this->session->getToken())
+        // 尝试基于JWT的认证
+        if ($this->currentLoginKey = $this->jwt->getToken())
         {
             return true;
         }
-        
-        // 尝试基于JWT的认证
-        if ($this->currentLoginKey = $this->jwt->getToken())
+    
+        // 尝试基于SESSION的认证
+        if ($this->currentLoginKey = $this->app->make(SessionVerifier::class)->getToken())
         {
             return true;
         }
