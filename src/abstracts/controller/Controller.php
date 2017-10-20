@@ -79,7 +79,7 @@ abstract class Controller extends Module implements IController
      * @param string $header_type 输出头类型
      * @param string $charset     字符集
      */
-    protected function json($object, int $status_code = 200, string $header_type = 'html', string $charset = null)
+    protected function json($object, int $status_code = 200, string $header_type = 'json', string $charset = null)
     {
         return $this->text(json_encode($object), $status_code, $header_type, $charset);
     }
@@ -95,7 +95,7 @@ abstract class Controller extends Module implements IController
      * @param string $header_type 输出头类型
      * @param string $charset     字符集
      */
-    protected function success(bool $success = true, $message = null, int $status_code = 200, string $header_type = 'html', string $charset = null)
+    protected function success(bool $success = true, $message = null, int $status_code = 200, string $header_type = 'json', string $charset = null)
     {
         if (is_null($message))
         {
