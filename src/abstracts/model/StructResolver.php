@@ -62,16 +62,10 @@ class StructResolver
         'autoinc' => false,
         'create'  => true,
         'update'  => true,
-        'enable'  => true,
         'created' => false,
         'updated' => false,
         'deleted' => false,
-        'sort'    => 0,
-        'default' => null,
-        'view'    => [
-            'type'    => 'text',
-            'control' => 'text',
-        ],
+        'default' => null
     ];
     
     /**
@@ -179,19 +173,16 @@ class StructResolver
             {
                 $fields[$field]['create']  = false;
                 $fields[$field]['created'] = true;
-                $fields[$field]['view']    = [];
             }
             else if ("{$prefix}updated" == $field)
             {
                 $fields[$field]['update']  = false;
                 $fields[$field]['updated'] = true;
-                $fields[$field]['view']    = [];
             }
             else if ("{$prefix}deleted" == $field)
             {
                 $fields[$field]['create']  = false;
                 $fields[$field]['deleted'] = true;
-                $fields[$field]['view']    = [];
             }
             
             // 主键
@@ -214,27 +205,20 @@ class StructResolver
         return $fields;
     }
     
+    /**
+     * 格式化字段
+     *
+     * @param array $struct
+     * @param       $prefix
+     *
+     * @return array
+     */
     public static function formatFields(array $struct, $prefix)
     {
         $result = [];
         
-        usort($struct, function ($a, $b)
-        {
-            $a['sort'] = $a['sort'] ?? 0;
-            $b['sort'] = $b['sort'] ?? 0;
-            
-            if ($a['sort'] == $b['sort'])
-            {
-                return 0;
-            }
-            
-            return ($a['sort'] > $b['sort']) ? -1 : 1;
-        });
-        
         foreach ($struct as $index => $config)
         {
-//            $config['sort'] = 999 - $index;
-            
             if (isset($config['length']))
             {
                 $config['length'] = (int)$config['length'];
@@ -253,7 +237,6 @@ class StructResolver
                 $config['updated'] = false;
                 $config['deleted'] = false;
                 $config['type']    = 'integer';
-                $config['enable']  = (bool)($config['enable'] ?? false);
             }
             else
             {
@@ -266,12 +249,7 @@ class StructResolver
                 $config['created'] = false;
                 $config['updated'] = false;
                 $config['deleted'] = false;
-                $config['enable']  = (bool)($config['enable'] ?? false);
                 
-                if (isset($config['virtual']))
-                {
-                    $config['virtual'] = (int)$config['virtual'];
-                }
                 
                 // 设置自动属性, 自动时间戳
                 $field = $config['name'];
@@ -281,122 +259,18 @@ class StructResolver
                     $config['create']  = false;
                     $config['update']  = false;
                     $config['created'] = true;
-                    $config['view']    = [];
                 }
                 else if ("{$prefix}updated" == $field)
                 {
                     $config['create']  = false;
                     $config['update']  = false;
                     $config['updated'] = true;
-                    $config['view']    = [];
                 }
                 else if ("{$prefix}deleted" == $field)
                 {
                     $config['create']  = false;
                     $config['update']  = false;
                     $config['deleted'] = true;
-                    $config['view']    = [];
-                }
-                
-                // 处理文本输入
-                if (isset($config['view']['type']) and $config['view']['type'] == 'text' and isset($config['view']['min']))
-                {
-                    $config['view']['min'] = (int)$config['view']['min'];
-                }
-                if (isset($config['view']['type']) and $config['view']['type'] == 'text' and isset($config['view']['max']))
-                {
-                    $config['view']['max'] = (int)$config['view']['max'];
-                }
-                
-                if (isset($config['view']['readonly']))
-                {
-                    $config['view']['readonly'] = (bool)$config['view']['readonly'];
-                }
-                
-                if (isset($config['view']['label']) and !$config['view']['label'])
-                {
-                    $config['view']['label'] = $config['text'];
-                }
-                
-                if (isset($config['view']['blank']))
-                {
-                    $config['view']['blank'] = (bool)$config['view']['blank'];
-                }
-                
-                if (isset($config['view']['resize']))
-                {
-                    $config['view']['resize'] = (bool)$config['view']['resize'];
-                }
-                
-                if (isset($config['view']['thumbnail']))
-                {
-                    $config['view']['thumbnail'] = (bool)$config['view']['thumbnail'];
-                }
-                
-                if (isset($config['view']['type']) and $config['view']['type'] == 'file' and isset($config['view']['min']))
-                {
-                    $config['view']['min'] = (int)$config['view']['min'];
-                }
-                
-                if (isset($config['view']['type']) and $config['view']['type'] == 'file' and isset($config['view']['max']))
-                {
-                    $config['view']['max'] = (int)$config['view']['max'];
-                }
-                
-                if (isset($config['view']['size']))
-                {
-                    $config['view']['size'] = (int)$config['view']['size'];
-                }
-                
-                if (isset($config['view']['resize_width']))
-                {
-                    $config['view']['resize_width'] = (int)$config['view']['resize_width'];
-                }
-                
-                if (isset($config['view']['resize_height']))
-                {
-                    $config['view']['resize_height'] = (int)$config['view']['resize_height'];
-                }
-                
-                if (isset($config['view']['thumbnail_width']))
-                {
-                    $config['view']['thumbnail_width'] = (int)$config['view']['thumbnail_width'];
-                }
-                
-                if (isset($config['view']['thumbnail_height']))
-                {
-                    $config['view']['thumbnail_height'] = (int)$config['view']['thumbnail_height'];
-                }
-    
-                if (isset($config['view']['hide']))
-                {
-                    $config['view']['hide'] = (bool)$config['view']['hide'];
-                }
-    
-                if (isset($config['view']['hideAble']))
-                {
-                    $config['view']['hideAble'] = (bool)$config['view']['hideAble'];
-                }
-                
-                if (isset($config['list']))
-                {
-                    $config['list'] = (bool)$config['list'];
-                }
-                
-                if (isset($config['filter']))
-                {
-                    $config['filter'] = (bool)$config['filter'];
-                }
-                
-                if (isset($config['view']['options']) and is_array($config['view']['options']))
-                {
-                    for ($i = 0; $i < count($config['view']['options']); $i++)
-                    {
-                        if (isset($config['view']['options'][$i]['value']) and is_numeric($config['view']['options'][$i]['value']))
-                        {
-                            $config['view']['options'][$i]['value'] = (int)$config['view']['options'][$i]['value'];
-                        }
-                    }
                 }
                 
                 if (isset($config['default']) and isset($config['type']))
