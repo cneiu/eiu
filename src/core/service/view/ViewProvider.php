@@ -170,7 +170,7 @@ class ViewProvider extends Provider
     {
         $this->output = $this->app->make(OutputProvider::class);
         $this->output->setOutput($text);
-        $this->output->setHeader('Access-Control-Allow-Origin: *');
+        $this->output->setHeader('Access-Control-Allow-Origin: ' . $this->app->request->header('Origin') ?: '*');
         $this->output->setHeader('Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, PATCH, DELETE');
         $this->output->setHeader('Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Authorization');
         $this->output->setHeaderStatus($status_code);

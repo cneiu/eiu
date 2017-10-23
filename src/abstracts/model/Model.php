@@ -90,13 +90,6 @@ abstract class Model extends Module
     protected static $structs = [];
     
     /**
-     * 视图
-     *
-     * @var array
-     */
-    protected static $views = [];
-    
-    /**
      * @var EventProvider
      */
     private $event;
@@ -160,37 +153,11 @@ abstract class Model extends Module
      * 查询
      *
      * @param array $query
-     * @param array $view
      *
      * @return array
      */
-    public function select(array $query = [], $view = []): array
+    public function select(array $query = []): array
     {
-        // 获取所有字段
-//        if (!isset($query['field']) or !$query['field'])
-//        {
-//            $query['field'] = $this::getFields();
-//        }
-//
-//        $structs = $this::getStructs();
-//
-//        foreach ($structs as $field => $config)
-//        {
-//            if (isset($config['view']['type']) and 'foreignKey' == $config['view']['type'])
-//            {
-//                if (in_array($field, $query['field']))
-//                {
-//                    $query['join'][] = $field;
-//                }
-//            }
-//        }
-        
-        // 如果指定了视图则用指定视图
-        if ($view)
-        {
-            static::$structs = $view;
-        }
-        
         $sql = $this->qr->parseSelect($query);
         
         if (!$rows = $this->db->query($sql))
@@ -517,16 +484,6 @@ abstract class Model extends Module
     }
     
     /**
-     * 获取所有视图
-     *
-     * @return array
-     */
-    public static function getViews(): array
-    {
-        return static::$views;
-    }
-    
-    /**
      * 字段是否存在
      *
      * @param $fieldName
@@ -536,18 +493,6 @@ abstract class Model extends Module
     public static function hasField($fieldName)
     {
         return in_array($fieldName, array_keys(static::$structs));
-    }
-    
-    /**
-     * 视图是否存在
-     *
-     * @param $viewName
-     *
-     * @return bool
-     */
-    public static function hasView($viewName)
-    {
-        return in_array($viewName, static::$views);
     }
     
     /**
@@ -561,48 +506,6 @@ abstract class Model extends Module
     public static function getStruct(string $fieldName): array
     {
         return static::$structs[$fieldName] ?? [];
-    }
-    
-    /**
-     * 获取指定视图
-     *
-     * @param string $viewName   视图名称
-     * @param bool   $fullConfig 是否完整字段属性
-     *
-     * @return array
-     */
-    public static function getView(string $viewName, bool $fullConfig = false): array
-    {
-        if (!isset(static::$views[$viewName]))
-        {
-            return static::$structs;
-        }
-        
-        if (!$fullConfig)
-        {
-            return static::$views[$viewName];
-        }
-        
-        $view = static::$views[$viewName];
-        
-        if (isset($view['struct']))
-        {
-            foreach ($view['struct'] as $field => $config)
-            {
-                if (!isset($config['virtual']) || !$config['virtual'])
-                {
-                    foreach (static::$structs[$field] as $item => $prop)
-                    {
-                        if (!isset($config[$item]))
-                        {
-                            $view['struct'][$field][$item] = $prop;
-                        }
-                    }
-                }
-            }
-        }
-        
-        return $view;
     }
     
     /**

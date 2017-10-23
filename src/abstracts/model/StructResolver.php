@@ -172,16 +172,19 @@ class StructResolver
             if ("{$prefix}created" == $field)
             {
                 $fields[$field]['create']  = false;
+                $fields[$field]['update']  = false;
                 $fields[$field]['created'] = true;
             }
             else if ("{$prefix}updated" == $field)
             {
+                $fields[$field]['create']  = false;
                 $fields[$field]['update']  = false;
                 $fields[$field]['updated'] = true;
             }
             else if ("{$prefix}deleted" == $field)
             {
                 $fields[$field]['create']  = false;
+                $fields[$field]['update']  = false;
                 $fields[$field]['deleted'] = true;
             }
             
