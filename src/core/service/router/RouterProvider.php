@@ -283,17 +283,14 @@ class RouterProvider extends Provider
 //        }
 
         // find action
-        $method = null;
+        $method = $this->defaultAction;
         
         if (current($pathParams))
         {
             $method = array_shift($pathParams);
         }
-        else if (method_exists($fullClassName, '_' . $this->defaultAction))
-        {
-            $method = $this->defaultAction;
-        }
-        else
+        
+        if (!method_exists($fullClassName, '_' . $method))
         {
             throw new Exception("Controller \"$fullClassName\" missing action.", 404);
         }
