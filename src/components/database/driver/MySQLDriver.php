@@ -73,9 +73,9 @@ class MySQLDriver implements IDatabaseDriver
     /**
      * 当前连接池
      *
-     * @var \PDOStatement
+     * @var \PDO
      */
-    private $_link = [];
+    private $_link;
     /**
      * 服务器列表
      *
@@ -181,8 +181,8 @@ class MySQLDriver implements IDatabaseDriver
      * @param    array $config  数据库服务器配置信息
      * @param    int   $linkNum 连接编号
      *
-     * @return    object
-     *
+     * @return object
+     * @throws DatabaseException
      */
     public function connect(array $config, int $linkNum = 0)
     {
@@ -212,7 +212,9 @@ class MySQLDriver implements IDatabaseDriver
             }
             
             // set charset
-            self::$_links[$linkNum]->exec('SET NAMES \'' . $this->_config_charset . '\'');
+            /** @var \PDO $link */
+            $link = self::$_links[$linkNum];
+            $link->exec('SET NAMES \'' . $this->_config_charset . '\'');
         }
         
         $this->logger->info("Connect to database server {$config['HOST']}:{$config['PORT']} ok, link id is \"$linkNum\".");
@@ -416,7 +418,8 @@ class MySQLDriver implements IDatabaseDriver
     /**
      * 提交事务
      *
-     * @return    bool
+     * @return bool
+     * @throws DatabaseException
      */
     public function commit()
     {
@@ -514,7 +517,7 @@ class MySQLDriver implements IDatabaseDriver
                 $fields[$row['field']]['type']    = $row['type'];
                 $fields[$row['field']]['unique']  = ($row['key'] == 'UNI' or $row['key'] == 'PRI') ? true : false;
                 $fields[$row['field']]['notnull'] = !(strtoupper($row['null']) == 'YES');
-                $fields[$row['field']]['default'] = $row['default'] ?? $row['dflt_value'] ?? null;
+                $fields[$row['field']]['default'] = $default;
                 $fields[$row['field']]['primary'] = $row['key'] == 'PRI';
                 $fields[$row['field']]['autoinc'] = (strtolower($row['extra']) == 'auto_increment') ? true : false;
             }
@@ -585,7 +588,8 @@ class MySQLDriver implements IDatabaseDriver
     /**
      * 获取表信息
      *
-     * @return    array
+     * @return array
+     * @throws DatabaseException
      */
     public function getTables(): array
     {

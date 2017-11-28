@@ -48,6 +48,18 @@ abstract class Module
     }
     
     /**
+     * make an object use Container
+     *
+     * @param $abstract
+     *
+     * @return mixed
+     */
+    public function make($abstract)
+    {
+        return $this->app->make($abstract);
+    }
+    
+    /**
      * 别名
      *
      * @return string

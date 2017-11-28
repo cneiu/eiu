@@ -108,12 +108,10 @@ abstract class Controller extends Module implements IController
     /**
      * 输出一个 404 消息
      *
-     * @param string $log_message  消息内容
-     * @param bool   $log_writable 是否写入日志, 默认: true
+     * @param string $message
      */
-    protected function notFound(string $log_message = '', bool $log_writable = true)
+    protected function notFound(string $message = 'Not Found!')
     {
-        return $this->text('404');
-//        return $this->call('core', 'exception')->show_404($log_message, $log_writable);
+        return $this->json($message, 404);
     }
 }

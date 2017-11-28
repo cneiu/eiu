@@ -246,7 +246,7 @@ abstract class Model extends Module
         // 提交事务
         $this->db()->commit();
     
-        return $this->db->getInsertId() ?: $data[$pk['name']] ?? true;
+        return $this->db->getInsertId() ?: ($data[$pk['name']] ?? true);
     }
     
     /**
