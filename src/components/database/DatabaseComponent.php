@@ -81,10 +81,18 @@ class DatabaseComponent extends Component implements IDatabaseDriver
      * @param    string $sql SQL 语句
      *
      * @return int
+     * @throws DatabaseException
      */
     public function exec(string $sql)
     {
-        return $this->driver->exec($sql);
+        try
+        {
+            return $this->driver->exec($sql);
+        }
+        catch (DatabaseException $e)
+        {
+            throw new DatabaseException($e);
+        }
     }
     
     /**
@@ -94,10 +102,18 @@ class DatabaseComponent extends Component implements IDatabaseDriver
      * @param    bool   $fetchNumber 是否数字索引
      *
      * @return array
+     * @throws DatabaseException
      */
     public function query(string $sql, bool $fetchNumber = false)
     {
-        return $this->driver->query($sql, $fetchNumber);
+        try
+        {
+            return $this->driver->query($sql, $fetchNumber);
+        }
+        catch (DatabaseException $e)
+        {
+            throw new DatabaseException($e);
+        }
     }
     
     /**
