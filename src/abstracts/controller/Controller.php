@@ -65,6 +65,8 @@ abstract class Controller extends Module implements IController
      * @param int    $status_code 状态代码
      * @param string $header_type 输出头类型
      * @param string $charset     字符集
+     *
+     * @return string
      */
     protected function text(string $text, int $status_code = 200, string $header_type = 'html', string $charset = null)
     {
@@ -78,6 +80,8 @@ abstract class Controller extends Module implements IController
      * @param int    $status_code 状态代码
      * @param string $header_type 输出头类型
      * @param string $charset     字符集
+     *
+     * @return string
      */
     protected function json($object, int $status_code = 200, string $header_type = 'json', string $charset = null)
     {
@@ -94,6 +98,8 @@ abstract class Controller extends Module implements IController
      * @param int    $status_code 状态代码
      * @param string $header_type 输出头类型
      * @param string $charset     字符集
+     *
+     * @return string
      */
     protected function success(bool $success = true, $message = null, int $status_code = 200, string $header_type = 'json', string $charset = null)
     {
@@ -109,6 +115,8 @@ abstract class Controller extends Module implements IController
      * 输出一个 404 消息
      *
      * @param string $message
+     *
+     * @return string
      */
     protected function notFound(string $message = 'Not Found!')
     {

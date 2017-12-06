@@ -165,6 +165,8 @@ class ViewProvider extends Provider
      * @param int    $status_code 状态代码
      * @param string $header_type 输出类型
      * @param string $charset     字符集
+     *
+     * @return string
      */
     public function text($text, int $status_code = 200, string $header_type = 'html', string $charset = null)
     {
@@ -177,6 +179,8 @@ class ViewProvider extends Provider
         $this->output->setHeaderStatus($status_code);
         $this->output->setHeaderType($header_type);
         $this->output->setHeaderCharset($charset ?: $this->config['app']['CHARSET']);
+        
+        return $text;
     }
     
     /**

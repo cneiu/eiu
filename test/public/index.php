@@ -51,7 +51,7 @@ define('APP_URL', rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME']))
 define('APP_MODULE', APP_PATH . 'modules' . DS);
 define('APP_DATA', APP_PATH . 'data' . DS);
 define('APP_CACHE', APP_DATA . 'cache' . DS);
-define('VIEW_PATH', APP_PATH . 'temples' . DS);
+define('VIEW_PATH', APP_PATH . 'templates' . DS);
 define('MEDIA_PATH', APP_PATH . 'public' . DS . 'media' . DS);
 define('PUBLIC_PATH', APP_PATH . 'public' . DS);
 define('STATIC_URL', APP_URL . 'static/');
@@ -78,8 +78,6 @@ define('FOPEN_READ_WRITE_CREATE_STRICT', 'x+b');
  *---------------------------------------------------------------
  * 自动加载
  *---------------------------------------------------------------
- *
- * 引用自定义自动加载器
  */
 file_exists("../../vendor/autoload.php") or exit("Please run \"composer init\"");
 
@@ -90,8 +88,6 @@ require_once "../../vendor/autoload.php";
  *---------------------------------------------------------------
  * 创建应用程序
  *---------------------------------------------------------------
- *
- * 引用自定义自动加载器
  */
 $app = new \eiu\core\application\Application();
 
@@ -100,8 +96,6 @@ $app = new \eiu\core\application\Application();
  *---------------------------------------------------------------
  * 绑定核心处理器
  *---------------------------------------------------------------
- *
- * 引用自定义自动加载器
  */
 $app->bind(\eiu\core\application\IKernel::class, \eiu\core\application\HttpKernel::class, true);
 
@@ -110,7 +104,5 @@ $app->bind(\eiu\core\application\IKernel::class, \eiu\core\application\HttpKerne
  *---------------------------------------------------------------
  * 运行应用程序
  *---------------------------------------------------------------
- *
- * 引用自定义自动加载器
  */
 $app->make(eiu\core\application\IKernel::class)->handle();
