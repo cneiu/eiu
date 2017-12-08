@@ -10,7 +10,6 @@
 namespace eiu\core\application;
 
 
-use eiu\components\cache\CacheComponent;
 use eiu\core\service\debug\ExceptionProvider;
 use eiu\core\service\event\EventProvider;
 use eiu\core\service\logger\Logger;
@@ -135,21 +134,21 @@ class HttpKernel implements IKernel
         
         // 输出渲染
         $this->output->render();
-    
+        
         // 事件 输出渲染完成
         $this->event->fire('output.after');
-    
+        
         // timer
         $this->app->timerTick('kernel.over');
-
+        
         // 性能统计
         $memory       = $this->app->getMemory();
         $totalElapsed = (float)$this->app->timerElapsed('kernel.begin', 'kernel.over', 4);
         $execElapsed  = (float)$this->app->timerElapsed('controller.start', 'controller.over', 4);
-    
+        
         // 事件 应用结束
         $this->event->fire('kernel.over', [$memory, $totalElapsed, $execElapsed]);
-    
+        
         // 遗言
         $this->logger->info("Total execution time: {$totalElapsed}s, Controller execution time: {$execElapsed}, Memory: {$memory}." . str_repeat(PHP_EOL, 3));
     }

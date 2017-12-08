@@ -213,6 +213,96 @@ class RequestProvider extends Provider implements ArrayAccess
     }
     
     /**
+     * header
+     *
+     * @param string|null $index     索引
+     * @param bool        $xss_clean 是否 XSS 过滤
+     *
+     * @return array|mixed
+     */
+    public function server($index = null, $xss_clean = true)
+    {
+        $this->requestData['server'] = $this->_fetch_from_array($_SERVER, null, $xss_clean);
+        
+        return $index ? $this->requestData['server'][$index] ?? null : $this->requestData['server'];
+    }
+    
+    /**
+     * 数组安全过滤
+     *
+     * @param    array &$array    $_GET, $_POST, $_COOKIE, $_SERVER, etc.
+     * @param          $index     Index for item to be fetched from $array
+     * @param    bool  $xss_clean Whether to apply XSS filtering
+     *
+     * @return    mixed
+     */
+    private function _fetch_from_array(array $array, $index = null, $xss_clean = false)
+    {
+        // If $index is NULL, it means that the whole $array is requested
+        isset($index) or $index = array_keys($array);
+        
+        // allow fetching multiple keys at once
+        if (is_array($index))
+        {
+            $output = [];
+            
+            foreach ($index as $key)
+            {
+                $output[$key] = $this->_fetch_from_array($array, $key, $xss_clean);
+            }
+            
+            return $output;
+        }
+        
+        if (isset($array[$index]))
+        {
+            $value = $array[$index];
+        }
+        else if (($count = preg_match_all('/(?:^[^\[]+)|\[[^]]*\]/', $index, $matches)) > 1) // Does the index contain array notation
+        {
+            $value = $array;
+            
+            for ($i = 0; $i < $count; $i++)
+            {
+                $key = trim($matches[0][$i], '[]');
+                
+                if ($key === '') // Empty notation will return the value as array
+                {
+                    break;
+                }
+                
+                if (isset($value[$key]))
+                {
+                    $value = $value[$key];
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+        else
+        {
+            return null;
+        }
+        
+        return ($xss_clean === true) ? $this->security->xss_clean($value) : $value;
+    }
+    
+    /**
+     * router
+     *
+     * @param string|null $index 索引
+     *
+     * @return array|mixed
+     *
+     */
+    public function router($index = null)
+    {
+        return $index ? $this->requestData['router'][$index] ?? null : $this->requestData['router'];
+    }
+    
+    /**
      * server
      *
      * @param string|null $index     索引
@@ -249,34 +339,6 @@ class RequestProvider extends Provider implements ArrayAccess
         $this->requestData['header'] = $this->_fetch_from_array($headers, null, $xss_clean);
         
         return $index ? $this->requestData['header'][$index] ?? null : $this->requestData['header'];
-    }
-    
-    /**
-     * header
-     *
-     * @param string|null $index     索引
-     * @param bool        $xss_clean 是否 XSS 过滤
-     *
-     * @return array|mixed
-     */
-    public function server($index = null, $xss_clean = true)
-    {
-        $this->requestData['server'] = $this->_fetch_from_array($_SERVER, null, $xss_clean);
-        
-        return $index ? $this->requestData['server'][$index] ?? null : $this->requestData['server'];
-    }
-    
-    /**
-     * router
-     *
-     * @param string|null $index 索引
-     *
-     * @return array|mixed
-     *
-     */
-    public function router($index = null)
-    {
-        return $index ? $this->requestData['router'][$index] ?? null : $this->requestData['router'];
     }
     
     /**
@@ -484,6 +546,18 @@ class RequestProvider extends Provider implements ArrayAccess
     }
     
     /**
+     * 获取请求方法
+     *
+     * @param    bool $upper 是否大写
+     *
+     * @return    string
+     */
+    public function getRequestMethod(bool $upper = true)
+    {
+        return $upper ? strtoupper($_SERVER['REQUEST_METHOD']) : strtolower($_SERVER['REQUEST_METHOD']);
+    }
+    
+    /**
      * 是否 GET 请求
      *
      * @return bool
@@ -551,80 +625,6 @@ class RequestProvider extends Provider implements ArrayAccess
     public function isCli()
     {
         return (PHP_SAPI === 'cli' or defined('STDIN'));
-    }
-    
-    /**
-     * 获取请求方法
-     *
-     * @param    bool $upper 是否大写
-     *
-     * @return    string
-     */
-    public function getRequestMethod(bool $upper = true)
-    {
-        return $upper ? strtoupper($_SERVER['REQUEST_METHOD']) : strtolower($_SERVER['REQUEST_METHOD']);
-    }
-    
-    /**
-     * 数组安全过滤
-     *
-     * @param    array &$array    $_GET, $_POST, $_COOKIE, $_SERVER, etc.
-     * @param          $index     Index for item to be fetched from $array
-     * @param    bool  $xss_clean Whether to apply XSS filtering
-     *
-     * @return    mixed
-     */
-    private function _fetch_from_array(array $array, $index = null, $xss_clean = false)
-    {
-        // If $index is NULL, it means that the whole $array is requested
-        isset($index) or $index = array_keys($array);
-        
-        // allow fetching multiple keys at once
-        if (is_array($index))
-        {
-            $output = [];
-            
-            foreach ($index as $key)
-            {
-                $output[$key] = $this->_fetch_from_array($array, $key, $xss_clean);
-            }
-            
-            return $output;
-        }
-        
-        if (isset($array[$index]))
-        {
-            $value = $array[$index];
-        }
-        else if (($count = preg_match_all('/(?:^[^\[]+)|\[[^]]*\]/', $index, $matches)) > 1) // Does the index contain array notation
-        {
-            $value = $array;
-            
-            for ($i = 0; $i < $count; $i++)
-            {
-                $key = trim($matches[0][$i], '[]');
-                
-                if ($key === '') // Empty notation will return the value as array
-                {
-                    break;
-                }
-                
-                if (isset($value[$key]))
-                {
-                    $value = $value[$key];
-                }
-                else
-                {
-                    return null;
-                }
-            }
-        }
-        else
-        {
-            return null;
-        }
-        
-        return ($xss_clean === true) ? $this->security->xss_clean($value) : $value;
     }
     
     /**

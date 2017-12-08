@@ -7,16 +7,13 @@
  */
 
 
-namespace eiu\abstracts\model;
+namespace eiu\components\cryptography\hashing;
 
 
 use Exception;
 
 
-/**
- * Defines the exception that is thrown by the encrypter
- */
-class ModelErrorException extends Exception
+class HashingException extends Exception
 {
     // Don't do anything
 }

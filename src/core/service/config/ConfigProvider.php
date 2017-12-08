@@ -14,7 +14,6 @@ use ArrayAccess;
 use eiu\core\service\logger\Logger;
 use eiu\core\service\logger\LoggerProvider;
 use eiu\core\service\Provider;
-use RuntimeException;
 
 
 class ConfigProvider extends Provider implements ArrayAccess
@@ -47,6 +46,8 @@ class ConfigProvider extends Provider implements ArrayAccess
      * 服务启动
      *
      * @param Logger|LoggerProvider $logger
+     *
+     * @throws \Exception
      */
     public function boot(LoggerProvider $logger)
     {
@@ -54,12 +55,12 @@ class ConfigProvider extends Provider implements ArrayAccess
         
         if (!is_file($file = static::$path . 'app.config.php'))
         {
-            throw new RuntimeException("The file \"{$file}\" does not exist.");
+            throw new \Exception("The file \"{$file}\" does not exist.");
         }
         
         if (!is_array($_config = include($file)))
         {
-            throw new RuntimeException('Application configuration option is invalid.');
+            throw new \Exception('Application configuration option is invalid.');
         }
         
         // 设置字符集
@@ -142,6 +143,7 @@ class ConfigProvider extends Provider implements ArrayAccess
      * @param string|null $key       配置索引
      *
      * @return mixed
+     * @throws \Exception
      */
     public function get(string $namespace, string $key = null)
     {
@@ -151,7 +153,7 @@ class ConfigProvider extends Provider implements ArrayAccess
             
             if (!is_file($file))
             {
-                throw new RuntimeException("The \"{$namespace}\" configuration file does not exist.");
+                throw new \Exception("The \"{$namespace}\" configuration file does not exist.");
             }
             
             self::$configs[$namespace] = include($file);
@@ -164,7 +166,7 @@ class ConfigProvider extends Provider implements ArrayAccess
         
         if (!isset(self::$configs[$namespace][$key]))
         {
-            throw new RuntimeException("The \"{$key}\" option for the \"{$namespace}\" configuration file is invalid.");
+            throw new \Exception("The \"{$key}\" option for the \"{$namespace}\" configuration file is invalid.");
         }
         
         return self::$configs[$namespace][$key];

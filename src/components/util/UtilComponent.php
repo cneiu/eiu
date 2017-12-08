@@ -14,7 +14,7 @@ use eiu\components\Component;
 
 
 /**
- * 杂项
+ * 杂项组件
  *
  * @package eiu\core\service\event
  */
@@ -30,7 +30,7 @@ class UtilComponent extends Component
      *
      * @return double 单位为公里的距离
      */
-    public static function calculateDistance($lon1, $lat1, $lon2, $lat2)
+    public static function gps_calculateDistance($lon1, $lat1, $lon2, $lat2)
     {
         $theta = $lon1 - $lon2;
         $dist  = sin(deg2rad($lat1)) * sin(deg2rad($lat2)) + cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * cos(deg2rad($theta));
@@ -52,7 +52,7 @@ class UtilComponent extends Component
      * @return array 经度/纬度
      * @internal param float $distance 距离（公里）
      */
-    public static function calculateDerivedPosition($lon1, $lat1, $linDistance, $bearing)
+    public static function gps_calculateDerivedPosition($lon1, $lat1, $linDistance, $bearing)
     {
         $lon1 = deg2rad($lon1);
         $lat1 = deg2rad($lat1);
@@ -69,7 +69,7 @@ class UtilComponent extends Component
     }
     
     /**
-     * 生成树结构
+     * 递归生成树结构
      *
      * @param array  $data         data array 数据
      * @param string $parentId     parent value 父节点ID
@@ -80,7 +80,7 @@ class UtilComponent extends Component
      *
      * @return array
      */
-    public static function buildTree(array $data, $parentId, $parent_name, $self_name, $childrenName = '_children', $asName = [])
+    public static function tree(array $data, $parentId, $parent_name, $self_name, $childrenName = '_children', $asName = [])
     {
         $tree = [];
         
@@ -101,7 +101,7 @@ class UtilComponent extends Component
             
             if ($data[$index][$parent_name] == $parentId)
             {
-                $children = static::buildTree($data, $data[$index][$self_name], $parent_name, $self_name, $childrenName, $asName);
+                $children = static::tree($data, $data[$index][$self_name], $parent_name, $self_name, $childrenName, $asName);
                 // set a trivial key
                 if (!empty($children))
                 {
@@ -228,21 +228,21 @@ class UtilComponent extends Component
     {
         $result = "";
         $j      = 0;
-    
+        
         for ($i = 0; $i < strlen($string); $i++)
         {
             $a      = self::_getCharcode($string, $i);
             $b      = $a ^ self::_getCharcode($key, $j);
             $result .= self::_fromCharCode($b);
-        
+            
             $j++;
-        
+            
             if ($j == strlen($key))
             {
                 $j = 0;
             }
         }
-    
+        
         return $result;
     }
     
@@ -260,25 +260,6 @@ class UtilComponent extends Component
     {
         return self::_uniord(substr($str, $i, 1));
     }
-    
-    /**
-     * Gets character from code.
-     *
-     * @access private
-     * @return string
-     */
-    private static function _fromCharCode()
-    {
-        $output = '';
-        $chars  = func_get_args();
-        foreach ($chars as $char)
-        {
-            $output .= chr((int)$char);
-        }
-        
-        return $output;
-    }
-    
     
     /**
      * Multi byte ord function.
@@ -316,5 +297,23 @@ class UtilComponent extends Component
         {
             return false;
         }
+    }
+    
+    /**
+     * Gets character from code.
+     *
+     * @access private
+     * @return string
+     */
+    private static function _fromCharCode()
+    {
+        $output = '';
+        $chars  = func_get_args();
+        foreach ($chars as $char)
+        {
+            $output .= chr((int)$char);
+        }
+        
+        return $output;
     }
 }

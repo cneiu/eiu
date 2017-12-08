@@ -14,7 +14,6 @@ use eiu\core\service\config\ConfigProvider;
 use eiu\core\service\logger\Logger;
 use eiu\core\service\logger\LoggerProvider;
 use eiu\core\service\Provider;
-use Exception;
 
 
 class RouterProvider extends Provider
@@ -130,7 +129,7 @@ class RouterProvider extends Provider
         $this->pathInfoSuffix    = $config['router']['URL_SUFFIX'];
         $this->defaultController = $config['router']['DEFAULT_CONTROLLER'];
         $this->defaultAction     = $config['router']['DEFAULT_ACTION'];
-        $this->logger = $logger;
+        $this->logger            = $logger;
         $this->logger->info($this->className() . " is booted");
     }
     
@@ -247,7 +246,7 @@ class RouterProvider extends Provider
      * @param string $pathInfoUri 请求信息
      *
      * @return array
-     * @throws Exception
+     * @throws \Exception
      */
     public function parseController($pathInfoUri = null)
     {
@@ -271,7 +270,7 @@ class RouterProvider extends Provider
         
         if (!class_exists($fullClassName))
         {
-            throw new Exception("Controller class \"$fullClassName\" isn't exist.", 404);
+            throw new \Exception("Controller class \"$fullClassName\" isn't exist.", 404);
         }
         
         $this->logger->info("Parse router is \"$fullClassName\"");
@@ -281,7 +280,7 @@ class RouterProvider extends Provider
 //        {
 //            trigger_error("Controller class \"$fullClassName\" inherited error.", E_USER_ERROR);
 //        }
-
+        
         // find action
         $method = $this->defaultAction;
         
@@ -292,7 +291,7 @@ class RouterProvider extends Provider
         
         if (!method_exists($fullClassName, '_' . $method))
         {
-            throw new Exception("Controller \"$fullClassName\" missing action.", 404);
+            throw new \Exception("Controller \"$fullClassName\" missing action.", 404);
         }
         
         $pathInfo   = $pathInfo = join('/', $classNameArr) . '/' . $method;
@@ -305,7 +304,7 @@ class RouterProvider extends Provider
         $this->requestPathInfo   = $pathInfo;
         $this->requestController = $controller;
         $this->requestUri        = $pathInfoUri;
-    
+        
         return compact('namespace', 'className', 'controller', 'method', 'pathParams', 'pathInfo', 'pathInfoUri');
     }
     
@@ -315,7 +314,7 @@ class RouterProvider extends Provider
      * @param array $uri URI
      *
      * @return array
-     * @throws Exception
+     * @throws \Exception
      */
     private function _find_controller(array $uri)
     {
@@ -354,7 +353,7 @@ class RouterProvider extends Provider
             // can not find
             if (!$cur_dir)
             {
-                throw new Exception("Controller load failure, maybe it's not exist.", 404);
+                throw new \Exception("Controller load failure, maybe it's not exist.", 404);
             }
             
             // build

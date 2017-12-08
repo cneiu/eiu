@@ -1,34 +1,22 @@
 <?php
 /**
- * Pop PHP Framework (http://www.popphp.org/)
+ * EIU PHP FRAMEWORK
  *
- * @link       https://github.com/popphp/popphp-framework
- * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2017 NOLA Interactive, LLC. (http://www.nolainteractive.com)
- * @license    http://www.popphp.org/license     New BSD License
- */
-
-
-/**
- * @namespace
+ * @author        成都东联智胜软件有限公司
+ * @link          https://www.cneiu.com
  */
 
 
 namespace eiu\components\cache\adapter;
 
 
-use Exception;
+use eiu\components\cache\CacheException;
 
 
 /**
- * Memcache cache adapter class
+ * Memcache 缓存适配器
  *
- * @category   Pop
- * @package    Pop\Cache
- * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2017 NOLA Interactive, LLC. (http://www.nolainteractive.com)
- * @license    http://www.popphp.org/license     New BSD License
- * @version    3.1.0
+ * @package eiu\components\cache\adapter
  */
 class Memcache extends AbstractAdapter
 {
@@ -54,20 +42,22 @@ class Memcache extends AbstractAdapter
     public function __construct($ttl = 0, $host = 'localhost', $port = 11211)
     {
         parent::__construct($ttl);
+        
         if (!class_exists('Memcache', false))
         {
-            throw new Exception('Error: Memcache is not available.');
+            throw new CacheException('Memcache is not available');
         }
         
         $this->memcache = new \Memcache();
+        
         if (!$this->memcache->connect($host, (int)$port))
         {
-            throw new Exception('Error: Unable to connect to the memcache server.');
+            throw new CacheException('Unable to connect to the memcache server');
         }
     }
     
     /**
-     * Get the memcache object.
+     * 获取缓存器
      *
      * @return \Memcache
      */
@@ -77,7 +67,7 @@ class Memcache extends AbstractAdapter
     }
     
     /**
-     * Get the current version of memcache.
+     * 获取缓冲器版本
      *
      * @return string
      */
@@ -87,7 +77,7 @@ class Memcache extends AbstractAdapter
     }
     
     /**
-     * Get the time-to-live for an item in cache
+     * 获取指定缓存过期时间
      *
      * @param  string $id
      *
@@ -107,7 +97,7 @@ class Memcache extends AbstractAdapter
     }
     
     /**
-     * Save an item to cache
+     * 写入一个缓存
      *
      * @param  string $id
      * @param  mixed  $value
@@ -129,7 +119,7 @@ class Memcache extends AbstractAdapter
     }
     
     /**
-     * Get an item from cache
+     * 获取指定缓存
      *
      * @param  string $id
      *
@@ -149,7 +139,7 @@ class Memcache extends AbstractAdapter
     }
     
     /**
-     * Determine if the item exist in cache
+     * 判断指定缓存是否存在
      *
      * @param  string $id
      *
@@ -163,7 +153,7 @@ class Memcache extends AbstractAdapter
     }
     
     /**
-     * Delete a value in cache
+     * 删除指定缓存
      *
      * @param  string $id
      *
@@ -177,7 +167,7 @@ class Memcache extends AbstractAdapter
     }
     
     /**
-     * Clear all stored values from cache
+     * 清除所有缓存
      *
      * @return Memcache
      */
@@ -189,7 +179,7 @@ class Memcache extends AbstractAdapter
     }
     
     /**
-     * Destroy cache resource
+     * 销毁缓存器
      *
      * @return Memcache
      */

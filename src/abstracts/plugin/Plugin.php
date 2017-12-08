@@ -7,17 +7,12 @@
  */
 
 
-/**
- * @namespace
- */
+namespace eiu\abstracts\plugin;
 
 
-namespace eiu\components\image\Layer;
+use eiu\abstracts\Module;
 
-/**
- * Layer interface
- */
-interface LayerInterface
+
+abstract class Plugin extends Module
 {
-    
 }

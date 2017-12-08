@@ -1,34 +1,22 @@
 <?php
 /**
- * Pop PHP Framework (http://www.popphp.org/)
+ * EIU PHP FRAMEWORK
  *
- * @link       https://github.com/popphp/popphp-framework
- * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2017 NOLA Interactive, LLC. (http://www.nolainteractive.com)
- * @license    http://www.popphp.org/license     New BSD License
- */
-
-
-/**
- * @namespace
+ * @author        成都东联智胜软件有限公司
+ * @link          https://www.cneiu.com
  */
 
 
 namespace eiu\components\cache\adapter;
 
 
-use Exception;
+use eiu\components\cache\CacheException;
 
 
 /**
- * Redis cache adapter class
+ * Redis 缓存适配器
  *
- * @category   Pop
- * @package    Pop\Cache
- * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2017 NOLA Interactive, LLC. (http://www.nolainteractive.com)
- * @license    http://www.popphp.org/license     New BSD License
- * @version    3.1.0
+ * @package eiu\components\cache\adapter
  */
 class Redis extends AbstractAdapter
 {
@@ -54,20 +42,22 @@ class Redis extends AbstractAdapter
     public function __construct($ttl = 0, $host = 'localhost', $port = 6379)
     {
         parent::__construct($ttl);
+        
         if (!class_exists('Redis', false))
         {
-            throw new Exception('Error: Redis is not available.');
+            throw new CacheException('Redis is not available');
         }
         
         $this->redis = new \Redis();
+        
         if (!$this->redis->connect($host, (int)$port))
         {
-            throw new Exception('Error: Unable to connect to the redis server.');
+            throw new CacheException('Unable to connect to the redis server');
         }
     }
     
     /**
-     * Get the redis object.
+     * 获取缓存器
      *
      * @return \Redis
      */
@@ -77,7 +67,7 @@ class Redis extends AbstractAdapter
     }
     
     /**
-     * Get the current version of redis.
+     * 获取缓存器版本
      *
      * @return string
      */
@@ -87,7 +77,7 @@ class Redis extends AbstractAdapter
     }
     
     /**
-     * Get the time-to-live for an item in cache
+     * 获取指定缓存过期时间
      *
      * @param  string $id
      *
@@ -108,7 +98,7 @@ class Redis extends AbstractAdapter
     }
     
     /**
-     * Save an item to cache
+     * 写入一个缓存
      *
      * @param  string $id
      * @param  mixed  $value
@@ -137,7 +127,7 @@ class Redis extends AbstractAdapter
     }
     
     /**
-     * Get an item from cache
+     * 获取指定缓存
      *
      * @param  string $id
      *
@@ -158,7 +148,7 @@ class Redis extends AbstractAdapter
     }
     
     /**
-     * Determine if the item exist in cache
+     * 判断指定缓存是否存在
      *
      * @param  string $id
      *
@@ -172,7 +162,7 @@ class Redis extends AbstractAdapter
     }
     
     /**
-     * Delete a value in cache
+     * 删除指定缓存
      *
      * @param  string $id
      *
@@ -186,7 +176,7 @@ class Redis extends AbstractAdapter
     }
     
     /**
-     * Clear all stored values from cache
+     * 清除所有缓存
      *
      * @return Redis
      */
@@ -198,7 +188,7 @@ class Redis extends AbstractAdapter
     }
     
     /**
-     * Destroy cache resource
+     * 销毁缓存器
      *
      * @return Redis
      */

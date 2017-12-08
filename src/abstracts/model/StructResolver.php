@@ -23,33 +23,11 @@ use eiu\components\database\DatabaseComponent as db;
 class StructResolver
 {
     /**
-     * 模型
-     *
-     * @var Model
-     */
-    private $model;
-    
-    /**
-     * 数据库
-     *
-     * @var db
-     */
-    private $db;
-    
-    /**
-     * 表
-     *
-     * @var string
-     */
-    private $table;
-    
-    /**
      * 主键
      *
      * @var string
      */
     private static $primaryKey = '';
-    
     /**
      * 默认配置
      *
@@ -65,8 +43,26 @@ class StructResolver
         'created' => false,
         'updated' => false,
         'deleted' => false,
-        'default' => null
+        'default' => null,
     ];
+    /**
+     * 模型
+     *
+     * @var Model
+     */
+    private $model;
+    /**
+     * 数据库
+     *
+     * @var db
+     */
+    private $db;
+    /**
+     * 表
+     *
+     * @var string
+     */
+    private $table;
     
     /**
      * StructResolver constructor.
@@ -79,6 +75,114 @@ class StructResolver
         $this->db    = $db;
         $this->model = $model;
         $this->table = $this->model->table();
+    }
+    
+    /**
+     * 格式化字段
+     *
+     * @param array $struct
+     * @param       $prefix
+     *
+     * @return array
+     */
+    public static function formatFields(array $struct, $prefix)
+    {
+        $result = [];
+        
+        foreach ($struct as $index => $config)
+        {
+            if (isset($config['length']))
+            {
+                $config['length'] = (int)$config['length'];
+            }
+            
+            if (isset($config['primary']) and $config['primary'] and $config['autoinc'])
+            {
+                // 自增主键处理
+                $config['primary'] = true;
+                $config['autoinc'] = (bool)($config['autoinc'] ?? true);
+                $config['notnull'] = false;
+                $config['unique']  = false;
+                $config['create']  = false;
+                $config['update']  = false;
+                $config['created'] = false;
+                $config['updated'] = false;
+                $config['deleted'] = false;
+                $config['type']    = 'integer';
+            }
+            else
+            {
+                $config['autoinc'] = (bool)($config['autoinc'] ?? false);
+                $config['primary'] = (bool)($config['primary'] ?? false);
+                $config['notnull'] = (bool)($config['notnull'] ?? false);
+                $config['unique']  = (bool)($config['unique'] ?? false);
+                $config['create']  = (bool)($config['create'] ?? false);
+                $config['update']  = (bool)($config['update'] ?? false);
+                $config['created'] = false;
+                $config['updated'] = false;
+                $config['deleted'] = false;
+                
+                
+                // 设置自动属性, 自动时间戳
+                $field = $config['name'];
+                
+                if ("{$prefix}created" == $field)
+                {
+                    $config['create']  = false;
+                    $config['update']  = false;
+                    $config['created'] = true;
+                }
+                else if ("{$prefix}updated" == $field)
+                {
+                    $config['create']  = false;
+                    $config['update']  = false;
+                    $config['updated'] = true;
+                }
+                else if ("{$prefix}deleted" == $field)
+                {
+                    $config['create']  = false;
+                    $config['update']  = false;
+                    $config['deleted'] = true;
+                }
+                
+                if (isset($config['default']) and isset($config['type']))
+                {
+                    switch ($config['type'])
+                    {
+                        case 'integer':
+                        case 'tinyint':
+                            if (is_string($config['default']))
+                            {
+                                if (strlen($config['default']))
+                                {
+                                    $config['default'] = (int)$config['default'];
+                                }
+                                else
+                                {
+                                    $config['default'] = null;
+                                }
+                            }
+                            break;
+                        
+                        case 'float':
+                            if (strlen($config['default']))
+                            {
+                                $config['default'] = (float)$config['default'];
+                            }
+                            break;
+                        
+                        case 'boolean':
+                            $config['default'] = (bool)$config['default'];
+                            break;
+                    }
+                }
+            }
+            $result[$config['name']] = $config;
+        }
+        
+        unset($struct);
+        
+        return $result;
     }
     
     /**
@@ -209,114 +313,6 @@ class StructResolver
     }
     
     /**
-     * 格式化字段
-     *
-     * @param array $struct
-     * @param       $prefix
-     *
-     * @return array
-     */
-    public static function formatFields(array $struct, $prefix)
-    {
-        $result = [];
-        
-        foreach ($struct as $index => $config)
-        {
-            if (isset($config['length']))
-            {
-                $config['length'] = (int)$config['length'];
-            }
-            
-            if (isset($config['primary']) and $config['primary'] and $config['autoinc'])
-            {
-                // 自增主键处理
-                $config['primary'] = true;
-                $config['autoinc'] = (bool)($config['autoinc'] ?? true);
-                $config['notnull'] = false;
-                $config['unique']  = false;
-                $config['create']  = false;
-                $config['update']  = false;
-                $config['created'] = false;
-                $config['updated'] = false;
-                $config['deleted'] = false;
-                $config['type']    = 'integer';
-            }
-            else
-            {
-                $config['autoinc'] = (bool)($config['autoinc'] ?? false);
-                $config['primary'] = (bool)($config['primary'] ?? false);
-                $config['notnull'] = (bool)($config['notnull'] ?? false);
-                $config['unique']  = (bool)($config['unique'] ?? false);
-                $config['create']  = (bool)($config['create'] ?? false);
-                $config['update']  = (bool)($config['update'] ?? false);
-                $config['created'] = false;
-                $config['updated'] = false;
-                $config['deleted'] = false;
-                
-                
-                // 设置自动属性, 自动时间戳
-                $field = $config['name'];
-
-                if ("{$prefix}created" == $field)
-                {
-                    $config['create']  = false;
-                    $config['update']  = false;
-                    $config['created'] = true;
-                }
-                else if ("{$prefix}updated" == $field)
-                {
-                    $config['create']  = false;
-                    $config['update']  = false;
-                    $config['updated'] = true;
-                }
-                else if ("{$prefix}deleted" == $field)
-                {
-                    $config['create']  = false;
-                    $config['update']  = false;
-                    $config['deleted'] = true;
-                }
-                
-                if (isset($config['default']) and isset($config['type']))
-                {
-                    switch ($config['type'])
-                    {
-                        case 'integer':
-                        case 'tinyint':
-                            if (is_string($config['default']))
-                            {
-                                if (strlen($config['default']))
-                                {
-                                    $config['default'] = (int)$config['default'];
-                                }
-                                else
-                                {
-                                    $config['default'] = null;
-                                }
-                            }
-                            break;
-                        
-                        case 'float':
-                            if (strlen($config['default']))
-                            {
-                                $config['default'] = (float)$config['default'];
-                            }
-                            break;
-                        
-                        case 'boolean':
-                            $config['default'] = (bool)$config['default'];
-                            break;
-                    }
-                }
-            }
-            $result[$config['name']] = $config;
-        }
-        
-        unset($struct);
-        
-        return $result;
-    }
-    
-    /**
      * 获取主键
      *
      * @return string
@@ -324,29 +320,5 @@ class StructResolver
     public function getPrimaryKey()
     {
         return self::$primaryKey;
-    }
-    
-    /**
-     * 将 SQL 表结构字符串转换为结构数组
-     *
-     * @param string $sql
-     *
-     * @return array
-     */
-    public function SQLToStruct(string $sql): array
-    {
-        return [];
-    }
-    
-    /**
-     * 将结构转换为 SQL 表结构字符串
-     *
-     * @param array $structs
-     *
-     * @return string
-     */
-    public function structToSQL(array $structs): string
-    {
-        return null;
     }
 }

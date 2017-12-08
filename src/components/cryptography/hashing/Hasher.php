@@ -1,18 +1,13 @@
 <?php
-
-/*
- * Opulence
+/**
+ * EIU PHP FRAMEWORK
  *
- * @link      https://www.opulencephp.com
- * @copyright Copyright (C) 2017 David Young
- * @license   https://github.com/opulencephp/Opulence/blob/master/LICENSE.md
+ * @author        成都东联智胜软件有限公司
+ * @link          https://www.cneiu.com
  */
 
 
 namespace eiu\components\cryptography\hashing;
-
-
-use RuntimeException;
 
 
 /**
@@ -50,7 +45,7 @@ abstract class Hasher implements IHasher
         
         if ($hashedValue === false)
         {
-            throw new RuntimeException("Failed to generate hash for algorithm {$this->hashAlgorithm}");
+            throw new HashingException("Failed to generate hash for algorithm {$this->hashAlgorithm}");
         }
         
         return $hashedValue;

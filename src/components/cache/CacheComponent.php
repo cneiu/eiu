@@ -10,17 +10,18 @@
 namespace eiu\components\cache;
 
 
+use ArrayAccess;
 use eiu\components\cache\adapter\AdapterInterface;
 use eiu\components\Component;
 use eiu\core\application\Application;
 
 
 /**
- * Cache component
+ * 缓存组件
  *
  * @package eiu\components\cache
  */
-class CacheComponent extends Component
+class CacheComponent extends Component implements ArrayAccess
 {
     /**
      * Cache adapter
@@ -42,7 +43,7 @@ class CacheComponent extends Component
     }
     
     /**
-     * setup adapter
+     * 设置适配器
      *
      * @param AdapterInterface $adapter
      */
@@ -52,26 +53,26 @@ class CacheComponent extends Component
     }
     
     /**
-     * Determine if an adapter is available
+     * 判断是否设置了适配器
      *
      * @param  string $adapter
      *
      * @return boolean
      */
-    public static function isAvailable($adapter)
+    public function isAvailable($adapter)
     {
         $adapter  = strtolower($adapter);
-        $adapters = self::getAvailableAdapters();
+        $adapters = $this->getAvailableAdapters();
         
         return (isset($adapters[$adapter]) && ($adapters[$adapter]));
     }
     
     /**
-     * Determine available adapters
+     * 获取可用适配器列表
      *
      * @return array
      */
-    public static function getAvailableAdapters()
+    public function getAvailableAdapters()
     {
         $pdoDrivers = (class_exists('Pdo', false)) ? \PDO::getAvailableDrivers() : [];
         
@@ -86,7 +87,7 @@ class CacheComponent extends Component
     }
     
     /**
-     * Get the adapter
+     * 获取当前适配器
      *
      * @return mixed
      */
@@ -96,7 +97,7 @@ class CacheComponent extends Component
     }
     
     /**
-     * Get global cache TTL
+     * 获取全局缓存过期时间
      *
      * @return int
      */
@@ -106,7 +107,7 @@ class CacheComponent extends Component
     }
     
     /**
-     * Get item cache TTL
+     * 获取指定缓存的过期时间
      *
      * @param  string $id
      *
@@ -118,7 +119,7 @@ class CacheComponent extends Component
     }
     
     /**
-     * Save an item to cache
+     * 写入一个缓存
      *
      * @param  string $id
      * @param  mixed  $value
@@ -134,7 +135,7 @@ class CacheComponent extends Component
     }
     
     /**
-     * Save items to cache
+     * 写入多个缓存
      *
      * @param  array $items
      *
@@ -151,7 +152,7 @@ class CacheComponent extends Component
     }
     
     /**
-     * Get an item from cache
+     * 获取指定缓存
      *
      * @param  string $id
      *
@@ -163,7 +164,7 @@ class CacheComponent extends Component
     }
     
     /**
-     * Determine if the item is in cache
+     * 判断指定缓存是否存在
      *
      * @param  string $id
      *
@@ -175,7 +176,7 @@ class CacheComponent extends Component
     }
     
     /**
-     * Delete an item in cache
+     * 删除指定缓存
      *
      * @param  string $id
      *
@@ -189,7 +190,7 @@ class CacheComponent extends Component
     }
     
     /**
-     * Delete items in cache
+     * 删除多个缓存
      *
      * @param  array $ids
      *
@@ -206,7 +207,7 @@ class CacheComponent extends Component
     }
     
     /**
-     * Clear all stored values from cache
+     * 清除所有缓存
      *
      * @return CacheComponent
      */
@@ -218,7 +219,7 @@ class CacheComponent extends Component
     }
     
     /**
-     * Destroy cache resource
+     * 销毁缓存器
      *
      * @return CacheComponent
      */

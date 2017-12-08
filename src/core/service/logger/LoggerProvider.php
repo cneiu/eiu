@@ -78,10 +78,10 @@ class LoggerProvider extends Provider
         
         if (is_null(static::$logger))
         {
-            $path   = $this->config['app']['LOG_PATH'];
-            $path   = DS == substr($path, -1) ? $path : $path . DS;
-            $path   .= date('Y-m-d') . $this->config['app']['LOG_FILE_EXTENSION'];
-    
+            $path = $this->config['app']['LOG_PATH'];
+            $path = DS == substr($path, -1) ? $path : $path . DS;
+            $path .= date('Y-m-d') . $this->config['app']['LOG_FILE_EXTENSION'];
+            
             if (!$filesComponent->exists(dirname($path)))
             {
                 if (!$filesComponent->makeDirectory(dirname($path), 0755, true))

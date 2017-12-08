@@ -1,34 +1,22 @@
 <?php
 /**
- * Pop PHP Framework (http://www.popphp.org/)
+ * EIU PHP FRAMEWORK
  *
- * @link       https://github.com/popphp/popphp-framework
- * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2017 NOLA Interactive, LLC. (http://www.nolainteractive.com)
- * @license    http://www.popphp.org/license     New BSD License
- */
-
-
-/**
- * @namespace
+ * @author        成都东联智胜软件有限公司
+ * @link          https://www.cneiu.com
  */
 
 
 namespace eiu\components\cache\adapter;
 
 
-use Exception;
+use eiu\components\cache\CacheCacheException;
 
 
 /**
- * SQLite cache adapter class
+ * SQLite 缓存适配器
  *
- * @category   Pop
- * @package    Pop\Cache
- * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2017 NOLA Interactive, LLC. (http://www.nolainteractive.com)
- * @license    http://www.popphp.org/license     New BSD License
- * @version    3.1.0
+ * @package eiu\components\cache\adapter
  */
 class Sqlite extends AbstractAdapter
 {
@@ -45,7 +33,7 @@ class Sqlite extends AbstractAdapter
      *
      * @var string
      */
-    protected $table = 'pop_cache';
+    protected $table = 'eiu_cache';
     
     /**
      * Sqlite DB object
@@ -85,9 +73,9 @@ class Sqlite extends AbstractAdapter
      * @param  string  $table
      * @param  boolean $pdo
      *
-     * @throws Exception
+     * @throws CacheException
      */
-    public function __construct($db, $ttl = 0, $table = 'pop_cache', $pdo = false)
+    public function __construct($db, $ttl = 0, $table = 'eiu_cache', $pdo = false)
     {
         parent::__construct($ttl);
         
@@ -96,7 +84,7 @@ class Sqlite extends AbstractAdapter
         $pdoDrivers = (class_exists('Pdo', false)) ? \PDO::getAvailableDrivers() : [];
         if (!class_exists('Sqlite3', false) && !in_array('sqlite', $pdoDrivers))
         {
-            throw new Exception('Error: SQLite is not available.');
+            throw new CacheCacheException('SQLite is not available');
         }
         else if (($pdo) && !in_array('sqlite', $pdoDrivers))
         {
@@ -124,7 +112,7 @@ class Sqlite extends AbstractAdapter
     }
     
     /**
-     * Get the current cache db file.
+     * 获取数据库文件
      *
      * @return string
      */
@@ -134,11 +122,11 @@ class Sqlite extends AbstractAdapter
     }
     
     /**
-     * Set the current cache db file.
+     * 设置数据库文件
      *
      * @param  string $db
      *
-     * @throws Exception
+     * @throws CacheException
      * @return Sqlite
      */
     public function setDb($db)
@@ -155,29 +143,26 @@ class Sqlite extends AbstractAdapter
             }
             else
             {
-                throw new Exception('Error: That cache db file and/or directory is not writable.');
+                throw new CacheException('That cache db file and/or directory is not writable');
             }
         }
-        
-        // Make it writable.
-        chmod($this->db, 0777);
         
         // Check the permissions, access the database and check for the cache table.
         if (!is_writable($dir) || !is_writable($this->db))
         {
-            throw new Exception('Error: That cache db file and/or directory is not writable.');
+            throw new CacheException('That cache db file and/or directory is not writable');
         }
         
         if (!class_exists('Sqlite3', false) && !class_exists('Pdo', false))
         {
-            throw new Exception('Error: Neither SQLite3 or PDO are available.');
+            throw new CacheException('Neither SQLite3 or PDO are available');
         }
         
         return $this;
     }
     
     /**
-     * Get the current cache db table.
+     * 获取数据表
      *
      * @return string
      */
@@ -187,7 +172,7 @@ class Sqlite extends AbstractAdapter
     }
     
     /**
-     * Set the cache db table
+     * 设置数据表
      *
      * @param  string $table
      *
@@ -202,7 +187,7 @@ class Sqlite extends AbstractAdapter
     }
     
     /**
-     * Get the time-to-live for an item in cache
+     * 获取指定缓存过期时间
      *
      * @param  string $id
      *
@@ -242,23 +227,23 @@ class Sqlite extends AbstractAdapter
     }
     
     /**
-     * Execute the prepared SQL query
+     * 执行SQL语句
      *
-     * @throws Exception
+     * @throws CacheException
      * @return void
      */
     protected function execute()
     {
         if (null === $this->statement)
         {
-            throw new Exception('Error: The database statement resource is not currently set.');
+            throw new CacheException('The database statement resource is not currently set');
         }
         
         $this->result = $this->statement->execute();
     }
     
     /**
-     * Bind parameters to for a prepared SQL query
+     * 绑定查询参数
      *
      * @param  array $params
      *
@@ -276,7 +261,7 @@ class Sqlite extends AbstractAdapter
     }
     
     /**
-     * Prepare a SQL query
+     * 预查询
      *
      * @param  string $sql
      *
@@ -290,7 +275,7 @@ class Sqlite extends AbstractAdapter
     }
     
     /**
-     * Save an item to cache
+     * 写入一个缓存
      *
      * @param  string $id
      * @param  mixed  $value
@@ -353,7 +338,7 @@ class Sqlite extends AbstractAdapter
     }
     
     /**
-     * Get an item from cache
+     * 获取指定缓存
      *
      * @param  string $id
      *
@@ -400,7 +385,7 @@ class Sqlite extends AbstractAdapter
     }
     
     /**
-     * Delete a value in cache
+     * 删除指定缓存
      *
      * @param  string $id
      *
@@ -416,7 +401,7 @@ class Sqlite extends AbstractAdapter
     }
     
     /**
-     * Determine if the item exist in cache
+     * 判断指定缓存是否存在
      *
      * @param  string $id
      *
@@ -456,7 +441,7 @@ class Sqlite extends AbstractAdapter
     }
     
     /**
-     * Clear all stored values from cache
+     * 清除所有缓存
      *
      * @return Sqlite
      */
@@ -468,11 +453,11 @@ class Sqlite extends AbstractAdapter
     }
     
     /**
-     * Execute the SQL query
+     * 执行SQL查询
      *
      * @param  string $sql
      *
-     * @throws Exception
+     * @throws CacheException
      * @return void
      */
     public function query($sql)
@@ -483,7 +468,7 @@ class Sqlite extends AbstractAdapter
             
             if (!($sth->execute()))
             {
-                throw new Exception($sth->errorCode() . ': ' . $sth->errorInfo());
+                throw new CacheException($sth->errorCode() . ': ' . $sth->errorInfo());
             }
             else
             {
@@ -494,13 +479,13 @@ class Sqlite extends AbstractAdapter
         {
             if (!($this->result = $this->sqlite->query($sql)))
             {
-                throw new Exception('Error: ' . $this->sqlite->lastErrorCode() . ': ' . $this->sqlite->lastErrorMsg() . '.');
+                throw new CacheException('' . $this->sqlite->lastErrorCode() . ': ' . $this->sqlite->lastErrorMsg() . '');
             }
         }
     }
     
     /**
-     * Destroy cache resource
+     * 销毁缓存器
      *
      * @return Sqlite
      */
@@ -516,15 +501,15 @@ class Sqlite extends AbstractAdapter
     }
     
     /**
-     * Check if cache table exists
+     * 检查表是否存在
      *
      * @return void
      */
     protected function checkTable()
     {
         $tables = [];
-        $sql    = "SELECT name FROM sqlite_master WHERE type IN ('table', ttemplateate) AND name NOT LIKE 'sqlite_%' " .
-                  "UNION ALL SELECT name FROM sqlite_temp_master WHERE type IN ('table',templateplate) ORDER BY 1";
+        $sql    = "SELECT name FROM sqlite_master WHERE type IN ('table', 'ttemplateate') AND name NOT LIKE 'sqlite_%' " .
+                  "UNION ALL SELECT name FROM sqlite_temp_master WHERE type IN ('table','templateplate') ORDER BY 1";
         
         if ($this->isPdo)
         {
@@ -539,6 +524,7 @@ class Sqlite extends AbstractAdapter
         else
         {
             $result = $this->sqlite->query($sql);
+            
             while (($row = $result->fetchArray(SQLITE3_ASSOC)) != false)
             {
                 $tables[] = $row['name'];

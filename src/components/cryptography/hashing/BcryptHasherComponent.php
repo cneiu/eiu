@@ -14,7 +14,6 @@ use eiu\components\Component;
 use eiu\core\application\Application;
 use eiu\core\service\logger\Logger;
 use eiu\core\service\logger\LoggerProvider;
-use RuntimeException;
 
 
 /**
@@ -66,7 +65,7 @@ class BcryptHasherComponent extends Component
      *
      * @return string The hashed value
      *
-     * @throws RuntimeException Thrown if the hashing failed
+     * @throws HashingException Thrown if the hashing failed
      */
     public function hash(string $unhashedValue, array $options = [], string $pepper = ''): string
     {

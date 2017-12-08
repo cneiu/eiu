@@ -1,34 +1,22 @@
 <?php
 /**
- * Pop PHP Framework (http://www.popphp.org/)
+ * EIU PHP FRAMEWORK
  *
- * @link       https://github.com/popphp/popphp-framework
- * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2017 NOLA Interactive, LLC. (http://www.nolainteractive.com)
- * @license    http://www.popphp.org/license     New BSD License
- */
-
-
-/**
- * @namespace
+ * @author        成都东联智胜软件有限公司
+ * @link          https://www.cneiu.com
  */
 
 
 namespace eiu\components\cache\adapter;
 
 
-use Exception;
+use eiu\components\cache\CacheException;
 
 
 /**
- * File adapter cache class
+ * 文件缓存适配器
  *
- * @category   Pop
- * @package    Pop\Cache
- * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2017 NOLA Interactive, LLC. (http://www.nolainteractive.com)
- * @license    http://www.popphp.org/license     New BSD License
- * @version    3.1.0
+ * @package eiu\components\cache\adapter
  */
 class File extends AbstractAdapter
 {
@@ -55,7 +43,7 @@ class File extends AbstractAdapter
     }
     
     /**
-     * Get the current cache dir
+     * 获取缓存目录
      *
      * @return string
      */
@@ -65,7 +53,7 @@ class File extends AbstractAdapter
     }
     
     /**
-     * Set the current cache dir
+     * 设置缓存目录
      *
      * @param  string $dir
      *
@@ -76,11 +64,11 @@ class File extends AbstractAdapter
     {
         if (!file_exists($dir))
         {
-            throw new Exception('Error: That cache directory does not exist.');
+            throw new CacheException('That cache directory does not exist');
         }
         else if (!is_writable($dir))
         {
-            throw new Exception('Error: That cache directory is not writable.');
+            throw new CacheException('That cache directory is not writable');
         }
         
         $this->dir = realpath($dir);
@@ -89,7 +77,7 @@ class File extends AbstractAdapter
     }
     
     /**
-     * Get the time-to-live for an item in cache
+     * 获取指定缓存过期时间
      *
      * @param  string $id
      *
@@ -110,7 +98,7 @@ class File extends AbstractAdapter
     }
     
     /**
-     * Save an item to cache
+     * 写入一个缓存
      *
      * @param  string $id
      * @param  mixed  $value
@@ -130,7 +118,7 @@ class File extends AbstractAdapter
     }
     
     /**
-     * Get an item from cache
+     * 获取指定缓存
      *
      * @param  string $id
      *
@@ -158,7 +146,7 @@ class File extends AbstractAdapter
     }
     
     /**
-     * Delete a value in cache
+     * 删除指定缓存
      *
      * @param  string $id
      *
@@ -176,7 +164,7 @@ class File extends AbstractAdapter
     }
     
     /**
-     * Determine if the item exist in cache
+     * 判断指定缓存是否存在
      *
      * @param  string $id
      *
@@ -197,7 +185,7 @@ class File extends AbstractAdapter
     }
     
     /**
-     * Destroy cache resource
+     * 销毁缓存器
      *
      * @return File
      */
@@ -210,7 +198,7 @@ class File extends AbstractAdapter
     }
     
     /**
-     * Clear all stored values from cache
+     * 清除所有缓存
      *
      * @return File
      */

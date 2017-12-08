@@ -1,30 +1,18 @@
 <?php
 /**
- * Pop PHP Framework (http://www.popphp.org/)
+ * EIU PHP FRAMEWORK
  *
- * @link       https://github.com/popphp/popphp-framework
- * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2017 NOLA Interactive, LLC. (http://www.nolainteractive.com)
- * @license    http://www.popphp.org/license     New BSD License
- */
-
-
-/**
- * @namespace
+ * @author        成都东联智胜软件有限公司
+ * @link          https://www.cneiu.com
  */
 
 
 namespace eiu\components\cache\adapter;
 
 /**
- * Cache adapter abstract class
+ * 抽象缓存适配器
  *
- * @category   Pop
- * @package    Pop\Cache
- * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2017 NOLA Interactive, LLC. (http://www.nolainteractive.com)
- * @license    http://www.popphp.org/license     New BSD License
- * @version    3.1.0
+ * @package eiu\components\cache\adapter
  */
 abstract class AbstractAdapter implements AdapterInterface
 {
@@ -49,7 +37,7 @@ abstract class AbstractAdapter implements AdapterInterface
     }
     
     /**
-     * Get the global time-to-live for the cache object
+     * 获取全局过期时间
      *
      * @return int
      */
@@ -59,7 +47,7 @@ abstract class AbstractAdapter implements AdapterInterface
     }
     
     /**
-     * Set the global time-to-live for the cache adapter
+     * 设置全局过期时间
      *
      * @param  int $ttl
      *
@@ -73,7 +61,7 @@ abstract class AbstractAdapter implements AdapterInterface
     }
     
     /**
-     * Get the time-to-live for an item in cache
+     * 获取指定缓存过期时间
      *
      * @param  string $id
      *
@@ -82,7 +70,7 @@ abstract class AbstractAdapter implements AdapterInterface
     abstract public function getItemTtl($id);
     
     /**
-     * Save an item to cache
+     * 写入一个缓存
      *
      * @param  string $id
      * @param  mixed  $value
@@ -93,7 +81,7 @@ abstract class AbstractAdapter implements AdapterInterface
     abstract public function saveItem($id, $value, $ttl = null);
     
     /**
-     * Get an item from cache
+     * 获取指定缓存
      *
      * @param  string $id
      *
@@ -102,7 +90,7 @@ abstract class AbstractAdapter implements AdapterInterface
     abstract public function getItem($id);
     
     /**
-     * Determine if the item exist in cache
+     * 判断指定缓存是否存在
      *
      * @param  string $id
      *
@@ -111,7 +99,7 @@ abstract class AbstractAdapter implements AdapterInterface
     abstract public function hasItem($id);
     
     /**
-     * Delete a value in cache
+     * 删除指定缓存
      *
      * @param  string $id
      *
@@ -120,14 +108,14 @@ abstract class AbstractAdapter implements AdapterInterface
     abstract public function deleteItem($id);
     
     /**
-     * Clear all stored values from cache
+     * 清除所有缓存
      *
      * @return void
      */
     abstract public function clear();
     
     /**
-     * Destroy cache resource
+     * 销毁缓存器
      *
      * @return void
      */

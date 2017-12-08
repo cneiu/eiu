@@ -17,7 +17,6 @@ use eiu\core\service\output\OutputProvider;
 use eiu\core\service\Provider;
 use eiu\core\service\router\RouterProvider;
 use eiu\core\service\view\ViewProvider;
-use Exception;
 
 
 class ExceptionProvider extends Provider
@@ -44,18 +43,6 @@ class ExceptionProvider extends Provider
      * @var Logger
      */
     private $logger;
-    
-    /**
-     * 获取错误重要程度说明
-     *
-     * @param int $code
-     *
-     * @return mixed|string
-     */
-    private static function getSeverityLevels(int $code)
-    {
-        return static::$severityLevels[$code] ?? 'Unknown';
-    }
     
     /**
      * 服务注册
@@ -89,15 +76,6 @@ class ExceptionProvider extends Provider
     public function errorHandler(int $severity, string $message, string $file = '', int $line = 0)
     {
         $this->showError($severity, $message, $file, $line);
-    }
-    
-    /**
-     * @inheritdoc
-     */
-    public function exceptionHandler($e)
-    {
-        /** @var Exception $e */
-        $this->showException($e->getCode(), $e->getMessage(), $e->getFile(), $e->getLine(), $e->getTrace());
     }
     
     /**
@@ -201,6 +179,27 @@ class ExceptionProvider extends Provider
         }
         
         exit;
+    }
+    
+    /**
+     * 获取错误重要程度说明
+     *
+     * @param int $code
+     *
+     * @return mixed|string
+     */
+    private static function getSeverityLevels(int $code)
+    {
+        return static::$severityLevels[$code] ?? 'Unknown';
+    }
+    
+    /**
+     * @inheritdoc
+     */
+    public function exceptionHandler($e)
+    {
+        /** @var \Exception $e */
+        $this->showException($e->getCode(), $e->getMessage(), $e->getFile(), $e->getLine(), $e->getTrace());
     }
     
     /**

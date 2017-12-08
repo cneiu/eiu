@@ -6,15 +6,13 @@
  * @link          https://www.cneiu.com
  */
 
+
 namespace eiu\components\files;
 
 
 use Exception;
 
 
-/**
- * Defines the exception that is thrown by the encrypter
- */
 class FilesException extends Exception
 {
     // Don't do anything

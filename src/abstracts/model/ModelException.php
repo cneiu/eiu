@@ -7,17 +7,13 @@
  */
 
 
-/**
- * @namespace
- */
+namespace eiu\abstracts\model;
 
 
-namespace eiu\components\image\Layer;
+use Exception;
 
-/**
- * Layer interface
- */
-interface LayerInterface
+
+class ModelException extends Exception
 {
-    
+    // Don't do anything
 }

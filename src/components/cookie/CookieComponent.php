@@ -23,7 +23,7 @@ use Exception;
 
 
 /**
- * Class EventProvider
+ * Class CookieComponent
  *
  * @package eiu\core\service\event
  */

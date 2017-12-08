@@ -11,20 +11,15 @@ namespace eiu\components\image;
 
 
 /**
- * Image factory class
+ * 图形处理组件
  *
- * @category   Pop
- * @package    eiu\components\image
- * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2017 NOLA Interactive, LLC. (http://www.nolainteractive.com)
- * @license    http://www.popphp.org/license     New BSD License
- * @version    3.0.0
+ * @package eiu\components\image
  */
 class ImageComponent
 {
-
+    
     /**
-     * Get the available image adapters
+     * 获取所有适配器列表
      *
      * @return array
      */
@@ -33,21 +28,23 @@ class ImageComponent
         return [
             'gd'      => function_exists('gd_info'),
             'gmagick' => (class_exists('Gmagick', false)),
-            'imagick' => (class_exists('Imagick', false))
+            'imagick' => (class_exists('Imagick', false)),
         ];
     }
-
+    
     /**
-     * Determine if the adapter is available
+     * 判断指定适配器是否可用
      *
      * @param  string $adapter
+     *
      * @return boolean
      */
     public static function isAvailable($adapter)
     {
         $result = false;
-
-        switch (strtolower($adapter)) {
+        
+        switch (strtolower($adapter))
+        {
             case 'gd':
                 $result = function_exists('gd_info');
                 break;
@@ -60,155 +57,167 @@ class ImageComponent
                 $result = (class_exists('Imagick', false));
                 break;
         }
-
+        
         return $result;
     }
-
+    
     /**
-     * Load the image resource from the existing image file into a Gd object
+     * 使用 GD 适配器加载图形文件
      *
      * @param  string $image
+     *
      * @return Adapter\Gd
      */
-    public static function loadGd($image)
+    public function loadGd($image)
     {
         return Gd::load($image);
     }
-
+    
     /**
-     * Load the image resource from the existing image file into a Gmagick object
+     * 使用 Gmagick 适配器加载图形文件
      *
      * @param  string $image
+     *
      * @return Adapter\Gmagick
      */
-    public static function loadGmagick($image)
+    public function loadGmagick($image)
     {
         return Gmagick::load($image);
     }
-
+    
     /**
-     * Load the image resource from the existing image file into a Imagick object
+     * 使用 Imagick 适配器加载图形文件
      *
      * @param  string $image
+     *
      * @return Adapter\Imagick
      */
-    public static function loadImagick($image)
+    public function loadImagick($image)
     {
         return Imagick::load($image);
     }
-
+    
     /**
-     * Load the image resource from data into a Gd object
+     * 使用 GD 适配器加载图形数据
      *
      * @param  string $data
      * @param  string $name
+     *
      * @return Adapter\Gd
      */
-    public static function loadGdFromString($data, $name = null)
+    public function loadGdFromString($data, $name = null)
     {
         return Gd::loadFromString($data, $name);
     }
-
+    
     /**
-     * Load the image resource from data into a Gmagick object
+     * 使用 Gmagick 适配器加载图形数据
      *
      * @param  string $data
      * @param  string $name
+     *
      * @return Adapter\Gmagick
      */
-    public static function loadGmagickFromString($data, $name = null)
+    public function loadGmagickFromString($data, $name = null)
     {
         return Gmagick::loadFromString($data, $name);
     }
-
+    
     /**
-     * Load the image resource from data into a Imagick object
+     * 使用 Imagick 适配器加载图形数据
      *
      * @param  string $data
      * @param  string $name
+     *
      * @return Adapter\Imagick
      */
-    public static function loadImagickFromString($data, $name = null)
+    public function loadImagickFromString($data, $name = null)
     {
         return Imagick::loadFromString($data, $name);
     }
-
+    
     /**
-     * Create a new image resource and load it into a Gd object
+     * 使用 GD 适配器创建图形
      *
      * @param  int    $width
      * @param  int    $height
      * @param  string $image
+     *
      * @return Adapter\Gd
      */
-    public static function createGd($width, $height, $image = null)
+    public function createGd($width, $height, $image = null)
     {
         return Gd::create($width, $height, $image);
     }
-
+    
     /**
-     * Create a new indexed image resource and load it into a Gd object
+     * 使用 GD 适配器创建索引图形
      *
      * @param  int    $width
      * @param  int    $height
      * @param  string $image
+     *
      * @return Adapter\Gd
      */
-    public static function createGdIndex($width, $height, $image = null)
+    public function createGdIndex($width, $height, $image = null)
     {
         return Gd::createIndex($width, $height, $image);
     }
-
+    
     /**
-     * Create a new image resource and load it into a Gmagick object
+     * 使用 Gmagick 适配器创建图形
      *
      * @param  int    $width
      * @param  int    $height
      * @param  string $image
+     *
      * @return Adapter\Gmagick
      */
-    public static function createGmagick($width, $height, $image = null)
+    public function createGmagick($width, $height, $image = null)
     {
         return Gmagick::create($width, $height, $image);
     }
-
+    
     /**
-     * Create a new indexed image resource and load it into a Gmagick object
+     * 使用 Gmagick 适配器创建索引图形
      *
      * @param  int    $width
      * @param  int    $height
      * @param  string $image
+     *
      * @return Adapter\Gmagick
      */
-    public static function createGmagickIndex($width, $height, $image = null)
+    public function createGmagickIndex($width, $height, $image = null)
     {
         return Gmagick::createIndex($width, $height, $image);
     }
-
+    
     /**
-     * Create a new image resource and load it into a Imagick object
+     * 使用 Imagick 适配器创建图形
      *
      * @param  int    $width
      * @param  int    $height
      * @param  string $image
+     *
      * @return Adapter\Imagick
      */
-    public static function createImagick($width, $height, $image = null)
+    public function createImagick($width, $height, $image = null)
     {
         return Imagick::create($width, $height, $image);
     }
-
+    
     /**
-     * Create a new indexde image resource and load it into a Imagick object
+     * 使用 Imagick 适配器创建索引图形
      *
      * @param  int    $width
      * @param  int    $height
      * @param  string $image
+     *
      * @return Adapter\Imagick
      */
-    public static function createImagickIndex($width, $height, $image = null)
+    public function createImagickIndex($width, $height, $image = null)
     {
         return Imagick::createIndex($width, $height, $image);
     }
-
+    
 }

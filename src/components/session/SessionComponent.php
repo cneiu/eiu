@@ -23,7 +23,7 @@ use Exception;
 
 
 /**
- * Class EventProvider
+ * 会话组件
  *
  * @package eiu\core\service\event
  */

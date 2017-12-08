@@ -96,7 +96,7 @@ class Application extends Container implements IApplication
     {
         // 注册配置服务
         $this->register(ConfigProvider::class);
-    
+        
         // 注册异常处理服务
         $this->register(ExceptionProvider::class);
         
@@ -324,8 +324,9 @@ class Application extends Container implements IApplication
         }
         
         $tick2 = (!$tick2 or !isset(self::$timerTicks[$tick2])) ? microtime(true) : self::$timerTicks[$tick2];
+        $timer = (string)number_format(self::$timerTicks[$tick1] - $tick2, $decimals);
         
-        return number_format(self::$timerTicks[$tick1] - $tick2, $decimals);
+        return str_replace('-', '', $timer);
     }
     
     /**

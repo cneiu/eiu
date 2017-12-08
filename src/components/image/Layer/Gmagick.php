@@ -6,36 +6,34 @@
  * @link          https://www.cneiu.com
  */
 
+
 /**
  * @namespace
  */
+
+
 namespace eiu\components\image\Layer;
 
 /**
  * Layer class for Gmagick
- *
- * @category   Pop
- * @package    eiu\components\image
- * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2017 NOLA Interactive, LLC. (http://www.nolainteractive.com)
- * @license    http://www.popphp.org/license     New BSD License
- * @version    3.0.0
  */
 class Gmagick extends AbstractLayer
 {
-
+    
     /**
      * Opacity
+     *
      * @var mixed
      */
     protected $opacity = 1.0;
-
+    
     /**
      * Overlay style
+     *
      * @var int
      */
     protected $overlay = \Gmagick::COMPOSITE_ATOP;
-
+    
     /**
      * Get the overlay
      *
@@ -45,46 +43,52 @@ class Gmagick extends AbstractLayer
     {
         return $this->overlay;
     }
-
+    
     /**
      * Get the overlay
      *
      * @param  int $overlay
+     *
      * @return Gmagick
      */
     public function setOverlay($overlay)
     {
         $this->overlay = $overlay;
+        
         return $this;
     }
-
+    
     /**
      * Set the opacity
      *
      * @param  float $opacity
+     *
      * @return Gmagick
      */
     public function setOpacity($opacity)
     {
         $this->opacity = $opacity;
+        
         return $this;
     }
-
+    
     /**
      * Overlay an image onto the current image.
      *
      * @param  string $image
      * @param  int    $x
      * @param  int    $y
+     *
      * @return Gmagick
      */
     public function overlay($image, $x = 0, $y = 0)
     {
         $overlayImage = new \Gmagick($image);
         $this->image->getResource()->compositeimage($overlayImage, $this->overlay, $x, $y);
+        
         return $this;
     }
-
+    
     /**
      * Flatten the image layers
      *
@@ -92,10 +96,12 @@ class Gmagick extends AbstractLayer
      */
     public function flatten()
     {
-        if (method_exists($this->image->getResource(), 'flattenImages')) {
+        if (method_exists($this->image->getResource(), 'flattenImages'))
+        {
             $this->image->getResource()->flattenimages();
         }
+        
         return $this;
     }
-
+    
 }

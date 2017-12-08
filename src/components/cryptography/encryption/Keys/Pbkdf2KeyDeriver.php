@@ -1,18 +1,16 @@
 <?php
-
-/*
- * Opulence
+/**
+ * EIU PHP FRAMEWORK
  *
- * @link      https://www.opulencephp.com
- * @copyright Copyright (C) 2017 David Young
- * @license   https://github.com/opulencephp/Opulence/blob/master/LICENSE.md
+ * @author        成都东联智胜软件有限公司
+ * @link          https://www.cneiu.com
  */
 
 
 namespace eiu\components\cryptography\encryption\keys;
 
 
-use InvalidArgumentException;
+use eiu\components\cryptography\encryption\EncryptionException;
 
 
 /**
@@ -51,13 +49,13 @@ class Pbkdf2KeyDeriver implements IKeyDeriver
      *
      * @param string $salt The salt to validate
      *
-     * @throws InvalidArgumentException Thrown if the salt is not the correct length
+     * @throws EncryptionException Thrown if the salt is not the correct length
      */
     private function validateSaltLength(string $salt)
     {
         if (\mb_strlen($salt, '8bit') !== self::KEY_SALT_BYTE_LENGTH)
         {
-            throw new InvalidArgumentException('Salt must be ' . self::KEY_SALT_BYTE_LENGTH . ' bytes long');
+            throw new EncryptionException('Salt must be ' . self::KEY_SALT_BYTE_LENGTH . ' bytes long');
         }
     }
     

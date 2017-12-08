@@ -6,58 +6,39 @@
  * @link          https://www.cneiu.com
  */
 
+
 /**
  * @namespace
  */
+
+
 namespace eiu\components\image\Color;
 
 /**
  * Image gray color class
- *
- * @category   Pop
- * @package    eiu\components\image
- * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2017 NOLA Interactive, LLC. (http://www.nolainteractive.com)
- * @license    http://www.popphp.org/license     New BSD License
- * @version    3.0.0
  */
 class Gray extends AbstractColor
 {
-
+    
     /**
      * Gray
+     *
      * @var float
      */
     protected $gray = 0;
-
+    
     /**
      * Constructor
      *
      * Instantiate a PDF Gray Color object
      *
-     * @param  mixed $gray   0 - 100
+     * @param  mixed $gray 0 - 100
      */
     public function __construct($gray)
     {
         $this->setGray($gray);
     }
-
-    /**
-     * Set the gray value
-     *
-     * @param  mixed $gray
-     * @throws \OutOfRangeException
-     * @return Gray
-     */
-    public function setGray($gray)
-    {
-        if (((int)$gray < 0) || ((int)$gray > 100)) {
-            throw new \OutOfRangeException('Error: The value must be between 0 and 100');
-        }
-        $this->gray = (int)$gray;
-        return $this;
-    }
-
+    
     /**
      * Get the gray value
      *
@@ -67,7 +48,26 @@ class Gray extends AbstractColor
     {
         return $this->gray;
     }
-
+    
+    /**
+     * Set the gray value
+     *
+     * @param  mixed $gray
+     *
+     * @throws \OutOfRangeException
+     * @return Gray
+     */
+    public function setGray($gray)
+    {
+        if (((int)$gray < 0) || ((int)$gray > 100))
+        {
+            throw new \OutOfRangeException('Error: The value must be between 0 and 100');
+        }
+        $this->gray = (int)$gray;
+        
+        return $this;
+    }
+    
     /**
      * Convert to CMYK
      *
@@ -77,7 +77,7 @@ class Gray extends AbstractColor
     {
         return new Cmyk(0, 0, 0, $this->gray);
     }
-
+    
     /**
      * Convert to RGB
      *
@@ -87,7 +87,7 @@ class Gray extends AbstractColor
     {
         return new Rgb($this->gray, $this->gray, $this->gray);
     }
-
+    
     /**
      * Method to print the color object
      *
@@ -97,5 +97,5 @@ class Gray extends AbstractColor
     {
         return (string)$this->gray;
     }
-
+    
 }

@@ -17,52 +17,15 @@ use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 
 
+/**
+ * 文件系统组件
+ *
+ * @package eiu\components\files
+ */
 class FilesComponent extends Component
 {
     /**
-     * Get the returned value of a file.
-     *
-     * @param  string $path
-     *
-     * @return mixed
-     * @throws FilesException
-     */
-    public function getRequire($path)
-    {
-        if ($this->isFile($path))
-        {
-            return require $path;
-        }
-        
-        throw new FilesException("File does not exist at path {$path}");
-    }
-    
-    /**
-     * Determine if the given path is a file.
-     *
-     * @param  string $file
-     *
-     * @return bool
-     */
-    public function isFile($file)
-    {
-        return is_file($file);
-    }
-    
-    /**
-     * Require the given file once.
-     *
-     * @param  string $file
-     *
-     * @return mixed
-     */
-    public function requireOnce($file)
-    {
-        require_once $file;
-    }
-    
-    /**
-     * Get the MD5 hash of the file at the given path.
+     * 获取文件的md5哈希值
      *
      * @param  string $path
      *
@@ -74,25 +37,19 @@ class FilesComponent extends Component
     }
     
     /**
-     * Prepend to a file.
+     * 判断是否是文件
      *
      * @param  string $path
-     * @param  string $data
      *
-     * @return int
+     * @return bool
      */
-    public function prepend($path, $data)
+    public function isFile($path)
     {
-        if ($this->exists($path))
-        {
-            return $this->put($path, $data . $this->get($path));
-        }
-        
-        return $this->put($path, $data);
+        return is_file($path);
     }
     
     /**
-     * Determine if a file or directory exists.
+     * 判断路径是否存在
      *
      * @param  string $path
      *
@@ -104,7 +61,7 @@ class FilesComponent extends Component
     }
     
     /**
-     * Write the contents of a file.
+     * 写入文件内容
      *
      * @param  string $path
      * @param  string $contents
@@ -118,7 +75,7 @@ class FilesComponent extends Component
     }
     
     /**
-     * Get the contents of a file.
+     * 获取文件内容
      *
      * @param  string $path
      * @param  bool   $lock
@@ -128,16 +85,16 @@ class FilesComponent extends Component
      */
     public function get($path, $lock = false)
     {
-        if ($this->isFile($path))
+        if (is_file($path))
         {
             return $lock ? $this->sharedGet($path) : file_get_contents($path);
         }
         
-        throw new FilesException("File does not exist at path {$path}");
+        throw new FilesException("File does not exist at path \"{$path}\"");
     }
     
     /**
-     * Get contents of a file with shared access.
+     * 获取具有共享访问权限的文件的内容
      *
      * @param  string $path
      *
@@ -172,7 +129,7 @@ class FilesComponent extends Component
     }
     
     /**
-     * Get the file size of a given file.
+     * 获取文件大小
      *
      * @param  string $path
      *
@@ -184,7 +141,7 @@ class FilesComponent extends Component
     }
     
     /**
-     * Append to a file.
+     * 追加一个文件内容
      *
      * @param  string $path
      * @param  string $data
@@ -197,7 +154,7 @@ class FilesComponent extends Component
     }
     
     /**
-     * Get or set UNIX mode of a file or directory.
+     * 获取或设置文件或目录的UNIX模式
      *
      * @param  string $path
      * @param  int    $mode
@@ -215,7 +172,7 @@ class FilesComponent extends Component
     }
     
     /**
-     * Move a file to a new location.
+     * 移动文件到新目录
      *
      * @param  string $path
      * @param  string $target
@@ -228,7 +185,7 @@ class FilesComponent extends Component
     }
     
     /**
-     * Create a hard link to the target file or directory.
+     * 创建一个指向目标文件或目录的硬链接
      *
      * @param  string $target
      * @param  string $link
@@ -248,7 +205,7 @@ class FilesComponent extends Component
     }
     
     /**
-     * Determine if the given path is a directory.
+     * 判断是否是目录
      *
      * @param  string $directory
      *
@@ -260,7 +217,7 @@ class FilesComponent extends Component
     }
     
     /**
-     * Extract the file name from a file path.
+     * 获取文件名
      *
      * @param  string $path
      *
@@ -272,7 +229,7 @@ class FilesComponent extends Component
     }
     
     /**
-     * Extract the trailing name component from a file path.
+     * 获取路径中文件名部分
      *
      * @param  string $path
      *
@@ -284,7 +241,7 @@ class FilesComponent extends Component
     }
     
     /**
-     * Extract the parent directory from a file path.
+     * 获取目录名
      *
      * @param  string $path
      *
@@ -296,7 +253,7 @@ class FilesComponent extends Component
     }
     
     /**
-     * Extract the file extension from a file path.
+     * 获取文件扩展名
      *
      * @param  string $path
      *
@@ -308,7 +265,7 @@ class FilesComponent extends Component
     }
     
     /**
-     * Get the file type of a given file.
+     * 获取文件类型
      *
      * @param  string $path
      *
@@ -320,7 +277,7 @@ class FilesComponent extends Component
     }
     
     /**
-     * Get the mime-type of a given file.
+     * 获取文件MIME类型
      *
      * @param  string $path
      *
@@ -332,7 +289,7 @@ class FilesComponent extends Component
     }
     
     /**
-     * Get the file's last modification time.
+     * 获取最后修改时间
      *
      * @param  string $path
      *
@@ -344,7 +301,7 @@ class FilesComponent extends Component
     }
     
     /**
-     * Determine if the given path is readable.
+     * 判断文件是否可读
      *
      * @param  string $path
      *
@@ -356,7 +313,7 @@ class FilesComponent extends Component
     }
     
     /**
-     * Determine if the given path is writable.
+     * 判断文件是否可写
      *
      * @param  string $path
      *
@@ -368,7 +325,7 @@ class FilesComponent extends Component
     }
     
     /**
-     * Find path names matching a given pattern.
+     * 找到匹配给定模式的路径名
      *
      * @param  string $pattern
      * @param  int    $flags
@@ -381,40 +338,14 @@ class FilesComponent extends Component
     }
     
     /**
-     * Get an array of all files in a directory.
-     *
-     * @param  string $directory
-     *
-     * @return array
-     */
-    public function files($directory)
-    {
-        $glob = glob($directory . DIRECTORY_SEPARATOR . '*');
-        
-        if ($glob === false)
-        {
-            return [];
-        }
-        
-        // To get the appropriate files, we'll simply glob the directory and filter
-        // out any "files" that are not truly files so we do not end up with any
-        // directories in our list, but only true files within the directory.
-        return array_filter($glob, function ($file)
-        {
-            return filetype($file) == 'file';
-        }
-        );
-    }
-    
-    /**
-     * Get all of the files from the given directory (recursive).
+     * 获取指定目录下的所有文件列表
      *
      * @param string $path
      * @param bool   $isRecursive
      *
      * @return array
      */
-    public function allFiles(string $path, bool $isRecursive = false): array
+    public function files(string $path, bool $isRecursive = false): array
     {
         if (!$this->isDirectory($path))
         {
@@ -445,7 +376,7 @@ class FilesComponent extends Component
     }
     
     /**
-     * Get all of the directories within a given directory.
+     * 获取指定目录下的所有子目录
      *
      * @param string $path
      * @param bool   $isRecursive
@@ -484,7 +415,7 @@ class FilesComponent extends Component
     }
     
     /**
-     * Move a directory.
+     * 移动一个目录
      *
      * @param  string $from
      * @param  string $to
@@ -506,7 +437,7 @@ class FilesComponent extends Component
     }
     
     /**
-     * Recursively delete a directory.
+     * 删除目录
      *
      * The directory itself may be optionally preserved.
      *
@@ -552,7 +483,7 @@ class FilesComponent extends Component
     }
     
     /**
-     * Delete the file at a given path.
+     * 删除文件
      *
      * @param  string|array $paths
      *
@@ -583,7 +514,7 @@ class FilesComponent extends Component
     }
     
     /**
-     * Copy a directory from one location to another.
+     * 拷贝目录
      *
      * @param  string $directory
      * @param  string $destination
@@ -643,7 +574,7 @@ class FilesComponent extends Component
     }
     
     /**
-     * Create a directory.
+     * 创建目录
      *
      * @param  string $path
      * @param  int    $mode
@@ -663,7 +594,7 @@ class FilesComponent extends Component
     }
     
     /**
-     * Copy a file to a new location.
+     * 拷贝文件
      *
      * @param  string $path
      * @param  string $target
@@ -673,17 +604,5 @@ class FilesComponent extends Component
     public function copy($path, $target)
     {
         return copy($path, $target);
-    }
-    
-    /**
-     * Empty the specified directory of all files and folders.
-     *
-     * @param  string $directory
-     *
-     * @return bool
-     */
-    public function cleanDirectory($directory)
-    {
-        return $this->deleteDirectory($directory, true);
     }
 }

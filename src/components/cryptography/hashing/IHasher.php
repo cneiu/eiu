@@ -1,18 +1,13 @@
 <?php
-
-/*
- * Opulence
+/**
+ * EIU PHP FRAMEWORK
  *
- * @link      https://www.opulencephp.com
- * @copyright Copyright (C) 2017 David Young
- * @license   https://github.com/opulencephp/Opulence/blob/master/LICENSE.md
+ * @author        成都东联智胜软件有限公司
+ * @link          https://www.cneiu.com
  */
 
 
 namespace eiu\components\cryptography\hashing;
-
-
-use RuntimeException;
 
 
 /**
@@ -39,7 +34,7 @@ interface IHasher
      * @param string $pepper        The optional pepper to append prior to hashing the value
      *
      * @return string The hashed value
-     * @throws RuntimeException Thrown if the hashing failed
+     * @throws HashingException Thrown if the hashing failed
      */
     public function hash(string $unhashedValue, array $options = [], string $pepper = ''): string;
     

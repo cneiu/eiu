@@ -60,7 +60,7 @@ interface IDatabaseDriver
      *
      * @return    bool
      */
-    public function rollBack();
+    public function rollback();
     
     /**
      * 获取表信息

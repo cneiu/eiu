@@ -14,7 +14,7 @@ use Exception;
 
 
 /**
- * Defines the exception that is thrown by the encrypter
+ * 数据库异常
  */
 class DatabaseException extends Exception
 {

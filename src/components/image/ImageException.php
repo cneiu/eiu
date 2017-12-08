@@ -7,17 +7,13 @@
  */
 
 
-/**
- * @namespace
- */
-
-
-namespace eiu\components\image\Layer;
+namespace eiu\components\image;
 
 /**
- * Layer interface
+ * 图形组件异常
+ *
+ * @package eiu\components\image
  */
-interface LayerInterface
+class ImageException extends \Exception
 {
-    
 }

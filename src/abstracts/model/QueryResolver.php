@@ -37,7 +37,7 @@ class QueryResolver
      *
      * @return string
      *
-     * @throws ModelErrorException
+     * @throws ModelException
      */
     public function parseSelect(array $query): string
     {
@@ -83,7 +83,7 @@ class QueryResolver
             }
             else
             {
-                throw new ModelErrorException("Parse invalid \"field\" expression, please use a string or an array.");
+                throw new ModelException("Parse invalid \"field\" expression, please use a string or an array.");
             }
         }
         else
@@ -119,7 +119,7 @@ class QueryResolver
             }
             else
             {
-                throw new ModelErrorException("Parse invalid \"where\" expression, please use a string or an array.");
+                throw new ModelException("Parse invalid \"where\" expression, please use a string or an array.");
             }
         }
         
@@ -136,7 +136,7 @@ class QueryResolver
             }
             else
             {
-                throw new ModelErrorException("Parse invalid \"group\" expression, please use a string or an array.");
+                throw new ModelException("Parse invalid \"group\" expression, please use a string or an array.");
             }
         }
         
@@ -155,7 +155,7 @@ class QueryResolver
             }
             else
             {
-                throw new ModelErrorException("Parse invalid \"having\" expression, please use a string or an array.");
+                throw new ModelException("Parse invalid \"having\" expression, please use a string or an array.");
             }
         }
         
@@ -175,7 +175,7 @@ class QueryResolver
             }
             else
             {
-                throw new ModelErrorException("Parse invalid \"order\" expression, please use a string or an array.");
+                throw new ModelException("Parse invalid \"order\" expression, please use a string or an array.");
             }
         }
         
@@ -192,7 +192,7 @@ class QueryResolver
             }
             else
             {
-                throw new ModelErrorException("Parse invalid \"limit\" expression, please use a string or an array.");
+                throw new ModelException("Parse invalid \"limit\" expression, please use a string or an array.");
             }
         }
         
@@ -259,7 +259,7 @@ class QueryResolver
      * @param array $fields
      *
      * @return string
-     * @throws ModelErrorException
+     * @throws ModelException
      *
      */
     private function parseField(array $fields = []): string
@@ -311,7 +311,7 @@ class QueryResolver
                         // 解析字段
                         if (!$this->_model->hasField($_field))
                         {
-                            throw new ModelErrorException("The \"{$table}.{$_field}\" field is undefined in the model config.");
+                            throw new ModelException("The \"{$table}.{$_field}\" field is undefined in the model config.");
                         }
                         
                         $old_fields_tmp[] = "{$table}." . $this->_db->setSpecialChar($_field);
@@ -324,7 +324,7 @@ class QueryResolver
                     // 解析字段
                     if (!$this->_model->hasField($field))
                     {
-                        throw new ModelErrorException("The \"{$field}\" field is undefined in the model config.");
+                        throw new ModelException("The \"{$field}\" field is undefined in the model config.");
                     }
                     
                     // 复制
@@ -345,7 +345,7 @@ class QueryResolver
      *
      * @return string
      *
-     * @throws ModelErrorException
+     * @throws ModelException
      */
     private function parseDistinct(array $fields)
     {
@@ -357,7 +357,7 @@ class QueryResolver
             
             if (!$this->_model->hasField($field))
             {
-                throw new ModelErrorException("The \"{$field}\" field is undefined in the model config.");
+                throw new ModelException("The \"{$field}\" field is undefined in the model config.");
             }
             
             $distinctArr[] = $this->_db->setSpecialChar($field);
@@ -372,7 +372,7 @@ class QueryResolver
      * @param mixed $expression
      *
      * @return string
-     * @throws ModelErrorException
+     * @throws ModelException
      */
     private function parseWhere(array $expression)
     {
@@ -401,7 +401,7 @@ class QueryResolver
         
         if (!$whereStr)
         {
-            throw new ModelErrorException("Parse the where expression is fail.");
+            throw new ModelException("Parse the where expression is fail.");
         }
         
         return $whereStr;
@@ -413,7 +413,7 @@ class QueryResolver
      * @param array $expression 表达式
      *
      * @return string
-     * @throws ModelErrorException
+     * @throws ModelException
      */
     private function parseWhereDo(array $expression)
     {
@@ -489,7 +489,7 @@ class QueryResolver
                         {
                             if (!is_array($field_val) or (count($field_val) != 2) or empty($field_val))
                             {
-                                throw new ModelErrorException("Field \"{$field}\" is between type, the value must be an array of length 2.");
+                                throw new ModelException("Field \"{$field}\" is between type, the value must be an array of length 2.");
                             }
                             
                             $field_val = $this->parseValue($field_val[0]) . ' AND ' . $this->parseValue($field_val[1]);
@@ -585,7 +585,7 @@ class QueryResolver
      * @param    mixed $groups
      *
      * @return string
-     * @throws ModelErrorException
+     * @throws ModelException
      */
     private function parseGroup(array $groups)
     {
@@ -597,7 +597,7 @@ class QueryResolver
             
             if (!$this->_model->hasField($group))
             {
-                throw new ModelErrorException("Parse group: the \"{$group}\" field is undefined in the model config.");
+                throw new ModelException("Parse group: the \"{$group}\" field is undefined in the model config.");
             }
             
             $groupArr[] = $this->_db->setSpecialChar($group);
@@ -612,7 +612,7 @@ class QueryResolver
      * @param array $orders
      *
      * @return string
-     * @throws ModelErrorException
+     * @throws ModelException
      */
     private function parseOrder(array $orders)
     {
@@ -661,6 +661,43 @@ class QueryResolver
     }
     
     /**
+     * 解析插入语句
+     *
+     * @param array $data
+     *
+     * @return string
+     */
+    public function parseInsert(array $data)
+    {
+        $tableStr = $this->_db->setSpecialChar($this->_model->table());
+        $keys     = [];
+        $values   = [];
+        
+        if (!$expression = $this->parseExecuteFields($data, 'create'))
+        {
+            return false;
+        }
+        
+        foreach ($expression as $k => $v)
+        {
+            if (!$this->_model->hasField($k))
+            {
+                continue;
+            }
+            $k        = $this->_db->setSpecialChar($k);
+            $keys[]   = $k;
+            $values[] = $this->parseValue($v);
+        }
+        
+        $keys   = implode(', ', $keys);
+        $values = implode(', ', $values);
+        
+        $setStr = ' (' . $keys . ') VALUES (' . $values . ') ';
+        
+        return 'INSERT INTO ' . $tableStr . $setStr;
+    }
+    
+    /**
      * 解析插入、更新字段数组
      *
      * @param array  $fields
@@ -668,8 +705,7 @@ class QueryResolver
      *
      * @return array
      *
-     * @throws ModelErrorException
-     * @throws ModelMessageException
+     * @throws ModelException
      */
     private function parseExecuteFields(array $fields, string $action): array
     {
@@ -727,7 +763,7 @@ class QueryResolver
             {
                 if (is_array($value) or is_object($value))
                 {
-                    trigger_error("{$action} field \"{$field}\" value cannot be array or object.", E_USER_ERROR);
+                    throw new ModelException("{$action} field \"{$field}\" value cannot be array or object.");
                 }
                 
                 switch ($struct['type'])
@@ -769,47 +805,10 @@ class QueryResolver
         
         if (empty($fields))
         {
-            throw new ModelErrorException('All field validate fail, no effective field.');
+            throw new ModelException('All field validate fail, no effective field.');
         }
         
         return $fields;
-    }
-    
-    /**
-     * 解析插入语句
-     *
-     * @param array $data
-     *
-     * @return string
-     */
-    public function parseInsert(array $data)
-    {
-        $tableStr = $this->_db->setSpecialChar($this->_model->table());
-        $keys     = [];
-        $values   = [];
-        
-        if (!$expression = $this->parseExecuteFields($data, 'create'))
-        {
-            return false;
-        }
-        
-        foreach ($expression as $k => $v)
-        {
-            if (!$this->_model->hasField($k))
-            {
-                continue;
-            }
-            $k        = $this->_db->setSpecialChar($k);
-            $keys[]   = $k;
-            $values[] = $this->parseValue($v);
-        }
-        
-        $keys   = implode(', ', $keys);
-        $values = implode(', ', $values);
-        
-        $setStr = ' (' . $keys . ') VALUES (' . $values . ') ';
-        
-        return 'INSERT INTO ' . $tableStr . $setStr;
     }
     
     /**
@@ -819,7 +818,7 @@ class QueryResolver
      * @param array $query
      *
      * @return array|string
-     * @throws ModelErrorException
+     * @throws ModelException
      */
     public function parseUpdate(array $data, array $query = []): string
     {
@@ -861,7 +860,7 @@ class QueryResolver
             }
             else
             {
-                throw new ModelErrorException("Parse invalid \"where\" expression, please use a string or an array.");
+                throw new ModelException("Parse invalid \"where\" expression, please use a string or an array.");
             }
         }
         
@@ -878,7 +877,7 @@ class QueryResolver
             }
             else
             {
-                throw new ModelErrorException("Parse invalid \"order\" expression, please use a string or an array.");
+                throw new ModelException("Parse invalid \"order\" expression, please use a string or an array.");
             }
         }
         
@@ -895,7 +894,7 @@ class QueryResolver
             }
             else
             {
-                throw new ModelErrorException("Parse invalid \"limit\" expression, please use a string or an array.");
+                throw new ModelException("Parse invalid \"limit\" expression, please use a string or an array.");
             }
         }
         
@@ -908,7 +907,7 @@ class QueryResolver
      * @param array $query
      *
      * @return string
-     * @throws ModelErrorException
+     * @throws ModelException
      */
     public function parseDelete(array $query = [])
     {
@@ -931,7 +930,7 @@ class QueryResolver
             }
             else
             {
-                throw new ModelErrorException("Parse invalid \"where\" expression, please use a string or an array.");
+                throw new ModelException("Parse invalid \"where\" expression, please use a string or an array.");
             }
         }
         
@@ -948,7 +947,7 @@ class QueryResolver
             }
             else
             {
-                throw new ModelErrorException("Parse invalid \"order\" expression, please use a string or an array.");
+                throw new ModelException("Parse invalid \"order\" expression, please use a string or an array.");
             }
         }
         
@@ -965,7 +964,7 @@ class QueryResolver
             }
             else
             {
-                throw new ModelErrorException("Parse invalid \"limit\" expression, please use a string or an array.");
+                throw new ModelException("Parse invalid \"limit\" expression, please use a string or an array.");
             }
         }
         

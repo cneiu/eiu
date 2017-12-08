@@ -1,34 +1,22 @@
 <?php
 /**
- * Pop PHP Framework (http://www.popphp.org/)
+ * EIU PHP FRAMEWORK
  *
- * @link       https://github.com/popphp/popphp-framework
- * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2017 NOLA Interactive, LLC. (http://www.nolainteractive.com)
- * @license    http://www.popphp.org/license     New BSD License
- */
-
-
-/**
- * @namespace
+ * @author        成都东联智胜软件有限公司
+ * @link          https://www.cneiu.com
  */
 
 
 namespace eiu\components\cache\adapter;
 
+
 /**
- * Session adapter cache class
+ * Session 缓存适配器
  *
- * @category   Pop
- * @package    Pop\Cache
- * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2017 NOLA Interactive, LLC. (http://www.nolainteractive.com)
- * @license    http://www.popphp.org/license     New BSD License
- * @version    3.1.0
+ * @package eiu\components\cache\adapter
  */
 class Session extends AbstractAdapter
 {
-    
     /**
      * Constructor
      *
@@ -43,14 +31,14 @@ class Session extends AbstractAdapter
         {
             session_start();
         }
-        if (!isset($_SESSION['_POP_CACHE']))
+        if (!isset($_SESSION['_EIU_CACHE']))
         {
-            $_SESSION['_POP_CACHE'] = [];
+            $_SESSION['_EIU_CACHE'] = [];
         }
     }
     
     /**
-     * Get the time-to-live for an item in cache
+     * 获取指定缓存过期时间
      *
      * @param  string $id
      *
@@ -60,9 +48,9 @@ class Session extends AbstractAdapter
     {
         $ttl = 0;
         
-        if (isset($_SESSION['_POP_CACHE'][$id]))
+        if (isset($_SESSION['_EIU_CACHE'][$id]))
         {
-            $cacheValue = unserialize($_SESSION['_POP_CACHE'][$id]);
+            $cacheValue = unserialize($_SESSION['_EIU_CACHE'][$id]);
             $ttl        = $cacheValue['ttl'];
         }
         
@@ -70,7 +58,7 @@ class Session extends AbstractAdapter
     }
     
     /**
-     * Save an item to cache
+     * 写入一个缓存
      *
      * @param  string $id
      * @param  mixed  $value
@@ -80,7 +68,7 @@ class Session extends AbstractAdapter
      */
     public function saveItem($id, $value, $ttl = null)
     {
-        $_SESSION['_POP_CACHE'][$id] = serialize([
+        $_SESSION['_EIU_CACHE'][$id] = serialize([
             'start' => time(),
             'ttl'   => (null !== $ttl) ? (int)$ttl : $this->ttl,
             'value' => $value,
@@ -90,7 +78,7 @@ class Session extends AbstractAdapter
     }
     
     /**
-     * Get an item from cache
+     * 获取指定缓存
      *
      * @param  string $id
      *
@@ -100,9 +88,9 @@ class Session extends AbstractAdapter
     {
         $value = false;
         
-        if (isset($_SESSION['_POP_CACHE'][$id]))
+        if (isset($_SESSION['_EIU_CACHE'][$id]))
         {
-            $cacheValue = unserialize($_SESSION['_POP_CACHE'][$id]);
+            $cacheValue = unserialize($_SESSION['_EIU_CACHE'][$id]);
             if (($cacheValue['ttl'] == 0) || ((time() - $cacheValue['start']) <= $cacheValue['ttl']))
             {
                 $value = $cacheValue['value'];
@@ -117,7 +105,7 @@ class Session extends AbstractAdapter
     }
     
     /**
-     * Delete a value in cache
+     * 删除指定缓存
      *
      * @param  string $id
      *
@@ -125,16 +113,16 @@ class Session extends AbstractAdapter
      */
     public function deleteItem($id)
     {
-        if (isset($_SESSION['_POP_CACHE'][$id]))
+        if (isset($_SESSION['_EIU_CACHE'][$id]))
         {
-            unset($_SESSION['_POP_CACHE'][$id]);
+            unset($_SESSION['_EIU_CACHE'][$id]);
         }
         
         return $this;
     }
     
     /**
-     * Determine if the item exist in cache
+     * 判断指定缓存是否存在
      *
      * @param  string $id
      *
@@ -144,9 +132,9 @@ class Session extends AbstractAdapter
     {
         $result = false;
         
-        if (isset($_SESSION['_POP_CACHE'][$id]))
+        if (isset($_SESSION['_EIU_CACHE'][$id]))
         {
-            $cacheValue = unserialize($_SESSION['_POP_CACHE'][$id]);
+            $cacheValue = unserialize($_SESSION['_EIU_CACHE'][$id]);
             $result     = (($cacheValue['ttl'] == 0) || ((time() - $cacheValue['start']) <= $cacheValue['ttl']));
         }
         
@@ -154,19 +142,19 @@ class Session extends AbstractAdapter
     }
     
     /**
-     * Clear all stored values from cache
+     * 清除所有缓存
      *
      * @return Session
      */
     public function clear()
     {
-        $_SESSION['_POP_CACHE'] = [];
+        $_SESSION['_EIU_CACHE'] = [];
         
         return $this;
     }
     
     /**
-     * Destroy cache resource
+     * 销毁缓存器
      *
      * @return void
      */

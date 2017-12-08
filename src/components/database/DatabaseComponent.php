@@ -52,7 +52,7 @@ class DatabaseComponent extends Component implements IDatabaseDriver
         {
             case 'MYSQL':
                 $this->app->bind(IDatabaseDriver::class, MySQLDriver::class, true);
-                $this->driver = new MySQLDriver($app, $config['db']['MYSQL_DRIVER']);
+                $this->driver = new MySQLDriver($app);
                 break;
         }
         
@@ -91,7 +91,7 @@ class DatabaseComponent extends Component implements IDatabaseDriver
         }
         catch (DatabaseException $e)
         {
-            throw new DatabaseException($e);
+            throw $e;
         }
     }
     
@@ -112,14 +112,15 @@ class DatabaseComponent extends Component implements IDatabaseDriver
         }
         catch (DatabaseException $e)
         {
-            throw new DatabaseException($e);
+            throw $e;
         }
     }
     
     /**
      * 开始事务
      *
-     * @return    bool
+     * @return bool
+     * @throws DatabaseException
      */
     public function begin()
     {
@@ -127,7 +128,14 @@ class DatabaseComponent extends Component implements IDatabaseDriver
         {
             $this->transferred = true;
             
-            $this->driver->begin();
+            try
+            {
+                $this->driver->begin();
+            }
+            catch (DatabaseException $e)
+            {
+                throw $e;
+            }
         }
         
         return $this->transferred;
@@ -136,7 +144,8 @@ class DatabaseComponent extends Component implements IDatabaseDriver
     /**
      * 提交事务
      *
-     * @return    bool
+     * @return bool
+     * @throws DatabaseException
      */
     public function commit()
     {
@@ -144,7 +153,14 @@ class DatabaseComponent extends Component implements IDatabaseDriver
         {
             $this->transferred = false;
             
-            $this->driver->commit();
+            try
+            {
+                $this->driver->commit();
+            }
+            catch (DatabaseException $e)
+            {
+                throw $e;
+            }
         }
         
         return $this->transferred;
@@ -153,15 +169,23 @@ class DatabaseComponent extends Component implements IDatabaseDriver
     /**
      * 回滚事务
      *
-     * @return    bool
+     * @return bool
+     * @throws DatabaseException
      */
-    public function rollBack()
+    public function rollback()
     {
         if ($this->transferred)
         {
             $this->transferred = false;
             
-            $this->driver->rollBack();
+            try
+            {
+                $this->driver->rollback();
+            }
+            catch (DatabaseException $e)
+            {
+                throw $e;
+            }
         }
         
         return $this->transferred;
@@ -180,11 +204,19 @@ class DatabaseComponent extends Component implements IDatabaseDriver
     /**
      * 获取表信息
      *
-     * @return    array
+     * @return array
+     * @throws DatabaseException
      */
     public function getTables(): array
     {
-        return $this->driver->getTables();
+        try
+        {
+            return $this->driver->getTables();
+        }
+        catch (DatabaseException $e)
+        {
+            throw $e;
+        }
     }
     
     /**
@@ -192,11 +224,19 @@ class DatabaseComponent extends Component implements IDatabaseDriver
      *
      * @param    string $table 表名称
      *
-     * @return    array
+     * @return array
+     * @throws DatabaseException
      */
     public function getFields(string $table): array
     {
-        return $this->driver->getFields($table);
+        try
+        {
+            return $this->driver->getFields($table);
+        }
+        catch (DatabaseException $e)
+        {
+            throw $e;
+        }
     }
     
     /**
@@ -206,7 +246,14 @@ class DatabaseComponent extends Component implements IDatabaseDriver
      */
     public function getStatus()
     {
-        return $this->driver->getStatus();
+        try
+        {
+            return $this->driver->getStatus();
+        }
+        catch (DatabaseException $e)
+        {
+            throw $e;
+        }
     }
     
     /**

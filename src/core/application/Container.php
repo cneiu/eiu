@@ -12,7 +12,6 @@ namespace eiu\core\application;
 
 use ArrayAccess;
 use Closure;
-use Exception;
 use ReflectionClass;
 use ReflectionParameter;
 
@@ -264,7 +263,7 @@ class Container implements ArrayAccess, IContainer
      *
      * @return mixed
      *
-     * @throws Exception
+     * @throws \Exception
      */
     public function build($concrete)
     {
@@ -329,7 +328,7 @@ class Container implements ArrayAccess, IContainer
      *
      * @param  string $concrete
      *
-     * @throws Exception
+     * @throws \Exception
      */
     protected function notInstantiable($concrete)
     {
@@ -344,7 +343,7 @@ class Container implements ArrayAccess, IContainer
             $message = "Target [$concrete] is not instantiable.";
         }
         
-        throw new Exception($message);
+        throw new \Exception($message);
     }
     
     /**
@@ -412,7 +411,7 @@ class Container implements ArrayAccess, IContainer
      *
      * @return mixed
      *
-     * @throws Exception
+     * @throws \Exception
      */
     protected function resolvePrimitive(ReflectionParameter $parameter)
     {
@@ -455,13 +454,13 @@ class Container implements ArrayAccess, IContainer
      *
      * @return void
      *
-     * @throws Exception
+     * @throws \Exception
      */
     protected function unresolvablePrimitive(ReflectionParameter $parameter)
     {
         $message = "Unresolvable dependency resolving [$parameter] in class {$parameter->getDeclaringClass()->getName()}";
         
-        throw new Exception($message);
+        throw new \Exception($message);
     }
     
     /**
@@ -471,7 +470,7 @@ class Container implements ArrayAccess, IContainer
      *
      * @return mixed
      *
-     * @throws Exception
+     * @throws \Exception
      */
     protected function resolveClass(ReflectionParameter $parameter)
     {
@@ -483,7 +482,7 @@ class Container implements ArrayAccess, IContainer
             // If we can not resolve the class instance, we will check to see if the value
             // is optional, and if it is we will return the optional parameter value as
             // the value of the dependency, similarly to how we do this with scalars.
-        catch (Exception $e)
+        catch (\Exception $e)
         {
             if ($parameter->isOptional())
             {
@@ -629,8 +628,6 @@ class Container implements ArrayAccess, IContainer
      * @param  \Closure $closure
      *
      * @return void
-     *
-     * @throws \InvalidArgumentException
      */
     public function extend($abstract, Closure $closure)
     {

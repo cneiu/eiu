@@ -57,38 +57,6 @@ abstract class Controller extends Module implements IController
     }
     
     /**
-     * 输出文本
-     *
-     * 输出一个文本消息
-     *
-     * @param string $text        文本内容
-     * @param int    $status_code 状态代码
-     * @param string $header_type 输出头类型
-     * @param string $charset     字符集
-     *
-     * @return string
-     */
-    protected function text(string $text, int $status_code = 200, string $header_type = 'html', string $charset = null)
-    {
-        return $this->view->text($text, $status_code, $header_type, $charset);
-    }
-    
-    /**
-     * 输出 JSON 字符串
-     *
-     * @param mixed  $object      输出对象
-     * @param int    $status_code 状态代码
-     * @param string $header_type 输出头类型
-     * @param string $charset     字符集
-     *
-     * @return string
-     */
-    protected function json($object, int $status_code = 200, string $header_type = 'json', string $charset = null)
-    {
-        return $this->text(json_encode($object), $status_code, $header_type, $charset);
-    }
-    
-    /**
      * 输出 SUCCESS 字符串
      *
      * 如果附加消息为空则自动使用 $this->get_message() 的内容填充
@@ -109,6 +77,38 @@ abstract class Controller extends Module implements IController
         }
         
         return $this->json(['success' => $success, 'message' => $message], $status_code, $header_type, $charset);
+    }
+    
+    /**
+     * 输出 JSON 字符串
+     *
+     * @param mixed  $object      输出对象
+     * @param int    $status_code 状态代码
+     * @param string $header_type 输出头类型
+     * @param string $charset     字符集
+     *
+     * @return string
+     */
+    protected function json($object, int $status_code = 200, string $header_type = 'json', string $charset = null)
+    {
+        return $this->text(json_encode($object), $status_code, $header_type, $charset);
+    }
+    
+    /**
+     * 输出文本
+     *
+     * 输出一个文本消息
+     *
+     * @param string $text        文本内容
+     * @param int    $status_code 状态代码
+     * @param string $header_type 输出头类型
+     * @param string $charset     字符集
+     *
+     * @return string
+     */
+    protected function text(string $text, int $status_code = 200, string $header_type = 'html', string $charset = null)
+    {
+        return $this->view->text($text, $status_code, $header_type, $charset);
     }
     
     /**

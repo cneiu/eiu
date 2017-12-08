@@ -51,8 +51,8 @@ class SecurityProvider extends Provider
                                    '#',                    //
                                    '{',                    //
                                    '}',                    //
-                                   
-                                   
+    
+    
                                    '[',                    //
                                    ']',                    //
                                    '=',                    //

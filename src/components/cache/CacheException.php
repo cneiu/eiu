@@ -7,16 +7,16 @@
  */
 
 
-namespace eiu\abstracts\model;
+namespace eiu\components\cache;
 
 
 use Exception;
 
 
 /**
- * Defines the exception that is thrown by the encrypter
+ * 缓存异常
  */
-class ModelMessageException extends Exception
+class CacheException extends Exception
 {
     // Don't do anything
 }

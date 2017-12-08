@@ -8,13 +8,15 @@
 
 
 namespace eiu\components\captcha;
+
+
 use eiu\components\Component;
 use eiu\core\application\Application;
 use eiu\core\service\logger\LoggerProvider;
 
 
 /**
- * Captcha
+ * 验证码
  *
  * @package eiu\components\captcha
  */
@@ -24,48 +26,66 @@ class CaptchaComponent extends Component implements ICaptchaBuilderInterface
      * @var resource 验证码图片
      */
     protected $image;
+    
     /**
      * @var string 验证码文字
      */
     protected $text;
+    
     /**
      * @var string 随机字符
      */
-    protected $characters = '2346789abcdefghjmnpqrtuxyzABCDEFGHJMNPQRTUXYZ';
+    protected $characters = '12346789abcdefghjmnpqrtuxyzABCDEFGHJMNPQRTUXYZ';
+    
     /**
      * @var int 图片宽度
      */
     protected $width = 150;
+    
     /**
      * @var int 图片高度
      */
     protected $height = 40;
     
+    /**
+     * @var array 字体列表
+     */
     private $fonts = [];
     /**
      * @var int 验证码字符的个数
      */
     private $number = 4;
+    
     /**
      * @var int 字体大小
      */
     private $fontSize = 24;
+    
     /**
      * @var string 验证码字体
      */
     private $textFont;
     
+    /**
+     * @var int 噪点级别
+     */
     private $noiseLevel = 30;
     
+    /**
+     * @var int 背景颜色
+     */
     private $backColor;
+    
     /**
      * @var bool 是否添加干扰线
      */
     private $isDrawLine = false;
+    
     /**
      * @var bool 是否启用曲线
      */
     private $isDrawCurve = true;
+    
     /**
      * @var bool 是否启用背景噪音
      */
@@ -77,9 +97,9 @@ class CaptchaComponent extends Component implements ICaptchaBuilderInterface
         parent::__construct($app);
         
         $this->initialize([]);
-    
+        
         $app->instance(__CLASS__, $this);
-    
+        
         $logger->info(__CLASS__ . " is called");
     }
     
@@ -180,67 +200,67 @@ class CaptchaComponent extends Component implements ICaptchaBuilderInterface
     }
     
     /**
-     * 保存
+     * 获取随机浅色
      *
-     * @param string $filename
-     * @param int    $quality
-     *
-     * @return bool
+     * @return array
      */
-    public function save($filename, $quality)
+    private function getLightColor()
     {
-        return imagepng($this->image, $filename, $quality);
-    }
-    
-    /**
-     * 输出
-     *
-     * @param int $quality
-     *
-     * @return mixed|void
-     */
-    public function output($quality = 1)
-    {
-        header('Cache-Control: private, max-age=0, no-store, no-cache, must-revalidate');
-        header('Cache-Control: post-check=0, pre-check=0', false);
-        header('Pragma: no-cache');
-        header("content-type: image/png");
-        imagepng($this->image, null, $quality);
-    }
-    
-    /**
-     * 获取验证码文字
-     *
-     * @return string
-     */
-    public function getText()
-    {
-        return $this->text;
-    }
-    
-    /**
-     * 销毁
-     */
-    public function destroy()
-    {
-        $this->image and @imagedestroy($this->image);
-    }
-    
-    public function __destruct()
-    {
-        $this->destroy();
-    }
-    
-    /**
-     * 获取字体颜色
-     *
-     * @return int
-     */
-    private function getFontColor()
-    {
-        list($red, $green, $blue) = $this->getDeepColor();
+        $colors[0] = 200 + mt_rand(1, 55);
+        $colors[1] = 200 + mt_rand(1, 55);
+        $colors[2] = 200 + mt_rand(1, 55);
         
-        return imagecolorallocate($this->image, $red, $green, $blue);
+        return $colors;
+    }
+    
+    /**
+     * 画杂点
+     *
+     * 往图片上写不同颜色的字母或数字
+     */
+    private function drawNoise()
+    {
+        
+        $codeSet = '12345678abcdefhijkmnpqrstuvwxyz';
+        for ($i = 0; $i < $this->noiseLevel; $i++)
+        {
+            list($red, $green, $blue) = $this->getLightColor();
+            
+            //杂点颜色
+            $noiseColor = imagecolorallocate($this->image, $red, $green, $blue);
+            for ($j = 0; $j < 5; $j++)
+            {
+                // 绘杂点
+                imagestring($this->image, 5, mt_rand(-10, $this->width), mt_rand(-10, $this->height), $codeSet[mt_rand(0, 29)], $noiseColor);
+            }
+        }
+    }
+    
+    /**
+     * 画线
+     */
+    protected function drawLine($image, $width, $height, $tcol = null)
+    {
+        if ($tcol === null)
+        {
+            $tcol = imagecolorallocate($image, mt_rand(100, 255), mt_rand(100, 255), mt_rand(100, 255));
+        }
+        if (mt_rand(0, 1))
+        { // Horizontal
+            $Xa = mt_rand(0, $width / 2);
+            $Ya = mt_rand(0, $height);
+            $Xb = mt_rand($width / 2, $width);
+            $Yb = mt_rand(0, $height);
+        }
+        else
+        { // Vertical
+            $Xa = mt_rand(0, $width);
+            $Ya = mt_rand(0, $height / 2);
+            $Xb = mt_rand(0, $width);
+            $Yb = mt_rand($height / 2, $height);
+        }
+        imagesetthickness($image, mt_rand(1, 3));
+        imageline($image, $Xa, $Ya, $Xb, $Yb, $tcol);
     }
     
     /**
@@ -301,67 +321,20 @@ class CaptchaComponent extends Component implements ICaptchaBuilderInterface
     }
     
     /**
-     * 画线
-     */
-    protected function drawLine($image, $width, $height, $tcol = null)
-    {
-        if ($tcol === null)
-        {
-            $tcol = imagecolorallocate($image, mt_rand(100, 255), mt_rand(100, 255), mt_rand(100, 255));
-        }
-        if (mt_rand(0, 1))
-        { // Horizontal
-            $Xa = mt_rand(0, $width / 2);
-            $Ya = mt_rand(0, $height);
-            $Xb = mt_rand($width / 2, $width);
-            $Yb = mt_rand(0, $height);
-        }
-        else
-        { // Vertical
-            $Xa = mt_rand(0, $width);
-            $Ya = mt_rand(0, $height / 2);
-            $Xb = mt_rand(0, $width);
-            $Yb = mt_rand($height / 2, $height);
-        }
-        imagesetthickness($image, mt_rand(1, 3));
-        imageline($image, $Xa, $Ya, $Xb, $Yb, $tcol);
-    }
-    
-    /**
-     * 画杂点
-     *
-     * 往图片上写不同颜色的字母或数字
-     */
-    private function drawNoise()
-    {
-        
-        $codeSet = '2345678abcdefhijkmnpqrstuvwxyz';
-        for ($i = 0; $i < $this->noiseLevel; $i++)
-        {
-            list($red, $green, $blue) = $this->getLightColor();
-            
-            //杂点颜色
-            $noiseColor = imagecolorallocate($this->image, $red, $green, $blue);
-            for ($j = 0; $j < 5; $j++)
-            {
-                // 绘杂点
-                imagestring($this->image, 5, mt_rand(-10, $this->width), mt_rand(-10, $this->height), $codeSet[mt_rand(0, 29)], $noiseColor);
-            }
-        }
-    }
-    
-    /**
-     * 获取随机浅色
+     * 获取随机深色
      *
      * @return array
      */
-    private function getLightColor()
+    private function getDeepColor()
     {
-        $colors[0] = 200 + mt_rand(1, 55);
-        $colors[1] = 200 + mt_rand(1, 55);
-        $colors[2] = 200 + mt_rand(1, 55);
+        list($red, $green, $blue) = $this->getRandColor();
+        $increase = 30 + mt_rand(1, 254);
         
-        return $colors;
+        $red   = abs(min(255, $red - $increase));
+        $green = abs(min(255, $green - $increase));
+        $blue  = abs(min(255, $blue - $increase));
+        
+        return [$red, $green, $blue];
     }
     
     /**
@@ -387,19 +360,66 @@ class CaptchaComponent extends Component implements ICaptchaBuilderInterface
     }
     
     /**
-     * 获取随机深色
+     * 保存
      *
-     * @return array
+     * @param string $filename
+     * @param int    $quality
+     *
+     * @return bool
      */
-    private function getDeepColor()
+    public function save($filename, $quality)
     {
-        list($red, $green, $blue) = $this->getRandColor();
-        $increase = 30 + mt_rand(1, 254);
+        return imagepng($this->image, $filename, $quality);
+    }
+    
+    /**
+     * 输出
+     *
+     * @param int $quality
+     *
+     * @return mixed|void
+     */
+    public function output($quality = 1)
+    {
+        header('Cache-Control: private, max-age=0, no-store, no-cache, must-revalidate');
+        header('Cache-Control: post-check=0, pre-check=0', false);
+        header('Pragma: no-cache');
+        header("content-type: image/png");
+        imagepng($this->image, null, $quality);
+    }
+    
+    /**
+     * 获取验证码文字
+     *
+     * @return string
+     */
+    public function getText()
+    {
+        return $this->text;
+    }
+    
+    public function __destruct()
+    {
+        $this->destroy();
+    }
+    
+    /**
+     * 销毁
+     */
+    public function destroy()
+    {
+        $this->image and @imagedestroy($this->image);
+    }
+    
+    /**
+     * 获取字体颜色
+     *
+     * @return int
+     */
+    private function getFontColor()
+    {
+        list($red, $green, $blue) = $this->getDeepColor();
         
-        $red   = abs(min(255, $red - $increase));
-        $green = abs(min(255, $green - $increase));
-        $blue  = abs(min(255, $blue - $increase));
-        
-        return [$red, $green, $blue];
+        return imagecolorallocate($this->image, $red, $green, $blue);
     }
 }

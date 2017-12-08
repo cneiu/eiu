@@ -127,7 +127,7 @@ class MySQLDriver implements IDatabaseDriver
         
         if (empty($config['SERVERS']))
         {
-            throw new DatabaseException("Servers list undefined.");
+            throw new DatabaseException("Servers list is undefined.");
         }
         
         $this->_config_servers     = $config['SERVERS'];
@@ -170,7 +170,7 @@ class MySQLDriver implements IDatabaseDriver
         $this->_link           = $this->connect($this->_config_servers[$linkID], $linkID);
         self::$_switch_connect = true;
         
-        $this->logger->info("Switch server ok, link id is \"$linkID\".");
+        $this->logger->info("Switch server success, link id is \"$linkID\".");
         
         return true;
     }
@@ -208,7 +208,7 @@ class MySQLDriver implements IDatabaseDriver
             }
             catch (PDOException $e)
             {
-                throw new DatabaseException('connect error, ' . $e->getMessage());
+                throw new DatabaseException('Connect error, ' . $e->getMessage());
             }
             
             // set charset
@@ -217,7 +217,7 @@ class MySQLDriver implements IDatabaseDriver
             $link->exec('SET NAMES \'' . $this->_config_charset . '\'');
         }
         
-        $this->logger->info("Connect to database server {$config['HOST']}:{$config['PORT']} ok, link id is \"$linkNum\".");
+        $this->logger->info("Connect to database server {$config['HOST']}:{$config['PORT']} success, link id is \"$linkNum\".");
         
         return self::$_links[$linkNum];
     }
@@ -243,72 +243,25 @@ class MySQLDriver implements IDatabaseDriver
     }
     
     /**
-     * 执行 SQL 更新语句
+     * 开始事务
      *
-     * @param    string $sql SQL 语句
-     *
-     * @return int 受影响行数
-     *
-     * @throws DatabaseException
+     * @return    bool
      */
-    public function exec(string $sql)
+    public function begin()
     {
-        if (!$this->app->timerIsTick('_DB_EXECUTE_'))
+        $this->init(true);
+        
+        // rollback support
+        if (self::$_trans_times == 0)
         {
-            $this->app->timerTick('_DB_EXECUTE_');
+            $this->_link->beginTransaction();
         }
         
-        // use master server
-        if (!self::$_switch_connect)
-        {
-            $this->init(true);
-        }
+        self::$_trans_times++;
         
-        // record query string
-        self::$_query_str = $sql;
+        $this->logger->info("Start an database trans");
         
-        // free history query
-        if (!empty(self::$_PDOStatement))
-        {
-            $this->free();
-        }
-        
-        // before process sql
-        self::$_PDOStatement = $this->_link->prepare($sql);
-        
-        // fail
-        if (false === self::$_PDOStatement)
-        {
-            throw new DatabaseException("exec error 01, SQL: {$sql}, message: " . $this->get_last_error());
-        }
-        
-        // execute
-        $result = self::$_PDOStatement->execute();
-        
-        if (false === $result)
-        {
-            $this->logger->info("exec error 02, SQL: {$sql}, message: " . $this->get_last_error());
-            
-            list($code, , $msg) = self::$_PDOStatement->errorInfo();
-            
-            switch ($code)
-            {
-                case 23000:
-                    throw new DatabaseException($msg, $code);
-                
-                default:
-                    throw new DatabaseException("exec error 02, SQL: {$sql}, message: " . $this->get_last_error());
-            }
-        }
-        
-        $timer = $this->app->timerElapsed('_DB_EXECUTE_');
-        
-        $this->app->timerUnsetTick('_DB_EXECUTE_');
-        
-        $this->logger->info("Execute sql finished, used {$timer}s, sql is \"$sql\"");
-        
-        // return effect rows number
-        return self::$_PDOStatement->rowCount();
+        return true;
     }
     
     /**
@@ -341,7 +294,7 @@ class MySQLDriver implements IDatabaseDriver
             throw new DatabaseException("Connection is not available.");
         }
         
-        $this->logger->info('Init database server connect...ok');
+        $this->logger->info('Init database server connect...success');
         
         return $this;
     }
@@ -376,46 +329,6 @@ class MySQLDriver implements IDatabaseDriver
     }
     
     /**
-     * 释放当前查询
-     */
-    public function free()
-    {
-        self::$_PDOStatement = null;
-    }
-    
-    /**
-     * 获取最近发生的一次错误
-     *
-     * @return string
-     */
-    public function get_last_error()
-    {
-        return implode(' ', self::$_PDOStatement->errorInfo());
-    }
-    
-    /**
-     * 开始事务
-     *
-     * @return    bool
-     */
-    public function begin()
-    {
-        $this->init(true);
-        
-        // rollback support
-        if (self::$_trans_times == 0)
-        {
-            $this->_link->beginTransaction();
-        }
-        
-        self::$_trans_times++;
-        
-        $this->logger->info("Start an database trans");
-        
-        return true;
-    }
-    
-    /**
      * 提交事务
      *
      * @return bool
@@ -432,7 +345,10 @@ class MySQLDriver implements IDatabaseDriver
             
             if (!$result)
             {
-                throw new DatabaseException("commit error, message: " . $this->get_last_error());
+                list(, $code, $message) = self::$_PDOStatement->errorInfo();
+                $error = "Commit error, {$code}, \"{$message}\"";
+                $this->logger->error($error);
+                throw new DatabaseException($error, $code);
             }
         }
         
@@ -458,7 +374,10 @@ class MySQLDriver implements IDatabaseDriver
             
             if (!$result)
             {
-                throw new DatabaseException("DB Component: rollback error, message: " . $this->get_last_error());
+                list(, $code, $message) = self::$_PDOStatement->errorInfo();
+                $error = "Rollback error, {$code}, \"{$message}\"";
+                $this->logger->error($error);
+                throw new DatabaseException($error, $code);
             }
         }
         
@@ -484,7 +403,10 @@ class MySQLDriver implements IDatabaseDriver
         
         if (!$rows)
         {
-            throw new DatabaseException($this->get_last_error());
+            list(, $code, $message) = self::$_PDOStatement->errorInfo();
+            $error = "Query error, {$code}, \"{$message}\"";
+            $this->logger->error($error);
+            throw new DatabaseException($error, $code);
         }
         
         $fields = [];
@@ -565,24 +487,38 @@ class MySQLDriver implements IDatabaseDriver
         
         if (false === self::$_PDOStatement)
         {
-            throw new DatabaseException("query error, SQL: {$sql}, message: " . $this->get_last_error());
+            list(, $code, $message) = self::$_PDOStatement->errorInfo();
+            $error = "Query error, {$code}, \"{$message}\"";
+            $this->logger->error($error);
+            throw new DatabaseException($error, $code);
         }
         
         $result = self::$_PDOStatement->execute();
         
         if (false === $result)
         {
-            throw new DatabaseException("query error, SQL: {$sql}, message: " . $this->get_last_error());
+            list(, $code, $message) = self::$_PDOStatement->errorInfo();
+            $error = "Query error, {$code}, \"{$message}\"";
+            $this->logger->error($error);
+            throw new DatabaseException($error, $code);
         }
         
         $timer = $this->app->timerElapsed('_DB_QUERY_');
         
         $this->app->timerUnsetTick('_DB_QUERY_');
         
-        $this->logger->info("Query sql finished, used {$timer}s sql is: \"$sql\"");
+        $this->logger->info("Query sql finished, used {$timer}s, \"$sql\"");
         
         // return rows collection
         return self::$_PDOStatement->fetchAll();
+    }
+    
+    /**
+     * 释放当前查询
+     */
+    public function free()
+    {
+        self::$_PDOStatement = null;
     }
     
     /**
@@ -595,7 +531,10 @@ class MySQLDriver implements IDatabaseDriver
     {
         if (false === ($result = $this->query('SHOW TABLES')))
         {
-            throw new DatabaseException("" . $this->get_last_error());
+            list(, $code, $message) = self::$_PDOStatement->errorInfo();
+            $error = "Query error, {$code}, \"{$message}\"";
+            $this->logger->error($error);
+            throw new DatabaseException($error, $code);
         }
         
         $info = [];
@@ -609,13 +548,82 @@ class MySQLDriver implements IDatabaseDriver
     }
     
     /**
+     * 执行 SQL 更新语句
+     *
+     * @param    string $sql SQL 语句
+     *
+     * @return int 受影响行数
+     *
+     * @throws DatabaseException
+     */
+    public function exec(string $sql)
+    {
+        if (!$this->app->timerIsTick('_DB_EXECUTE_'))
+        {
+            $this->app->timerTick('_DB_EXECUTE_');
+        }
+        
+        // use master server
+        if (!self::$_switch_connect)
+        {
+            $this->init(true);
+        }
+        
+        // record query string
+        self::$_query_str = $sql;
+        
+        // free history query
+        if (!empty(self::$_PDOStatement))
+        {
+            $this->free();
+        }
+        
+        // before process sql
+        self::$_PDOStatement = $this->_link->prepare($sql);
+        
+        // fail
+        if (false === self::$_PDOStatement)
+        {
+            list(, $code, $message) = self::$_PDOStatement->errorInfo();
+            throw new DatabaseException("Execute error, \"{$message}\" in \"{$sql}\"", $code);
+        }
+        
+        // execute
+        $result = self::$_PDOStatement->execute();
+        
+        if (false === $result)
+        {
+            list(, $code, $message) = self::$_PDOStatement->errorInfo();
+            $error = "Execute error, {$code}, \"{$message}\" in \"{$sql}\"";
+            $this->logger->error($error);
+            throw new DatabaseException($error, $code);
+        }
+        
+        $timer = $this->app->timerElapsed('_DB_EXECUTE_');
+        
+        $this->app->timerUnsetTick('_DB_EXECUTE_');
+        
+        $this->logger->info("Execute success, used {$timer}s, \"$sql\"");
+        
+        // return effect rows number
+        return self::$_PDOStatement->rowCount();
+    }
+    
+    /**
      * 获取表状态
      *
      * return array
      */
     public function getStatus()
     {
-        return $this->query('SHOW TABLE STATUS');
+        try
+        {
+            return $this->query('SHOW TABLE STATUS');
+        }
+        catch (DatabaseException $e)
+        {
+            throw $e;
+        }
     }
     
     /**

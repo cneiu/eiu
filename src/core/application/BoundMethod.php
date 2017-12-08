@@ -11,7 +11,6 @@ namespace eiu\core\application;
 
 
 use Closure;
-use InvalidArgumentException;
 use ReflectionFunction;
 use ReflectionMethod;
 
@@ -69,8 +68,7 @@ class BoundMethod
      * @param  string|null                     $defaultMethod
      *
      * @return mixed
-     *
-     * @throws \InvalidArgumentException
+     * @throws \Exception
      */
     protected static function callClass($container, $target, array $parameters = [], $defaultMethod = null)
     {
@@ -83,7 +81,7 @@ class BoundMethod
         
         if (is_null($method))
         {
-            throw new InvalidArgumentException('Method not provided.');
+            throw new \Exception('Method not provided.');
         }
         
         return static::call(

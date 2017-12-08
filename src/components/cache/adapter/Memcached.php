@@ -1,34 +1,22 @@
 <?php
 /**
- * Pop PHP Framework (http://www.popphp.org/)
+ * EIU PHP FRAMEWORK
  *
- * @link       https://github.com/popphp/popphp-framework
- * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2017 NOLA Interactive, LLC. (http://www.nolainteractive.com)
- * @license    http://www.popphp.org/license     New BSD License
- */
-
-
-/**
- * @namespace
+ * @author        成都东联智胜软件有限公司
+ * @link          https://www.cneiu.com
  */
 
 
 namespace eiu\components\cache\adapter;
 
 
-use Exception;
+use eiu\components\cache\CacheException;
 
 
 /**
- * Memcached cache adapter class
+ * Memcached 缓存适配器
  *
- * @category   Pop
- * @package    Pop\Cache
- * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2017 NOLA Interactive, LLC. (http://www.nolainteractive.com)
- * @license    http://www.popphp.org/license     New BSD License
- * @version    3.1.0
+ * @package eiu\components\cache\adapter
  */
 class Memcached extends AbstractAdapter
 {
@@ -62,15 +50,17 @@ class Memcached extends AbstractAdapter
     public function __construct($ttl = 0, $host = 'localhost', $port = 11211, $weight = 1)
     {
         parent::__construct($ttl);
+        
         if (!class_exists('Memcached', false))
         {
-            throw new Exception('Error: Memcached is not available.');
+            throw new CacheException('Memcached is not available');
         }
         
         $this->memcached = new \Memcached();
         $this->addServer($host, $port, $weight);
         
         $version = $this->memcached->getVersion();
+        
         if (isset($version[$host . ':' . $port]))
         {
             $this->version = $version[$host . ':' . $port];
@@ -78,7 +68,7 @@ class Memcached extends AbstractAdapter
     }
     
     /**
-     * Get the current version of memcached.
+     * 增加缓存服务器
      *
      * @param  string $host
      * @param  int    $port
@@ -94,7 +84,7 @@ class Memcached extends AbstractAdapter
     }
     
     /**
-     * Get the memcached object.
+     * 获取缓存器
      *
      * @return \Memcached
      */
@@ -104,7 +94,7 @@ class Memcached extends AbstractAdapter
     }
     
     /**
-     * Get the current version of memcached.
+     * 增加缓存服务器列表
      *
      * @param  array $servers
      *
@@ -118,7 +108,7 @@ class Memcached extends AbstractAdapter
     }
     
     /**
-     * Get the current version of memcached.
+     * 获取缓存器版本
      *
      * @return string
      */
@@ -128,7 +118,7 @@ class Memcached extends AbstractAdapter
     }
     
     /**
-     * Get the time-to-live for an item in cache
+     * 获取指定缓存过期时间
      *
      * @param  string $id
      *
@@ -148,7 +138,7 @@ class Memcached extends AbstractAdapter
     }
     
     /**
-     * Save an item to cache
+     * 写入一个缓存
      *
      * @param  string $id
      * @param  mixed  $value
@@ -170,7 +160,7 @@ class Memcached extends AbstractAdapter
     }
     
     /**
-     * Get an item from cache
+     * 获取指定缓存
      *
      * @param  string $id
      *
@@ -190,7 +180,7 @@ class Memcached extends AbstractAdapter
     }
     
     /**
-     * Determine if the item exist in cache
+     * 判断指定缓存是否存在
      *
      * @param  string $id
      *
@@ -204,7 +194,7 @@ class Memcached extends AbstractAdapter
     }
     
     /**
-     * Delete a value in cache
+     * 删除指定缓存
      *
      * @param  string $id
      *
@@ -218,7 +208,7 @@ class Memcached extends AbstractAdapter
     }
     
     /**
-     * Clear all stored values from cache
+     * 清除所有缓存
      *
      * @return Memcached
      */
@@ -230,7 +220,7 @@ class Memcached extends AbstractAdapter
     }
     
     /**
-     * Destroy cache resource
+     * 销毁缓存器
      *
      * @return Memcached
      */

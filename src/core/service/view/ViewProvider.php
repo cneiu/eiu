@@ -107,7 +107,6 @@ class ViewProvider extends Provider
      * @param string $charset     字符集
      *
      * @return string
-     * @throws ViewException
      */
     public function display(string $page, bool $return = false, int $status_code = 200, string $header_type = 'html', string $charset = null)
     {
@@ -115,7 +114,7 @@ class ViewProvider extends Provider
         
         if (!is_file($page = $this->getPath($page)))
         {
-            throw new ViewException("Template file $page does not exist.");
+            throw new Exception("Template file $page does not exist.");
         }
         
         $html = (new TemplateEngine($this->app, $this->_template_vars))->render($page);

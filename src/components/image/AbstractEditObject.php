@@ -9,27 +9,23 @@
 
 namespace eiu\components\image;
 
+
 use eiu\components\image\Adapter\AbstractAdapter;
+
 
 /**
  * Abstract image edit class
- *
- * @category   Pop
- * @package    eiu\components\image
- * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2017 NOLA Interactive, LLC. (http://www.nolainteractive.com)
- * @license    http://www.popphp.org/license     New BSD License
- * @version    3.0.0
  */
 abstract class AbstractEditObject
 {
-
+    
     /**
      * Image object
+     *
      * @var mixed
      */
     protected $image = null;
-
+    
     /**
      * Constructor
      *
@@ -39,11 +35,12 @@ abstract class AbstractEditObject
      */
     public function __construct(AbstractAdapter $image = null)
     {
-        if (null !== $image) {
+        if (null !== $image)
+        {
             $this->setImage($image);
         }
     }
-
+    
     /**
      * Get the image object
      *
@@ -53,17 +50,19 @@ abstract class AbstractEditObject
     {
         return $this->image;
     }
-
+    
     /**
      * Set the image object
      *
      * @param  AbstractAdapter $image
+     *
      * @return AbstractEditObject
      */
     public function setImage(AbstractAdapter $image)
     {
         $this->image = $image;
+        
         return $this;
     }
-
+    
 }
