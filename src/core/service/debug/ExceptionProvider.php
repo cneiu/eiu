@@ -63,7 +63,7 @@ class ExceptionProvider extends Provider
         $this->logger = $logger;
         
         error_reporting(-1);
-        ini_set('display_errors', 0);
+        ini_set('display_errors', 1);
         set_error_handler([&$this, 'errorHandler']);
         set_exception_handler([&$this, 'exceptionHandler']);
         
