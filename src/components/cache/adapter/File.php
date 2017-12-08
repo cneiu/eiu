@@ -57,14 +57,17 @@ class File extends AbstractAdapter
      *
      * @param  string $dir
      *
-     * @throws Exception
      * @return File
+     * @throws CacheException
      */
     public function setDir($dir)
     {
         if (!file_exists($dir))
         {
-            throw new CacheException('That cache directory does not exist');
+            if (!@mkdir($dir, 0777, true))
+            {
+                throw new CacheException('That cache directory does not exist');
+            }
         }
         else if (!is_writable($dir))
         {
