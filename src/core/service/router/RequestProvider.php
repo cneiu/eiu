@@ -285,8 +285,8 @@ class RequestProvider extends Provider implements ArrayAccess
         {
             return null;
         }
-        
-        return ($xss_clean === true) ? ($value ? $this->security->xss_clean($value) : $value) : $value;
+    
+        return ($xss_clean === true) ? $this->app->security->xss_clean($value) : $value;
     }
     
     /**
