@@ -10,9 +10,7 @@
 namespace eiu\core\service\event;
 
 
-use Closure;
 use eiu\core\service\config\ConfigProvider;
-use eiu\core\service\logger\Logger;
 use eiu\core\service\logger\LoggerProvider;
 use eiu\core\service\Provider;
 
@@ -43,45 +41,25 @@ class EventProvider extends Provider
     /**
      * 服务启动
      *
-     * @param ConfigProvider        $config
-     * @param Logger|LoggerProvider $logger
+     * @param ConfigProvider $config
+     * @param LoggerProvider $logger
      */
     public function boot(ConfigProvider $config, LoggerProvider $logger)
     {
         // 加载配置事件
         if ($events = $config['event'])
         {
-            foreach ($events as $eventName => $callback)
+            foreach ($events as $eventName => $callbacks)
             {
-                $this->bind($eventName, $callback);
+                if (is_array($callbacks) and $callbacks)
+                {
+                    self::$events[$eventName] = $callbacks;
+                }
             }
         }
         
         $this->logger = $logger;
         $this->logger->info($this->className() . " is booted");
-    }
-    
-    /**
-     * 绑定事件
-     *
-     * @param string  $eventName 事件名
-     * @param Closure $callback  回调函数
-     */
-    public function bind(string $eventName, Closure $callback)
-    {
-        if (!isset(self::$events[$eventName]))
-        {
-            self::$events[$eventName] = [];
-        }
-        
-        if ($index = array_search($callback, self::$events[$eventName]))
-        {
-            self::$events[$eventName][$index] = $callback;
-        }
-        else
-        {
-            self::$events[$eventName][] = $callback;
-        }
     }
     
     /**
@@ -96,12 +74,8 @@ class EventProvider extends Provider
         {
             foreach (self::$events[$eventName] as $event)
             {
-                if ($event instanceof Closure)
-                {
-                    $params = array_merge([$this->app], $params);
-                    $this->app->call($event, $params);
-                    $this->logger->info('Call event ' . $eventName . ' over.');
-                }
+                $this->app->call($event, $params);
+                $this->logger->info('Call event ' . $eventName . ' over.');
             }
         }
     }

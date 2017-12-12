@@ -16,7 +16,6 @@ use eiu\components\cryptography\encryption\EncrypterComponent;
 use eiu\components\cryptography\encryption\keys\Key;
 use eiu\core\application\Application;
 use eiu\core\service\config\ConfigProvider;
-use eiu\core\service\logger\Logger;
 use eiu\core\service\logger\LoggerProvider;
 use eiu\core\service\router\RequestProvider;
 use Exception;
@@ -84,10 +83,10 @@ class CookieComponent extends Component implements ArrayAccess
     /**
      * SessionComponent constructor.
      *
-     * @param Application           $app
-     * @param ConfigProvider        $config
-     * @param LoggerProvider|Logger $logger
-     * @param EncrypterComponent    $encrypter
+     * @param Application        $app
+     * @param ConfigProvider     $config
+     * @param LoggerProvider     $logger
+     * @param EncrypterComponent $encrypter
      */
     public function __construct(Application $app, ConfigProvider $config, LoggerProvider $logger, EncrypterComponent $encrypter, RequestProvider $request)
     {

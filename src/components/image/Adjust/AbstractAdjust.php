@@ -23,5 +23,5 @@ use eiu\components\image\AbstractEditObject;
  */
 abstract class AbstractAdjust extends AbstractEditObject implements AdjustInterface
 {
-
+    
 }

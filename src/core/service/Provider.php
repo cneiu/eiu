@@ -28,6 +28,13 @@ abstract class Provider
     }
     
     /**
+     * 服务提供者注册
+     *
+     * @return mixed
+     */
+    abstract function register();
+    
+    /**
      * to string
      *
      * @return string

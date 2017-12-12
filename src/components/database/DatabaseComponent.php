@@ -14,7 +14,6 @@ use eiu\components\Component;
 use eiu\components\database\driver\MySQLDriver;
 use eiu\core\application\Application;
 use eiu\core\service\config\ConfigProvider;
-use eiu\core\service\logger\Logger;
 use eiu\core\service\logger\LoggerProvider;
 
 
@@ -40,9 +39,9 @@ class DatabaseComponent extends Component implements IDatabaseDriver
     /**
      * SessionComponent constructor.
      *
-     * @param Application           $app
-     * @param ConfigProvider        $config
-     * @param LoggerProvider|Logger $logger
+     * @param Application    $app
+     * @param ConfigProvider $config
+     * @param LoggerProvider $logger
      */
     public function __construct(Application $app, ConfigProvider $config, LoggerProvider $logger)
     {
@@ -51,9 +50,12 @@ class DatabaseComponent extends Component implements IDatabaseDriver
         switch ($config['db']['DRIVER'])
         {
             case 'MYSQL':
-                $this->app->bind(IDatabaseDriver::class, MySQLDriver::class, true);
-                $this->driver = new MySQLDriver($app);
+                $this->app->singleton(IDatabaseDriver::class, MySQLDriver::class, true);
+                $this->driver = $this->app[IDatabaseDriver::class];
                 break;
+            
+            default:
+                throw new DatabaseException("Undefined database driver \"{$config['db']['DRIVER']}\".");
         }
         
         $app->instance(__CLASS__, $this);

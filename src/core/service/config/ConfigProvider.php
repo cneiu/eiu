@@ -11,7 +11,7 @@ namespace eiu\core\service\config;
 
 
 use ArrayAccess;
-use eiu\core\service\logger\Logger;
+use Dotenv\Dotenv;
 use eiu\core\service\logger\LoggerProvider;
 use eiu\core\service\Provider;
 
@@ -45,13 +45,13 @@ class ConfigProvider extends Provider implements ArrayAccess
     /**
      * 服务启动
      *
-     * @param Logger|LoggerProvider $logger
+     * @param LoggerProvider $logger
      *
      * @throws \Exception
      */
     public function boot(LoggerProvider $logger)
     {
-        static::$path = APP_PATH . 'configs' . DS;
+        static::$path = APP_CONFIG;
         
         if (!is_file($file = static::$path . 'app.config.php'))
         {
@@ -61,6 +61,12 @@ class ConfigProvider extends Provider implements ArrayAccess
         if (!is_array($_config = include($file)))
         {
             throw new \Exception('Application configuration option is invalid.');
+        }
+        
+        if (class_exists(Dotenv::class))
+        {
+            $dotenv = new Dotenv(dirname(APP_PATH));
+            $dotenv->load();
         }
         
         // 设置字符集
@@ -114,7 +120,7 @@ class ConfigProvider extends Provider implements ArrayAccess
      */
     public function offsetExists($offset)
     {
-        return isset(self::$configs[$offset]);
+        return !!$this->get($offset);
     }
     
     /**

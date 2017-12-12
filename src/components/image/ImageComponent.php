@@ -11,7 +11,7 @@ namespace eiu\components\image;
 
 
 /**
- * 图形处理组件
+ * 图像处理组件
  *
  * @package eiu\components\image
  */
@@ -62,7 +62,7 @@ class ImageComponent
     }
     
     /**
-     * 使用 GD 适配器加载图形文件
+     * 使用 GD 适配器加载图像文件
      *
      * @param  string $image
      *
@@ -74,7 +74,7 @@ class ImageComponent
     }
     
     /**
-     * 使用 Gmagick 适配器加载图形文件
+     * 使用 Gmagick 适配器加载图像文件
      *
      * @param  string $image
      *
@@ -86,7 +86,7 @@ class ImageComponent
     }
     
     /**
-     * 使用 Imagick 适配器加载图形文件
+     * 使用 Imagick 适配器加载图像文件
      *
      * @param  string $image
      *
@@ -98,7 +98,7 @@ class ImageComponent
     }
     
     /**
-     * 使用 GD 适配器加载图形数据
+     * 使用 GD 适配器加载图像数据
      *
      * @param  string $data
      * @param  string $name
@@ -111,7 +111,7 @@ class ImageComponent
     }
     
     /**
-     * 使用 Gmagick 适配器加载图形数据
+     * 使用 Gmagick 适配器加载图像数据
      *
      * @param  string $data
      * @param  string $name
@@ -124,7 +124,7 @@ class ImageComponent
     }
     
     /**
-     * 使用 Imagick 适配器加载图形数据
+     * 使用 Imagick 适配器加载图像数据
      *
      * @param  string $data
      * @param  string $name
@@ -137,7 +137,7 @@ class ImageComponent
     }
     
     /**
-     * 使用 GD 适配器创建图形
+     * 使用 GD 适配器创建图像
      *
      * @param  int    $width
      * @param  int    $height
@@ -151,7 +151,7 @@ class ImageComponent
     }
     
     /**
-     * 使用 GD 适配器创建索引图形
+     * 使用 GD 适配器创建索引图像
      *
      * @param  int    $width
      * @param  int    $height
@@ -165,7 +165,7 @@ class ImageComponent
     }
     
     /**
-     * 使用 Gmagick 适配器创建图形
+     * 使用 Gmagick 适配器创建图像
      *
      * @param  int    $width
      * @param  int    $height
@@ -179,7 +179,7 @@ class ImageComponent
     }
     
     /**
-     * 使用 Gmagick 适配器创建索引图形
+     * 使用 Gmagick 适配器创建索引图像
      *
      * @param  int    $width
      * @param  int    $height
@@ -193,7 +193,7 @@ class ImageComponent
     }
     
     /**
-     * 使用 Imagick 适配器创建图形
+     * 使用 Imagick 适配器创建图像
      *
      * @param  int    $width
      * @param  int    $height
@@ -207,7 +207,7 @@ class ImageComponent
     }
     
     /**
-     * 使用 Imagick 适配器创建索引图形
+     * 使用 Imagick 适配器创建索引图像
      *
      * @param  int    $width
      * @param  int    $height

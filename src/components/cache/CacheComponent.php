@@ -12,8 +12,16 @@ namespace eiu\components\cache;
 
 use ArrayAccess;
 use eiu\components\cache\adapter\AdapterInterface;
+use eiu\components\cache\adapter\Apc;
+use eiu\components\cache\adapter\File;
+use eiu\components\cache\adapter\Memcache;
+use eiu\components\cache\adapter\Memcached;
+use eiu\components\cache\adapter\Redis;
+use eiu\components\cache\adapter\Session;
+use eiu\components\cache\adapter\Sqlite;
 use eiu\components\Component;
 use eiu\core\application\Application;
+use eiu\core\service\config\ConfigProvider;
 
 
 /**
@@ -37,9 +45,73 @@ class CacheComponent extends Component implements ArrayAccess
      *
      * @param Application $app
      */
-    public function __construct(Application $app)
+    public function __construct(Application $app, ConfigProvider $config, AdapterInterface $adapter = null)
     {
         parent::__construct($app);
+        
+        if ($adapter)
+        {
+            $this->setupAdapter($adapter);
+        }
+        else
+        {
+            if (isset($config['cache']['TYPE']))
+            {
+                $ttl = $config['cache'][$config['cache']['TYPE']]['TTL'] ?? 0;
+                
+                switch ($config['cache']['TYPE'])
+                {
+                    case 'APC':
+                        $this->setupAdapter(new Apc($ttl));
+                        break;
+                    
+                    case 'FILE':
+                        $dir = $config['cache'][$config['cache']['TYPE']]['DIR'];
+                        
+                        if (!$dir or !file_exists($dir) or !is_writeable($dir))
+                        {
+                            throw new \Exception("Cant write to cache directory\"{$dir}\"");
+                        }
+                        
+                        $this->setupAdapter(new File($dir, $ttl));
+                        break;
+                    
+                    case 'MEMCACHE':
+                        $host = $config['cache'][$config['cache']['TYPE']]['HOST'];
+                        $port = $config['cache'][$config['cache']['TYPE']]['PORT'];
+                        $this->setupAdapter(new Memcache($ttl, $host, $port));
+                        break;
+                    
+                    case 'MEMCACHED':
+                        $servers = $config['cache'][$config['cache']['TYPE']]['SERVERS'];
+                        $this->setupAdapter(new Memcached($ttl, $servers));
+                        break;
+                    
+                    case 'REDIS':
+                        $host = $config['cache'][$config['cache']['TYPE']]['HOST'];
+                        $port = $config['cache'][$config['cache']['TYPE']]['PORT'];
+                        $this->setupAdapter(new Redis($ttl, $host, $port));
+                        break;
+                    
+                    case 'SQLITE':
+                        $file  = $config['cache'][$config['cache']['TYPE']]['FILE'];
+                        $table = $config['cache'][$config['cache']['TYPE']]['TABLE'];
+                        $pdo   = $config['cache'][$config['cache']['TYPE']]['PDO'];
+                        $this->setupAdapter(new Sqlite($file, $ttl, $table, $pdo));
+                        break;
+                    
+                    case 'SESSION':
+                    default:
+                        $this->setupAdapter(new Session($ttl));
+                        break;
+                }
+            }
+        }
+        
+        if (!$this->adapter)
+        {
+            throw new \Exception("Undefined cache adapter");
+        }
     }
     
     /**

@@ -11,7 +11,6 @@ namespace eiu\core\service\view;
 
 
 use eiu\core\service\config\ConfigProvider;
-use eiu\core\service\logger\Logger;
 use eiu\core\service\logger\LoggerProvider;
 use eiu\core\service\output\OutputProvider;
 use eiu\core\service\Provider;
@@ -58,15 +57,13 @@ class ViewProvider extends Provider
     /**
      * 服务启动
      *
-     * @param ConfigProvider        $config
-     * @param Logger|LoggerProvider $logger
+     * @param ConfigProvider $config
+     * @param LoggerProvider $logger
      */
     public function boot(ConfigProvider $config, LoggerProvider $logger)
     {
         $this->config = $config;
         $this->logger = $logger;
-        
-        $this->_template_vars = $this->config['view']['VIEW_VARS'];
         
         $this->logger->info($this->className() . " is booted");
     }
@@ -149,7 +146,7 @@ class ViewProvider extends Provider
         }
         
         $page = str_replace('/', DS, $page);
-        $page = 0 === stripos($page, VIEW_PATH) ? $page : VIEW_PATH . $page;
+        $page = 0 === stripos($page, APP_TEMPLATE) ? $page : APP_TEMPLATE . $page;
         $page .= (pathinfo($page, PATHINFO_EXTENSION) ? '' : '.tpl.php');
         
         return $page;
@@ -197,7 +194,7 @@ class ViewProvider extends Provider
         }
         
         $page = str_replace('/', DS, $page);
-        $page = 0 === stripos($page, VIEW_PATH) ? $page : VIEW_PATH . $page;
+        $page = 0 === stripos($page, APP_TEMPLATE) ? $page : APP_TEMPLATE . $page;
         $page .= (pathinfo($page, PATHINFO_EXTENSION) ? '' : '.tpl.php');
         
         return is_file($page) ? $page : false;

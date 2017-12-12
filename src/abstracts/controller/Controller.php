@@ -112,6 +112,18 @@ abstract class Controller extends Module implements IController
     }
     
     /**
+     * 输出一个 400 消息
+     *
+     * @param string $message
+     *
+     * @return string
+     */
+    protected function badRequest(string $message = 'Bad Request!')
+    {
+        return $this->json($message, 400);
+    }
+    
+    /**
      * 输出一个 404 消息
      *
      * @param string $message

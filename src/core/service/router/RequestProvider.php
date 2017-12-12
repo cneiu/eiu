@@ -14,7 +14,6 @@ use ArrayAccess;
 use eiu\components\cookie\CookieComponent;
 use eiu\components\session\SessionComponent;
 use eiu\core\service\config\ConfigProvider;
-use eiu\core\service\logger\Logger;
 use eiu\core\service\logger\LoggerProvider;
 use eiu\core\service\Provider;
 use eiu\core\service\security\SecurityProvider;
@@ -67,9 +66,9 @@ class RequestProvider extends Provider implements ArrayAccess
     /**
      * 服务启动
      *
-     * @param ConfigProvider        $config
-     * @param LoggerProvider|Logger $logger
-     * @param SecurityProvider      $security
+     * @param ConfigProvider   $config
+     * @param LoggerProvider   $logger
+     * @param SecurityProvider $security
      */
     public function boot(ConfigProvider $config, LoggerProvider $logger, SecurityProvider $security)
     {
@@ -285,7 +284,7 @@ class RequestProvider extends Provider implements ArrayAccess
         {
             return null;
         }
-    
+        
         return ($xss_clean === true) ? $this->app->security->xss_clean($value) : $value;
     }
     

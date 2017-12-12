@@ -12,7 +12,6 @@ namespace eiu\components\cryptography\hashing;
 
 use eiu\components\Component;
 use eiu\core\application\Application;
-use eiu\core\service\logger\Logger;
 use eiu\core\service\logger\LoggerProvider;
 
 
@@ -30,8 +29,8 @@ class BcryptHasherComponent extends Component
     /**
      * constructor.
      *
-     * @param Application           $app
-     * @param LoggerProvider|Logger $logger
+     * @param Application    $app
+     * @param LoggerProvider $logger
      */
     public function __construct(Application $app, LoggerProvider $logger)
     {

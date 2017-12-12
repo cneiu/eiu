@@ -47,7 +47,7 @@ class Memcached extends AbstractAdapter
      *
      * @throws Exception
      */
-    public function __construct($ttl = 0, $host = 'localhost', $port = 11211, $weight = 1)
+    public function __construct(int $ttl = 0, array $servers = [])
     {
         parent::__construct($ttl);
         
@@ -56,8 +56,13 @@ class Memcached extends AbstractAdapter
             throw new CacheException('Memcached is not available');
         }
         
+        if (!$servers)
+        {
+            $servers = [['localhost', 11211, 1]];
+        }
+        
         $this->memcached = new \Memcached();
-        $this->addServer($host, $port, $weight);
+        $this->addServers($servers);
         
         $version = $this->memcached->getVersion();
         
@@ -84,16 +89,6 @@ class Memcached extends AbstractAdapter
     }
     
     /**
-     * 获取缓存器
-     *
-     * @return \Memcached
-     */
-    public function memcached()
-    {
-        return $this->memcached;
-    }
-    
-    /**
      * 增加缓存服务器列表
      *
      * @param  array $servers
@@ -105,6 +100,16 @@ class Memcached extends AbstractAdapter
         $this->memcached->addServers($servers);
         
         return $this;
+    }
+    
+    /**
+     * 获取缓存器
+     *
+     * @return \Memcached
+     */
+    public function memcached()
+    {
+        return $this->memcached;
     }
     
     /**

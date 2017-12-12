@@ -17,7 +17,6 @@ use eiu\components\cryptography\encryption\keys\Key;
 use eiu\components\files\FilesComponent;
 use eiu\core\application\Application;
 use eiu\core\service\config\ConfigProvider;
-use eiu\core\service\logger\Logger;
 use eiu\core\service\logger\LoggerProvider;
 use Exception;
 
@@ -49,11 +48,11 @@ class SessionComponent extends Component implements ArrayAccess
     /**
      * SessionComponent constructor.
      *
-     * @param Application           $app
-     * @param ConfigProvider        $config
-     * @param LoggerProvider|Logger $logger
-     * @param EncrypterComponent    $encrypter
-     * @param FilesComponent        $filesComponent
+     * @param Application        $app
+     * @param ConfigProvider     $config
+     * @param LoggerProvider     $logger
+     * @param EncrypterComponent $encrypter
+     * @param FilesComponent     $filesComponent
      *
      * @throws Exception
      */
@@ -63,19 +62,37 @@ class SessionComponent extends Component implements ArrayAccess
         
         if (empty(session_id()))
         {
-            if (!$filesComponent->exists(APP_DATA . 'session'))
+            if (!$filesComponent->exists(APP_STORAGE . 'session'))
             {
-                if (!$filesComponent->makeDirectory(APP_DATA . 'session', 0755, true))
+                if (!$filesComponent->makeDirectory(APP_STORAGE . 'session', 0755, true))
                 {
                     throw new \Exception('The session directory cannot be written.', 500);
                 }
             }
             
-            session_save_path(APP_DATA . 'session');
+            session_save_path(APP_STORAGE . 'session');
             session_start();
             
             $this->sessionId = session_id();
-            $this->init();
+            
+            // 初始化会话
+            if (!isset($_SESSION['_EIU']))
+            {
+                $_SESSION['_EIU'] = [
+                    'requests'    => [],
+                    'expirations' => [],
+                ];
+            }
+            else if (isset($_SESSION['_EIU']) && !isset($_SESSION['_EIU']['requests']))
+            {
+                $_SESSION['_EIU']['requests']    = [];
+                $_SESSION['_EIU']['expirations'] = [];
+            }
+            else
+            {
+                $this->checkRequests();
+                $this->checkExpirations();
+            }
         }
         
         $this->config    = $config;
@@ -84,32 +101,6 @@ class SessionComponent extends Component implements ArrayAccess
         $app->instance(__CLASS__, $this);
         
         $logger->info(__CLASS__ . " is called");
-    }
-    
-    /**
-     * 初始化会话
-     *
-     * @return void
-     */
-    private function init()
-    {
-        if (!isset($_SESSION['_EIU']))
-        {
-            $_SESSION['_EIU'] = [
-                'requests'    => [],
-                'expirations' => [],
-            ];
-        }
-        else if (isset($_SESSION['_EIU']) && !isset($_SESSION['_EIU']['requests']))
-        {
-            $_SESSION['_EIU']['requests']    = [];
-            $_SESSION['_EIU']['expirations'] = [];
-        }
-        else
-        {
-            $this->checkRequests();
-            $this->checkExpirations();
-        }
     }
     
     /**
@@ -222,6 +213,18 @@ class SessionComponent extends Component implements ArrayAccess
     }
     
     /**
+     * ArrayAccess offsetExists
+     *
+     * @param  mixed $offset
+     *
+     * @return boolean
+     */
+    public function offsetExists($offset)
+    {
+        return $this->__isset($offset);
+    }
+    
+    /**
      * ArrayAccess offsetSet
      *
      * @param  mixed $offset
@@ -248,6 +251,21 @@ class SessionComponent extends Component implements ArrayAccess
     }
     
     /**
+     * Return the isset value of the $_SESSION global variable
+     *
+     * @param  string $name
+     *
+     * @return boolean
+     */
+    public function __isset($name)
+    {
+        $this->checkExpirations();
+        $this->checkRequests();
+        
+        return isset($_SESSION[$name]);
+    }
+    
+    /**
      * Get method to return the value of the $_SESSION global variable
      *
      * @param  string $name
@@ -256,6 +274,9 @@ class SessionComponent extends Component implements ArrayAccess
      */
     public function __get($name)
     {
+        $this->checkExpirations();
+        $this->checkRequests();
+        
         $value = null;
         
         if (isset($_SESSION[$name]))
@@ -281,30 +302,6 @@ class SessionComponent extends Component implements ArrayAccess
     }
     
     /**
-     * ArrayAccess offsetExists
-     *
-     * @param  mixed $offset
-     *
-     * @return boolean
-     */
-    public function offsetExists($offset)
-    {
-        return $this->__isset($offset);
-    }
-    
-    /**
-     * Return the isset value of the $_SESSION global variable
-     *
-     * @param  string $name
-     *
-     * @return boolean
-     */
-    public function __isset($name)
-    {
-        return isset($_SESSION[$name]);
-    }
-    
-    /**
      * ArrayAccess offsetUnset
      *
      * @param  mixed $offset
@@ -326,7 +323,6 @@ class SessionComponent extends Component implements ArrayAccess
      */
     public function __unset($name)
     {
-        $_SESSION[$name] = null;
         unset($_SESSION[$name]);
     }
 }

@@ -11,7 +11,6 @@ namespace eiu\core\service\security;
 
 
 use eiu\core\service\config\ConfigProvider;
-use eiu\core\service\logger\Logger;
 use eiu\core\service\logger\LoggerProvider;
 use eiu\core\service\Provider;
 use Exception;
@@ -133,8 +132,8 @@ class SecurityProvider extends Provider
     /**
      * 服务启动
      *
-     * @param ConfigProvider        $config
-     * @param Logger|LoggerProvider $logger
+     * @param ConfigProvider $config
+     * @param LoggerProvider $logger
      */
     public function boot(ConfigProvider $config, LoggerProvider $logger)
     {

@@ -20,172 +20,141 @@ use ReflectionParameter;
  * 核心容器
  */
 class Container implements ArrayAccess, IContainer
+
 {
     /**
-     * 当前容器实例
+     * The current globally available container (if any).
      *
      * @var static
      */
     protected static $instance;
     
     /**
-     * 绑定上下文
-     *
-     * @var array
-     */
-    public $contextual = [];
-    
-    /**
-     * 已实例化实体的数组
+     * An array of the types that have been resolved.
      *
      * @var array
      */
     protected $resolved = [];
     
     /**
-     * 容器绑定数组
-     *
-     * 存储提供服务的回调函数
+     * The container's bindings.
      *
      * @var array
      */
     protected $bindings = [];
     
     /**
-     * 绑定方法数组
+     * The container's method bindings.
      *
      * @var array
      */
     protected $methodBindings = [];
     
     /**
-     * 容器共享实例数组
-     *
-     * 存储共享实例（单例）
+     * The container's shared instances.
      *
      * @var array
      */
     protected $instances = [];
     
     /**
-     * 扩展闭包
+     * The registered type aliases.
+     *
+     * @var array
+     */
+    protected $aliases = [];
+    
+    /**
+     * The registered aliases keyed by the abstract name.
+     *
+     * @var array
+     */
+    protected $abstractAliases = [];
+    
+    /**
+     * The extension closures for services.
      *
      * @var array
      */
     protected $extenders = [];
     
     /**
-     * 当前上下文堆栈
+     * All of the registered tags.
+     *
+     * @var array
+     */
+    protected $tags = [];
+    
+    /**
+     * The stack of concretions currently being built.
      *
      * @var array
      */
     protected $buildStack = [];
     
     /**
-     * 重写堆栈参数
+     * The parameter override stack.
      *
      * @var array
      */
     protected $with = [];
     
     /**
-     * 获取应用实例
+     * The contextual binding map.
      *
-     * @return static
+     * @var array
      */
-    public static function getInstance()
+    public $contextual = [];
+    
+    /**
+     * All of the registered rebound callbacks.
+     *
+     * @var array
+     */
+    protected $reboundCallbacks = [];
+    
+    /**
+     * All of the global resolving callbacks.
+     *
+     * @var array
+     */
+    protected $globalResolvingCallbacks = [];
+    
+    /**
+     * All of the global after resolving callbacks.
+     *
+     * @var array
+     */
+    protected $globalAfterResolvingCallbacks = [];
+    
+    /**
+     * All of the resolving callbacks by class type.
+     *
+     * @var array
+     */
+    protected $resolvingCallbacks = [];
+    
+    /**
+     * All of the after resolving callbacks by class type.
+     *
+     * @var array
+     */
+    protected $afterResolvingCallbacks = [];
+    
+    /**
+     * 定义一个上下文绑定
+     *
+     * @param  string $concrete
+     *
+     * @return \eiu\core\application\ContextualBindingBuilder
+     */
+    public function when($concrete)
     {
-        if (is_null(static::$instance))
-        {
-            static::$instance = new static;
-        }
-        
-        return static::$instance;
+        return new ContextualBindingBuilder($this, $this->getAlias($concrete));
     }
     
     /**
-     * 设置应用实例
-     *
-     * @param  IContainer|null $container
-     *
-     * @return IContainer|Container
-     */
-    public static function setInstance(IContainer $container = null)
-    {
-        return static::$instance = $container;
-    }
-    
-    /**
-     * 方法是否已绑定
-     *
-     * @param  string $method
-     *
-     * @return bool
-     */
-    public function hasMethodBinding($method)
-    {
-        return isset($this->methodBindings[$method]);
-    }
-    
-    /**
-     * 绑定方法
-     *
-     * @param  string   $method
-     * @param  \Closure $callback
-     *
-     * @return void
-     */
-    public function bindMethod($method, $callback)
-    {
-        $this->methodBindings[$method] = $callback;
-    }
-    
-    /**
-     * 调用方法绑定
-     *
-     * @param  string $method
-     * @param  mixed  $instance
-     *
-     * @return mixed
-     */
-    public function callMethodBinding($method, $instance)
-    {
-        return call_user_func($this->methodBindings[$method], $instance, $this);
-    }
-    
-    /**
-     * 增加上下文绑定
-     *
-     * @param  string          $concrete
-     * @param  string          $abstract
-     * @param  \Closure|string $implementation
-     *
-     * @return void
-     */
-    public function addContextualBinding($concrete, $abstract, $implementation)
-    {
-        $this->contextual[$concrete][$abstract] = $implementation;
-    }
-    
-    /**
-     * 绑定抽象类型(如果不存在)
-     *
-     * @param  string               $abstract
-     * @param  \Closure|string|null $concrete
-     * @param  bool                 $shared
-     *
-     * @return void
-     */
-    public function bindIf($abstract, $concrete = null, $shared = false)
-    {
-        if (!$this->bound($abstract))
-        {
-            $this->bind($abstract, $concrete, $shared);
-        }
-    }
-    
-    /**
-     * 是否已绑定
+     * 判断给定抽象对象是否存在
      *
      * @param  string $abstract
      *
@@ -193,11 +162,57 @@ class Container implements ArrayAccess, IContainer
      */
     public function bound($abstract)
     {
-        return isset($this->bindings[$abstract]) || isset($this->instances[$abstract]);
+        return isset($this->bindings[$abstract]) ||
+               isset($this->instances[$abstract]) ||
+               $this->isAlias($abstract);
     }
     
     /**
-     * 绑定抽象类型
+     * 判断给定抽象对象是否已实例化
+     *
+     * @param  string $abstract
+     *
+     * @return bool
+     */
+    public function resolved($abstract)
+    {
+        if ($this->isAlias($abstract))
+        {
+            $abstract = $this->getAlias($abstract);
+        }
+        
+        return isset($this->resolved[$abstract]) ||
+               isset($this->instances[$abstract]);
+    }
+    
+    /**
+     * 判断给定抽象对象可否共享
+     *
+     * @param  string $abstract
+     *
+     * @return bool
+     */
+    public function isShared($abstract)
+    {
+        return isset($this->instances[$abstract]) ||
+               (isset($this->bindings[$abstract]['shared']) &&
+                $this->bindings[$abstract]['shared'] === true);
+    }
+    
+    /**
+     * 判断给定字符串是否是抽象对象的别名
+     *
+     * @param  string $name
+     *
+     * @return bool
+     */
+    public function isAlias($name)
+    {
+        return isset($this->aliases[$name]);
+    }
+    
+    /**
+     * 绑定给定抽象对象
      *
      * @param  string|array         $abstract
      * @param  \Closure|string|null $concrete
@@ -207,7 +222,10 @@ class Container implements ArrayAccess, IContainer
      */
     public function bind($abstract, $concrete = null, $shared = false)
     {
-        unset($this->instances[$abstract]);
+        // If no concrete type was given, we will simply set the concrete type to the
+        // abstract type. After that, the concrete type to be registered as shared
+        // without being forced to state their classes in both of the parameters.
+        $this->dropStaleInstances($abstract);
         
         if (is_null($concrete))
         {
@@ -224,14 +242,17 @@ class Container implements ArrayAccess, IContainer
         
         $this->bindings[$abstract] = compact('concrete', 'shared');
         
+        // If the abstract type was already resolved in this container we'll fire the
+        // rebound listener so that any objects which have already gotten resolved
+        // can have their copy of the object updated via the listener callbacks.
         if ($this->resolved($abstract))
         {
-            $this->make($abstract);
+            $this->rebound($abstract);
         }
     }
     
     /**
-     * 获取一个闭包来实例化实体类型
+     * 通过给定抽象对象、具体对象获取闭包
      *
      * @param  string $abstract
      * @param  string $concrete
@@ -240,24 +261,525 @@ class Container implements ArrayAccess, IContainer
      */
     protected function getClosure($abstract, $concrete)
     {
-        /**
-         * @param Container $container
-         * @param array     $parameters
-         *
-         * @return mixed
-         */
         return function ($container, $parameters = []) use ($abstract, $concrete) {
             if ($abstract == $concrete)
             {
                 return $container->build($concrete);
             }
             
-            return $this->resolve($concrete, $parameters);
+            return $container->make($concrete, $parameters);
         };
     }
     
     /**
-     * 实例化实体类型
+     * 判断给定方法名称是否是容器中已绑定的方法
+     *
+     * @param  string $method
+     *
+     * @return bool
+     */
+    public function hasMethodBinding($method)
+    {
+        return isset($this->methodBindings[$method]);
+    }
+    
+    /**
+     * 绑定一个闭包方法到容器中
+     *
+     * @param  string   $method
+     * @param  \Closure $callback
+     *
+     * @return void
+     */
+    public function bindMethod($method, $callback)
+    {
+        $this->methodBindings[$method] = $callback;
+    }
+    
+    /**
+     * 调用绑定的闭包方法
+     *
+     * @param  string $method
+     * @param  mixed  $instance
+     *
+     * @return mixed
+     */
+    public function callMethodBinding($method, $instance)
+    {
+        return call_user_func($this->methodBindings[$method], $instance, $this);
+    }
+    
+    /**
+     * 增加一个上下文绑定到容器中
+     *
+     * @param  string          $concrete
+     * @param  string          $abstract
+     * @param  \Closure|string $implementation
+     *
+     * @return void
+     */
+    public function addContextualBinding($concrete, $abstract, $implementation)
+    {
+        $this->contextual[$concrete][$this->getAlias($abstract)] = $implementation;
+    }
+    
+    /**
+     * 绑定一个尚未绑定的给定对象
+     *
+     * @param  string               $abstract
+     * @param  \Closure|string|null $concrete
+     * @param  bool                 $shared
+     *
+     * @return void
+     */
+    public function bindIf($abstract, $concrete = null, $shared = false)
+    {
+        if (!$this->bound($abstract))
+        {
+            $this->bind($abstract, $concrete, $shared);
+        }
+    }
+    
+    /**
+     * 绑定一个单例（共享）对象
+     *
+     * @param  string|array         $abstract
+     * @param  \Closure|string|null $concrete
+     *
+     * @return void
+     */
+    public function singleton($abstract, $concrete = null)
+    {
+        $this->bind($abstract, $concrete, true);
+    }
+    
+    /**
+     * 扩展绑定对象
+     *
+     * @param  string   $abstract
+     * @param  \Closure $closure
+     *
+     * @return void
+     *
+     * @throws \InvalidArgumentException
+     */
+    public function extend($abstract, Closure $closure)
+    {
+        $abstract = $this->getAlias($abstract);
+        
+        if (isset($this->instances[$abstract]))
+        {
+            $this->instances[$abstract] = $closure($this->instances[$abstract], $this);
+            
+            $this->rebound($abstract);
+        }
+        else
+        {
+            $this->extenders[$abstract][] = $closure;
+            
+            if ($this->resolved($abstract))
+            {
+                $this->rebound($abstract);
+            }
+        }
+    }
+    
+    /**
+     * 注册实例化对象到容器中
+     *
+     * @param  string $abstract
+     * @param  mixed  $instance
+     *
+     * @return mixed
+     */
+    public function instance($abstract, $instance)
+    {
+        $this->removeAbstractAlias($abstract);
+        
+        $isBound = $this->bound($abstract);
+        
+        unset($this->aliases[$abstract]);
+        
+        // We'll check to determine if this type has been bound before, and if it has
+        // we will fire the rebound callbacks registered with the container and it
+        // can be updated with consuming classes that have gotten resolved here.
+        $this->instances[$abstract] = $instance;
+        
+        if ($isBound)
+        {
+            $this->rebound($abstract);
+        }
+        
+        return $instance;
+    }
+    
+    /**
+     * 移除上下文绑定对象的别名
+     *
+     * @param  string $searched
+     *
+     * @return void
+     */
+    protected function removeAbstractAlias($searched)
+    {
+        if (!isset($this->aliases[$searched]))
+        {
+            return;
+        }
+        
+        foreach ($this->abstractAliases as $abstract => $aliases)
+        {
+            foreach ($aliases as $index => $alias)
+            {
+                if ($alias == $searched)
+                {
+                    unset($this->abstractAliases[$abstract][$index]);
+                }
+            }
+        }
+    }
+    
+    /**
+     * 为给定抽象对象定义一个分组标签
+     *
+     * @param  array|string $abstracts
+     * @param  array|mixed  ...$tags
+     *
+     * @return void
+     */
+    public function tag($abstracts, $tags)
+    {
+        $tags = is_array($tags) ? $tags : array_slice(func_get_args(), 1);
+        
+        foreach ($tags as $tag)
+        {
+            if (!isset($this->tags[$tag]))
+            {
+                $this->tags[$tag] = [];
+            }
+            
+            foreach ((array)$abstracts as $abstract)
+            {
+                $this->tags[$tag][] = $abstract;
+            }
+        }
+    }
+    
+    /**
+     * 解析给定标签组中的所有绑定对象
+     *
+     * @param  string $tag
+     *
+     * @return array
+     */
+    public function tagged($tag)
+    {
+        $results = [];
+        
+        if (isset($this->tags[$tag]))
+        {
+            foreach ($this->tags[$tag] as $abstract)
+            {
+                $results[] = $this->make($abstract);
+            }
+        }
+        
+        return $results;
+    }
+    
+    /**
+     * 为抽象对象定义一个别名
+     *
+     * @param  string $abstract
+     * @param  string $alias
+     *
+     * @return void
+     */
+    public function alias($abstract, $alias)
+    {
+        $this->aliases[$alias] = $abstract;
+        
+        $this->abstractAliases[$abstract][] = $alias;
+    }
+    
+    /**
+     * 绑定一个新的回调到给定抽象对象的重绑定回调列表中
+     *
+     * @param  string   $abstract
+     * @param  \Closure $callback
+     *
+     * @return mixed
+     */
+    public function rebinding($abstract, Closure $callback)
+    {
+        $this->reboundCallbacks[$abstract = $this->getAlias($abstract)][] = $callback;
+        
+        if ($this->bound($abstract))
+        {
+            return $this->make($abstract);
+        }
+    }
+    
+    /**
+     * 用给实例对象和方法刷新一个抽象对象
+     *
+     * @param  string $abstract
+     * @param  mixed  $target
+     * @param  string $method
+     *
+     * @return mixed
+     */
+    public function refresh($abstract, $target, $method)
+    {
+        return $this->rebinding($abstract, function ($app, $instance) use ($target, $method) {
+            $target->{$method}($instance);
+        });
+    }
+    
+    /**
+     * 通过给定抽象对象调用所有重绑定的回调列表
+     *
+     * @param  string $abstract
+     *
+     * @return void
+     */
+    protected function rebound($abstract)
+    {
+        $instance = $this->make($abstract);
+        
+        foreach ($this->getReboundCallbacks($abstract) as $callback)
+        {
+            call_user_func($callback, $this, $instance);
+        }
+    }
+    
+    /**
+     * 通过给定抽象对象获取重绑定回调列表
+     *
+     * @param  string $abstract
+     *
+     * @return array
+     */
+    protected function getReboundCallbacks($abstract)
+    {
+        if (isset($this->reboundCallbacks[$abstract]))
+        {
+            return $this->reboundCallbacks[$abstract];
+        }
+        
+        return [];
+    }
+    
+    /**
+     * 通过一个闭包对参数进行依赖注入
+     *
+     * @param  \Closure $callback
+     * @param  array    $parameters
+     *
+     * @return \Closure
+     */
+    public function wrap(Closure $callback, array $parameters = [])
+    {
+        return function () use ($callback, $parameters) {
+            return $this->call($callback, $parameters);
+        };
+    }
+    
+    /**
+     * 调用一个闭包或"className@methodName"进行依赖注入
+     *
+     * @param  callable|string $callback
+     * @param  array           $parameters
+     * @param  string|null     $defaultMethod
+     *
+     * @return mixed
+     */
+    public function call($callback, array $parameters = [], $defaultMethod = null)
+    {
+        return BoundMethod::call($this, $callback, $parameters, $defaultMethod);
+    }
+    
+    /**
+     * 通过一个闭包实例化给定抽象对象
+     *
+     * @param  string $abstract
+     *
+     * @return \Closure
+     */
+    public function factory($abstract)
+    {
+        return function () use ($abstract) {
+            return $this->make($abstract);
+        };
+    }
+    
+    /**
+     * 实例化给定抽象对象
+     *
+     * @param  string $abstract
+     * @param  array  $parameters
+     *
+     * @return mixed
+     */
+    public function make($abstract, array $parameters = [])
+    {
+        return $this->resolve($abstract, $parameters);
+    }
+    
+    /**
+     * 实例化给定抽象对象
+     *
+     * @param  string $abstract
+     * @param  array  $parameters
+     *
+     * @return mixed
+     */
+    protected function resolve($abstract, $parameters = [])
+    {
+        $abstract = $this->getAlias($abstract);
+        
+        $needsContextualBuild = !empty($parameters) || !is_null(
+                $this->getContextualConcrete($abstract)
+            );
+        
+        // If an instance of the type is currently being managed as a singleton we'll
+        // just return an existing instance instead of instantiating new instances
+        // so the developer can keep using the same objects instance every time.
+        if (isset($this->instances[$abstract]) && !$needsContextualBuild)
+        {
+            return $this->instances[$abstract];
+        }
+        
+        $this->with[] = $parameters;
+        
+        $concrete = $this->getConcrete($abstract);
+        
+        // We're ready to instantiate an instance of the concrete type registered for
+        // the binding. This will instantiate the types, as well as resolve any of
+        // its "nested" dependencies recursively until all have gotten resolved.
+        if ($this->isBuildable($concrete, $abstract))
+        {
+            $object = $this->build($concrete);
+        }
+        else
+        {
+            $object = $this->make($concrete);
+        }
+        
+        // If we defined any extenders for this type, we'll need to spin through them
+        // and apply them to the object being built. This allows for the extension
+        // of services, such as changing configuration or decorating the object.
+        foreach ($this->getExtenders($abstract) as $extender)
+        {
+            $object = $extender($object, $this);
+        }
+        
+        // If the requested type is registered as a singleton we'll want to cache off
+        // the instances in "memory" so we can return it later without creating an
+        // entirely new instance of an object on each subsequent request for it.
+        if ($this->isShared($abstract) && !$needsContextualBuild)
+        {
+            $this->instances[$abstract] = $object;
+        }
+        
+        $this->fireResolvingCallbacks($abstract, $object);
+        
+        // Before returning, we will also set the resolved flag to "true" and pop off
+        // the parameter overrides for this build. After those two things are done
+        // we will be ready to return back the fully constructed class instance.
+        $this->resolved[$abstract] = true;
+        
+        array_pop($this->with);
+        
+        return $object;
+    }
+    
+    /**
+     * 通过给定抽象对象获取具体对象
+     *
+     * @param  string $abstract
+     *
+     * @return mixed   $concrete
+     */
+    protected function getConcrete($abstract)
+    {
+        if (!is_null($concrete = $this->getContextualConcrete($abstract)))
+        {
+            return $concrete;
+        }
+        
+        // If we don't have a registered resolver or concrete for the type, we'll just
+        // assume each type is a concrete name and will attempt to resolve it as is
+        // since the container should be able to resolve concretes automatically.
+        if (isset($this->bindings[$abstract]))
+        {
+            return $this->bindings[$abstract]['concrete'];
+        }
+        
+        return $abstract;
+    }
+    
+    /**
+     * 通过给定抽象对象获取绑定的上下文具体对象
+     *
+     * @param  string $abstract
+     *
+     * @return string|null
+     */
+    protected function getContextualConcrete($abstract)
+    {
+        if (!is_null($binding = $this->findInContextualBindings($abstract)))
+        {
+            return $binding;
+        }
+        
+        // Next we need to see if a contextual binding might be bound under an alias of the
+        // given abstract type. So, we will need to check if any aliases exist with this
+        // type and then spin through them and check for contextual bindings on these.
+        if (empty($this->abstractAliases[$abstract]))
+        {
+            return;
+        }
+        
+        foreach ($this->abstractAliases[$abstract] as $alias)
+        {
+            if (!is_null($binding = $this->findInContextualBindings($alias)))
+            {
+                return $binding;
+            }
+        }
+    }
+    
+    /**
+     * 通过给定抽象对象在上下文绑定列表中查找具体对象
+     *
+     * @param  string $abstract
+     *
+     * @return string|null
+     */
+    protected function findInContextualBindings($abstract)
+    {
+        if (isset($this->contextual[end($this->buildStack)][$abstract]))
+        {
+            return $this->contextual[end($this->buildStack)][$abstract];
+        }
+    }
+    
+    /**
+     * 判断给定具体对象、抽象对象是否可实例化
+     *
+     * @param  mixed  $concrete
+     * @param  string $abstract
+     *
+     * @return bool
+     */
+    protected function isBuildable($concrete, $abstract)
+    {
+        return $concrete === $abstract || $concrete instanceof Closure;
+    }
+    
+    /**
+     * 实例化具体对象
      *
      * @param  string $concrete
      *
@@ -314,40 +836,7 @@ class Container implements ArrayAccess, IContainer
     }
     
     /**
-     * 获取最后的参数覆盖
-     *
-     * @return array
-     */
-    protected function getLastParameterOverride()
-    {
-        return count($this->with) ? end($this->with) : [];
-    }
-    
-    /**
-     * 抛出类型无法实例化异常
-     *
-     * @param  string $concrete
-     *
-     * @throws \Exception
-     */
-    protected function notInstantiable($concrete)
-    {
-        if (!empty($this->buildStack))
-        {
-            $previous = implode(', ', $this->buildStack);
-            
-            $message = "Target [$concrete] is not instantiable while building [$previous].";
-        }
-        else
-        {
-            $message = "Target [$concrete] is not instantiable.";
-        }
-        
-        throw new \Exception($message);
-    }
-    
-    /**
-     * 解析依赖
+     * 解决依赖
      *
      * @param  array $dependencies
      *
@@ -372,14 +861,16 @@ class Container implements ArrayAccess, IContainer
             // If the class is null, it means the dependency is a string or some other
             // primitive type which we can not resolve since it is not a class and
             // we will just bomb out with an error since we have no-where to go.
-            $results[] = is_null($class = $dependency->getClass()) ? $this->resolvePrimitive($dependency) : $this->resolveClass($dependency);
+            $results[] = is_null($dependency->getClass())
+                ? $this->resolvePrimitive($dependency)
+                : $this->resolveClass($dependency);
         }
         
         return $results;
     }
     
     /**
-     * 是否存在参数覆盖
+     * 判断给定依赖参数是否可覆盖
      *
      * @param  \ReflectionParameter $dependency
      *
@@ -405,7 +896,17 @@ class Container implements ArrayAccess, IContainer
     }
     
     /**
-     * 解析其他类型依赖
+     * 获取最后的参数覆盖
+     *
+     * @return array
+     */
+    protected function getLastParameterOverride()
+    {
+        return count($this->with) ? end($this->with) : [];
+    }
+    
+    /**
+     * 解析原始依赖(非注入)项
      *
      * @param  \ReflectionParameter $parameter
      *
@@ -415,7 +916,7 @@ class Container implements ArrayAccess, IContainer
      */
     protected function resolvePrimitive(ReflectionParameter $parameter)
     {
-        if (!is_null($concrete = $this->findInContextualBindings('$' . $parameter->name)))
+        if (!is_null($concrete = $this->getContextualConcrete('$' . $parameter->name)))
         {
             return $concrete instanceof Closure ? $concrete($this) : $concrete;
         }
@@ -426,45 +927,10 @@ class Container implements ArrayAccess, IContainer
         }
         
         $this->unresolvablePrimitive($parameter);
-        
-        return null;
     }
     
     /**
-     * 从绑定上下文查找实体类型
-     *
-     * @param  string $abstract
-     *
-     * @return string|null
-     */
-    protected function findInContextualBindings($abstract)
-    {
-        if (isset($this->contextual[end($this->buildStack)][$abstract]))
-        {
-            return $this->contextual[end($this->buildStack)][$abstract];
-        }
-        
-        return null;
-    }
-    
-    /**
-     * 抛出依赖无法解析异常
-     *
-     * @param  \ReflectionParameter $parameter
-     *
-     * @return void
-     *
-     * @throws \Exception
-     */
-    protected function unresolvablePrimitive(ReflectionParameter $parameter)
-    {
-        $message = "Unresolvable dependency resolving [$parameter] in class {$parameter->getDeclaringClass()->getName()}";
-        
-        throw new \Exception($message);
-    }
-    
-    /**
-     * 解析依赖参数
+     * 解析类依赖项
      *
      * @param  \ReflectionParameter $parameter
      *
@@ -494,225 +960,174 @@ class Container implements ArrayAccess, IContainer
     }
     
     /**
-     * 解析抽象类型
+     * 触发"给定实例对象不能实例化"的异常
      *
-     * @param  string $abstract
+     * @param  string $concrete
      *
-     * @return mixed
+     * @return void
+     *
+     * @throws \Exception
      */
-    public function make($abstract)
+    protected function notInstantiable($concrete)
     {
-        return $this->resolve($abstract);
-    }
-    
-    /**
-     * 解析抽象类型
-     *
-     * @param  string $abstract
-     * @param  array  $parameters
-     *
-     * @return mixed
-     */
-    protected function resolve($abstract, $parameters = [])
-    {
-        $needsContextualBuild = !empty($parameters) || !is_null($this->findInContextualBindings($abstract));
-        
-        // If an instance of the type is currently being managed as a singleton we'll
-        // just return an existing instance instead of instantiating new instances
-        // so the developer can keep using the same objects instance every time.
-        if (isset($this->instances[$abstract]) && !$needsContextualBuild)
+        if (!empty($this->buildStack))
         {
-            return $this->instances[$abstract];
-        }
-        
-        $this->with[] = $parameters;
-        
-        $concrete = $this->getConcrete($abstract);
-        
-        // We're ready to instantiate an instance of the concrete type registered for
-        // the binding. This will instantiate the types, as well as resolve any of
-        // its "nested" dependencies recursively until all have gotten resolved.
-        if ($this->isBuildable($concrete, $abstract))
-        {
-            $object = $this->build($concrete);
+            $previous = implode(', ', $this->buildStack);
+            
+            $message = "Target [$concrete] is not instantiable while building [$previous].";
         }
         else
         {
-            $object = $this->make($concrete);
+            $message = "Target [$concrete] is not instantiable.";
         }
         
-        // If the requested type is registered as a singleton we'll want to cache off
-        // the instances in "memory" so we can return it later without creating an
-        // entirely new instance of an object on each subsequent request for it.
-        if ($this->isShared($abstract) && !$needsContextualBuild)
-        {
-            $this->instances[$abstract] = $object;
-        }
-        
-        // Before returning, we will also set the resolved flag to "true" and pop off
-        // the parameter overrides for this build. After those two things are done
-        // we will be ready to return back the fully constructed class instance.
-        $this->resolved[$abstract] = true;
-        
-        array_pop($this->with);
-        
-        return $object;
+        throw new \Exception($message);
     }
     
     /**
-     * 通过抽象类型获取实体类型
+     * 触发"无法注入的依赖项"异常
      *
-     * @param  string $abstract
+     * @param  \ReflectionParameter $parameter
      *
-     * @return mixed   $concrete
+     * @return void
+     *
+     * @throws \Exception
      */
-    protected function getConcrete($abstract)
+    protected function unresolvablePrimitive(ReflectionParameter $parameter)
     {
-        if (!is_null($concrete = $this->findInContextualBindings($abstract)))
-        {
-            return $concrete;
-        }
+        $message = "Unresolvable dependency resolving [$parameter] in class {$parameter->getDeclaringClass()->getName()}";
         
-        // If we don't have a registered resolver or concrete for the type, we'll just
-        // assume each type is a concrete name and will attempt to resolve it as is
-        // since the container should be able to resolve concretes automatically.
-        if (isset($this->bindings[$abstract]))
-        {
-            return $this->bindings[$abstract]['concrete'];
-        }
-        
-        return $abstract;
+        throw new \Exception($message);
     }
     
     /**
-     * 实体类型是否可实例化
+     * 注册一个新的抽象对象实例化回调
      *
-     * @param  mixed  $concrete
-     * @param  string $abstract
-     *
-     * @return bool
-     */
-    protected function isBuildable($concrete, $abstract)
-    {
-        return $concrete === $abstract || $concrete instanceof Closure;
-    }
-    
-    /**
-     * 是否共享类型
-     *
-     * @param  string $abstract
-     *
-     * @return bool
-     */
-    public function isShared($abstract)
-    {
-        return isset($this->instances[$abstract]) || (isset($this->bindings[$abstract]['shared']) && $this->bindings[$abstract]['shared'] === true);
-    }
-    
-    /**
-     * 是否已实例化
-     *
-     * @param  string $abstract
-     *
-     * @return bool
-     */
-    public function resolved($abstract)
-    {
-        return isset($this->resolved[$abstract]) || isset($this->instances[$abstract]);
-    }
-    
-    /**
-     * 扩展抽象类型
-     *
-     * @param  string   $abstract
-     * @param  \Closure $closure
+     * @param  string        $abstract
+     * @param  \Closure|null $callback
      *
      * @return void
      */
-    public function extend($abstract, Closure $closure)
+    public function resolving($abstract, Closure $callback = null)
     {
-        if (isset($this->instances[$abstract]))
+        if (is_string($abstract))
         {
-            $this->instances[$abstract] = $closure($this->instances[$abstract], $this);
-            
-            $this->make($abstract);
+            $abstract = $this->getAlias($abstract);
+        }
+        
+        if (is_null($callback) && $abstract instanceof Closure)
+        {
+            $this->globalResolvingCallbacks[] = $abstract;
         }
         else
         {
-            $this->extenders[$abstract][] = $closure;
-            
-            if ($this->resolved($abstract))
+            $this->resolvingCallbacks[$abstract][] = $callback;
+        }
+    }
+    
+    /**
+     * 注册一个新的抽象对象实例化后的回调
+     *
+     * @param  string        $abstract
+     * @param  \Closure|null $callback
+     *
+     * @return void
+     */
+    public function afterResolving($abstract, Closure $callback = null)
+    {
+        if (is_string($abstract))
+        {
+            $abstract = $this->getAlias($abstract);
+        }
+        
+        if ($abstract instanceof Closure && is_null($callback))
+        {
+            $this->globalAfterResolvingCallbacks[] = $abstract;
+        }
+        else
+        {
+            $this->afterResolvingCallbacks[$abstract][] = $callback;
+        }
+    }
+    
+    /**
+     * 触发给定抽象对象实例化事件
+     *
+     * @param  string $abstract
+     * @param  mixed  $object
+     *
+     * @return void
+     */
+    protected function fireResolvingCallbacks($abstract, $object)
+    {
+        $this->fireCallbackArray($object, $this->globalResolvingCallbacks);
+        
+        $this->fireCallbackArray(
+            $object, $this->getCallbacksForType($abstract, $object, $this->resolvingCallbacks)
+        );
+        
+        $this->fireAfterResolvingCallbacks($abstract, $object);
+    }
+    
+    /**
+     * 触发给定抽象对象实例化后事件
+     *
+     * @param  string $abstract
+     * @param  mixed  $object
+     *
+     * @return void
+     */
+    protected function fireAfterResolvingCallbacks($abstract, $object)
+    {
+        $this->fireCallbackArray($object, $this->globalAfterResolvingCallbacks);
+        
+        $this->fireCallbackArray(
+            $object, $this->getCallbacksForType($abstract, $object, $this->afterResolvingCallbacks)
+        );
+    }
+    
+    /**
+     * 通过给定类型获取所有回调
+     *
+     * @param  string $abstract
+     * @param  object $object
+     * @param  array  $callbacksPerType
+     *
+     * @return array
+     */
+    protected function getCallbacksForType($abstract, $object, array $callbacksPerType)
+    {
+        $results = [];
+        
+        foreach ($callbacksPerType as $type => $callbacks)
+        {
+            if ($type === $abstract || $object instanceof $type)
             {
-                $this->make($abstract);
+                $results = array_merge($results, $callbacks);
             }
         }
+        
+        return $results;
     }
     
     /**
-     * 注册一个共享实例
+     * 执行一个回调函数数组
      *
-     * @param  string $abstract
-     * @param  mixed  $instance
+     * @param  mixed $object
+     * @param  array $callbacks
      *
      * @return void
      */
-    public function instance($abstract, $instance)
+    protected function fireCallbackArray($object, array $callbacks)
     {
-        $isBound = $this->bound($abstract);
-        
-        $this->instances[$abstract] = $instance;
-        
-        if ($isBound)
+        foreach ($callbacks as $callback)
         {
-            $this->make($abstract);
+            $callback($object, $this);
         }
     }
     
     /**
-     * 调用闭包并自动注入依赖
-     *
-     * @param  \Closure $callback
-     * @param  array    $parameters
-     *
-     * @return \Closure
-     */
-    public function wrap(Closure $callback, array $parameters = [])
-    {
-        return function () use ($callback, $parameters) {
-            return $this->call($callback, $parameters);
-        };
-    }
-    
-    /**
-     * 调用闭包或类方法(Closure / class@method)并自动注入依赖
-     *
-     * @param  callable|string $callback
-     * @param  array           $parameters
-     * @param  string|null     $defaultMethod
-     *
-     * @return mixed
-     */
-    public function call($callback, array $parameters = [], $defaultMethod = null)
-    {
-        return BoundMethod::call($this, $callback, $parameters, $defaultMethod);
-    }
-    
-    /**
-     * 获取一个闭包实例化抽象类型
-     *
-     * @param  string $abstract
-     *
-     * @return \Closure
-     */
-    public function factory($abstract)
-    {
-        return function () use ($abstract) {
-            return $this->make($abstract);
-        };
-    }
-    
-    /**
-     * 获取所有绑定
+     * 获取容器所有绑定的对象
      *
      * @return array
      */
@@ -722,7 +1137,74 @@ class Container implements ArrayAccess, IContainer
     }
     
     /**
-     * 清除一个实例
+     * 获取给定抽象对象的所有别名
+     *
+     * @param  string $abstract
+     *
+     * @return string
+     *
+     * @throws \LogicException
+     */
+    public function getAlias($abstract)
+    {
+        if (!isset($this->aliases[$abstract]))
+        {
+            return $abstract;
+        }
+        
+        if ($this->aliases[$abstract] === $abstract)
+        {
+            throw new LogicException("[{$abstract}] is aliased to itself.");
+        }
+        
+        return $this->getAlias($this->aliases[$abstract]);
+    }
+    
+    /**
+     * 获取给定抽象对象的所有回调
+     *
+     * @param  string $abstract
+     *
+     * @return array
+     */
+    protected function getExtenders($abstract)
+    {
+        $abstract = $this->getAlias($abstract);
+        
+        if (isset($this->extenders[$abstract]))
+        {
+            return $this->extenders[$abstract];
+        }
+        
+        return [];
+    }
+    
+    /**
+     * 移除给定抽象对象的所有回调
+     *
+     * @param  string $abstract
+     *
+     * @return void
+     */
+    public function forgetExtenders($abstract)
+    {
+        unset($this->extenders[$this->getAlias($abstract)]);
+    }
+    
+    /**
+     * 丢弃给定抽象对象及其别名
+     *
+     * @param  string $abstract
+     *
+     * @return void
+     */
+    protected function dropStaleInstances($abstract)
+    {
+        unset($this->instances[$abstract], $this->aliases[$abstract]);
+    }
+    
+    /**
+     * 丢弃给定抽象对象
      *
      * @param  string $abstract
      *
@@ -734,7 +1216,7 @@ class Container implements ArrayAccess, IContainer
     }
     
     /**
-     * 清除所有实例
+     * 清空容器实例化列表
      *
      * @return void
      */
@@ -744,15 +1226,44 @@ class Container implements ArrayAccess, IContainer
     }
     
     /**
-     * 清除所有绑定和实例
+     * 清空容器
      *
      * @return void
      */
     public function flush()
     {
-        $this->resolved  = [];
-        $this->bindings  = [];
-        $this->instances = [];
+        $this->aliases         = [];
+        $this->resolved        = [];
+        $this->bindings        = [];
+        $this->instances       = [];
+        $this->abstractAliases = [];
+    }
+    
+    /**
+     * 获取容器实例
+     *
+     * @return static
+     */
+    public static function getInstance()
+    {
+        if (is_null(static::$instance))
+        {
+            static::$instance = new static;
+        }
+        
+        return static::$instance;
+    }
+    
+    /**
+     * 设置容器实例
+     *
+     * @param  \eiu\core\application\Container|null $container
+     *
+     * @return static
+     */
+    public static function setInstance(IContainer $container = null)
+    {
+        return static::$instance = $container;
     }
     
     /**
@@ -789,11 +1300,9 @@ class Container implements ArrayAccess, IContainer
      */
     public function offsetSet($key, $value)
     {
-        $this->bind(
-            $key, $value instanceof Closure ? $value : function () use ($value) {
+        $this->bind($key, $value instanceof Closure ? $value : function () use ($value) {
             return $value;
-        }
-        );
+        });
     }
     
     /**

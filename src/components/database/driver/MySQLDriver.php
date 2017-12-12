@@ -13,7 +13,6 @@ namespace eiu\components\database\driver;
 use eiu\components\database\DatabaseException;
 use eiu\components\database\IDatabaseDriver;
 use eiu\core\application\Application;
-use eiu\core\service\logger\Logger;
 use eiu\core\service\logger\LoggerProvider;
 use PDO;
 use PDOException;
@@ -67,7 +66,7 @@ class MySQLDriver implements IDatabaseDriver
      */
     private $app;
     /**
-     * @var LoggerProvider|Logger
+     * @var LoggerProvider
      */
     private $logger;
     /**

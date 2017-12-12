@@ -14,7 +14,6 @@ use eiu\components\Component;
 use eiu\components\cryptography\encryption\keys\IKeyDeriver;
 use eiu\components\cryptography\encryption\keys\Secret;
 use eiu\core\application\Application;
-use eiu\core\service\logger\Logger;
 use eiu\core\service\logger\LoggerProvider;
 
 
@@ -37,8 +36,8 @@ class EncrypterComponent extends Component
     /**
      * constructor.
      *
-     * @param Application           $app
-     * @param LoggerProvider|Logger $logger
+     * @param Application    $app
+     * @param LoggerProvider $logger
      */
     public function __construct(Application $app, LoggerProvider $logger)
     {

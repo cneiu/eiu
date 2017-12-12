@@ -21,7 +21,7 @@ use eiu\components\image\Type;
 
 
 /**
- * 图形适配器抽象类
+ * 图像适配器抽象类
  *
  * @package eiu\components\image\Adapter
  */

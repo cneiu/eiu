@@ -20,7 +20,7 @@ use eiu\components\image\Type;
 
 
 /**
- * 图形适配器接口
+ * 图像适配器接口
  *
  * @package eiu\components\image\Adapter
  */

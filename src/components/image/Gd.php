@@ -17,7 +17,7 @@ namespace eiu\components\image;
 class Gd
 {
     /**
-     * 加载图形文件
+     * 加载图像文件
      *
      * @param  string $image
      *
@@ -29,7 +29,7 @@ class Gd
     }
     
     /**
-     * 加载图形数据
+     * 加载图像数据
      *
      * @param  string $data
      * @param  string $name
@@ -45,7 +45,7 @@ class Gd
     }
     
     /**
-     * 创建图形
+     * 创建图像
      *
      * @param  int    $width
      * @param  int    $height
@@ -59,7 +59,7 @@ class Gd
     }
     
     /**
-     * 创建索引图形
+     * 创建索引图像
      *
      * @param  int    $width
      * @param  int    $height

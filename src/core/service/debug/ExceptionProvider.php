@@ -11,7 +11,6 @@ namespace eiu\core\service\debug;
 
 
 use eiu\core\service\config\ConfigProvider;
-use eiu\core\service\logger\Logger;
 use eiu\core\service\logger\LoggerProvider;
 use eiu\core\service\output\OutputProvider;
 use eiu\core\service\Provider;
@@ -56,14 +55,14 @@ class ExceptionProvider extends Provider
     /**
      * 服务启动
      *
-     * @param Logger|LoggerProvider $logger
+     * @param LoggerProvider $logger
      */
     public function boot(LoggerProvider $logger)
     {
         $this->logger = $logger;
         
         error_reporting(-1);
-        ini_set('display_errors', 1);
+        ini_set('display_errors', 0);
         set_error_handler([&$this, 'errorHandler']);
         set_exception_handler([&$this, 'exceptionHandler']);
         
@@ -75,122 +74,12 @@ class ExceptionProvider extends Provider
      */
     public function errorHandler(int $severity, string $message, string $file = '', int $line = 0)
     {
-        $this->showError($severity, $message, $file, $line);
-    }
-    
-    /**
-     * 输出错误
-     *
-     * @param int         $severity 重要程度
-     * @param string      $message  消息
-     * @param string|null $file     文件
-     * @param int|null    $line     行
-     */
-    public function showError(int $severity, string $message, string $file = null, int $line = null)
-    {
         // 获取重要程度说明
-        $severityLevel = self::getSeverityLevels($severity);
+        $severityLevel = static::$severityLevels[$severity] ?? 'Unknown';
         
         // 写错误消息日志
         $this->logger->error("{$severityLevel}: {$message} in {$file}:{$line}");
-        
-        // 写错误跟踪日志
-        $context = [];
-        
-        if (function_exists('debug_backtrace') and $context = debug_backtrace())
-        {
-            $tracks = 'Tracking:' . PHP_EOL;
-            
-            foreach ($context as $c)
-            {
-                if (isset($c['file']))
-                {
-                    $tracks .= 'File: ' . $c['file'] . PHP_EOL;
-                }
-                
-                if (isset($c['line']))
-                {
-                    $tracks .= 'Line: ' . $c['line'] . PHP_EOL;
-                }
-                
-                if (isset($c['class']))
-                {
-                    $tracks .= 'Class: ' . $c['class'] . PHP_EOL;
-                }
-                
-                if (isset($c['function']))
-                {
-                    $tracks .= 'Function: ' . $c['function'] . PHP_EOL;
-                }
-            }
-            
-            $this->logger->error($tracks);
-        }
-        
-        /** @var ConfigProvider $config */
-        $config = $this->app->make(ConfigProvider::class);
-        
-        /** @var ViewProvider $view */
-        $view = $this->app->make(ViewProvider::class);
-        
-        /** @var OutputProvider $output */
-        $output = $this->app->make(OutputProvider::class);
-        
-        // 清空输出缓冲区
-        if (ob_get_level() > ob_get_level() + 1)
-        {
-            ob_end_flush();
-        }
-        
-        // 执行模式
-        if ((PHP_SAPI === 'cli' or defined('STDIN')))
-        {
-            $view->text($message, 500);
-            $output->render();
-        }
-        else
-        {
-            // 默认开发模式
-            $mode = 'production';
-            
-            if (isset($config['app']['RUN_MODE']))
-            {
-                $mode = $config['app']['RUN_MODE'];
-            }
-            
-            $view_file = $view_file = 'error' . DS . 'html' . DS . $mode . DS . 'error';
-            
-            if ($view->exist($view_file))
-            {
-                $view->severityLevel = $severityLevel;
-                $view->status        = 500;
-                $view->message       = $message;
-                $view->file          = $file;
-                $view->line          = $line;
-                $view->context       = $context;
-                $view->display($view_file, false, 500);
-            }
-            else
-            {
-                $view->text($message, 500);
-            }
-            
-            $output->render();
-        }
-        
-        exit;
-    }
-    
-    /**
-     * 获取错误重要程度说明
-     *
-     * @param int $code
-     *
-     * @return mixed|string
-     */
-    private static function getSeverityLevels(int $code)
-    {
-        return static::$severityLevels[$code] ?? 'Unknown';
+        $this->show(500, $message, $file, $line, []);
     }
     
     /**
@@ -199,23 +88,17 @@ class ExceptionProvider extends Provider
     public function exceptionHandler($e)
     {
         /** @var \Exception $e */
-        $this->showException($e->getCode(), $e->getMessage(), $e->getFile(), $e->getLine(), $e->getTrace());
+        $status  = $e->getCode();
+        $message = $e->getMessage();
+        $file    = $e->getFile();
+        $line    = $e->getLine();
+        $context = $e->getTrace();
+        $this->logger->error("{$message} in {$file}:{$line}");
+        $this->show($status, $message, $file, $line, $context);
     }
     
-    /**
-     * 输出异常
-     *
-     * @param int    $status
-     * @param string $message
-     * @param string $file
-     * @param int    $line
-     * @param array  $context
-     */
-    public function showException(int $status, string $message, string $file, int $line, array $context = [])
+    public function show(int $status, string $message, string $file, int $line, array $context = [])
     {
-        // 写错误消息日志
-        $this->logger->error("{$message} in {$file}:{$line}");
-        
         // 写错误跟踪日志
         if ($context)
         {
@@ -225,22 +108,22 @@ class ExceptionProvider extends Provider
             {
                 if (isset($c['file']))
                 {
-                    $tracks .= 'File: ' . $c['file'] . PHP_EOL;
+                    $tracks .= "\t" . 'File: ' . $c['file'] . PHP_EOL;
                 }
                 
                 if (isset($c['line']))
                 {
-                    $tracks .= 'Line: ' . $c['line'] . PHP_EOL;
+                    $tracks .= "\t" . 'Line: ' . $c['line'] . PHP_EOL;
                 }
                 
                 if (isset($c['class']))
                 {
-                    $tracks .= 'Class: ' . $c['class'] . PHP_EOL;
+                    $tracks .= "\t" . 'Class: ' . $c['class'] . PHP_EOL;
                 }
                 
                 if (isset($c['function']))
                 {
-                    $tracks .= 'Function: ' . $c['function'] . PHP_EOL;
+                    $tracks .= "\t" . 'Function: ' . $c['function'] . PHP_EOL;
                 }
             }
             
@@ -265,26 +148,29 @@ class ExceptionProvider extends Provider
             ob_end_flush();
         }
         
-        // 执行模式
-        if ((PHP_SAPI === 'cli' or defined('STDIN')))
+        if (isset($_SERVER['HTTP_ACCEPT']) and (false !== stripos(strtolower($_SERVER['HTTP_ACCEPT']), 'application/json')))
         {
-            $view->text($message, $status);
-            $output->render();
+            if ($config['app']['DEBUG'])
+            {
+                $json                       = [];
+                $json['error']['message']   = $message;
+                $json['error']['file']      = $file;
+                $json['error']['line']      = $line;
+                $json['error']['backtrace'] = $context;
+                $view->text(json_encode($json), $status, 'json', 'utf-8');
+            }
+            else
+            {
+                $json                     = [];
+                $json['error']['message'] = 'Server Error';
+                $view->text(json_encode($json), $status, 'json', 'utf-8');
+            }
         }
         else
         {
-            // 默认开发模式
-            $mode = 'production';
-            
-            if (isset($config['app']['RUN_MODE']))
+            if ($config['app']['DEBUG'])
             {
-                $mode = $config['app']['RUN_MODE'];
-            }
-            
-            $view_file = $view_file = 'error' . DS . 'html' . DS . $mode . DS . $status;
-            
-            if ($view->exist($view_file))
-            {
+                $view_file     = APP_TEMPLATE . 'error' . DS . 'http' . DS . 'debug' . DS . 'error';
                 $view->status  = $status;
                 $view->message = $message;
                 $view->file    = $file;
@@ -295,11 +181,12 @@ class ExceptionProvider extends Provider
             }
             else
             {
-                $view->text($message, $status);
+                $view_file = APP_TEMPLATE . 'error' . DS . 'http' . DS . 'production' . DS . 'error';
+                $view->display($view_file, false, $status);
             }
-            
-            $output->render();
         }
+        
+        $output->render();
         
         exit;
     }

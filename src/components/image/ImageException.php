@@ -10,7 +10,7 @@
 namespace eiu\components\image;
 
 /**
- * 图形组件异常
+ * 图像组件异常
  *
  * @package eiu\components\image
  */

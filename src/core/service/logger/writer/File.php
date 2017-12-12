@@ -7,22 +7,10 @@
  */
 
 
-/**
- * @namespace
- */
-
-
 namespace eiu\core\service\logger\writer;
 
 /**
  * File log writer class
- *
- * @category   Pop
- * @package    Pop\Log
- * @author     Nick Sagona, III <dev@nolainteractive.com>
- * @copyright  Copyright (c) 2009-2017 NOLA Interactive, LLC. (http://www.nolainteractive.com)
- * @license    http://www.popphp.org/license     New BSD License
- * @version    3.0.0
  */
 class File extends AbstractWriter
 {

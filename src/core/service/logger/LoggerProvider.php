@@ -22,38 +22,50 @@ use eiu\core\service\Provider;
  */
 class LoggerProvider extends Provider
 {
+    /**
+     * Constants for log levels
+     *
+     * @var int
+     */
+    const EMERGENCY = 0;
+    const ALERT     = 1;
+    const CRITICAL  = 2;
+    const ERROR     = 3;
+    const WARNING   = 4;
+    const NOTICE    = 5;
+    const INFO      = 6;
+    const DEBUG     = 7;
     
     /**
-     * 日志对象
-     *
-     * @var Logger
-     */
-    static protected $logger = null;
-    /**
-     * 日志队列
+     * Message level short codes
      *
      * @var array
      */
-    static protected $queues = [];
-    /**
-     * @var ConfigProvider
-     */
-    private $config;
-    /**
-     * 日志级别
-     *
-     * @var array
-     */
-    private $levels = [
-        'EMERGENCY' => 0,
-        'ALERT'     => 1,
-        'CRITICA'   => 2,
-        'ERROR'     => 3,
-        'WARNING'   => 4,
-        'NOTICE'    => 5,
-        'INFO'      => 6,
-        'DEBUG'     => 7,
+    protected $levels = [
+        0 => 'EMERGENCY',
+        1 => 'ALERT',
+        2 => 'CRITICAL',
+        3 => 'ERROR',
+        4 => 'WARNING',
+        5 => 'NOTICE',
+        6 => 'INFO',
+        7 => 'DEBUG',
     ];
+    
+    /**
+     * Log writers
+     *
+     * @var array
+     */
+    protected $writers = [];
+    
+    /**
+     * Log timestamp format
+     *
+     * @var string
+     */
+    protected $timestampFormat = 'Y-m-d H:i:s';
+    
     
     /**
      * 服务注册
@@ -74,54 +86,212 @@ class LoggerProvider extends Provider
      */
     public function boot(ConfigProvider $config, FilesComponent $filesComponent)
     {
-        $this->config = $config;
+        $path = $config['app']['LOG_PATH'];
+        $path = DS == substr($path, -1) ? $path : $path . DS;
+        $path .= date('Y-m-d') . $config['app']['LOG_FILE_EXTENSION'];
         
-        if (is_null(static::$logger))
+        if (!$filesComponent->exists(dirname($path)))
         {
-            $path = $this->config['app']['LOG_PATH'];
-            $path = DS == substr($path, -1) ? $path : $path . DS;
-            $path .= date('Y-m-d') . $this->config['app']['LOG_FILE_EXTENSION'];
-            
-            if (!$filesComponent->exists(dirname($path)))
+            if (!$filesComponent->makeDirectory(dirname($path), 0755, true))
             {
-                if (!$filesComponent->makeDirectory(dirname($path), 0755, true))
-                {
-                    throw new \Exception('The log directory cannot be written.', 500);
-                }
+                throw new \Exception('The log directory cannot be written.', 500);
             }
-            
-            $logger = new Logger(new writer\File($path));
-            $logger->setTimestampFormat($this->config['app']['LOG_DATE_FORMAT']);
-            
-            static::$logger = $logger;
         }
+        
+        $this->addWriter(new writer\File($path));
+        $this->timestampFormat = $config['app']['LOG_DATE_FORMAT'];
         
         $this->info($this->className() . " is booted");
     }
     
     /**
-     * 外部直接调用日志对象
+     * Add a log writer
      *
-     * @param $name
-     * @param $arguments
+     * @param  writer\WriterInterface $writer
+     *
+     * @return Logger
      */
-    public function __call($name, $arguments)
+    public function addWriter(writer\WriterInterface $writer)
     {
-        static::$queues[] = compact('name', 'arguments');
+        $this->writers[] = $writer;
         
-        if (!is_null(static::$logger))
+        return $this;
+    }
+    
+    /**
+     * Add an INFO log entry
+     *
+     * @param  mixed $message
+     * @param  array $context
+     *
+     * @return Logger
+     */
+    public function info($message, array $context = [])
+    {
+        return $this->log(self::INFO, $message, $context);
+    }
+    
+    /**
+     * Add a log entry
+     *
+     * @param  mixed $level
+     * @param  mixed $message
+     * @param  array $context
+     *
+     * @return Logger
+     */
+    public function log($level, $message, array $context = [])
+    {
+        $context['timestamp'] = (new \DateTime())->format($this->timestampFormat . '.u');
+        $context['name']      = $this->levels[$level];
+        
+        foreach ($this->writers as $writer)
         {
-            foreach (static::$queues as $index => $queue)
-            {
-                $name = $queue['name'];
-                
-                if (isset($this->levels[strtoupper($name)]) and in_array($this->levels[strtoupper($name)], $this->config['app']['LOG_THRESHOLD']))
-                {
-                    static::$logger->$name(...$queue['arguments']);
-                }
-                
-                unset(static::$queues[$index]);
-            }
+            $writer->writeLog($level, (string)$message, $context);
         }
+        
+        return $this;
+    }
+    
+    /**
+     * Add log writers
+     *
+     * @param  array $writers
+     *
+     * @return Logger
+     */
+    public function addWriters(array $writers)
+    {
+        foreach ($writers as $writer)
+        {
+            $this->addWriter($writer);
+        }
+        
+        return $this;
+    }
+    
+    /**
+     * Get all log writers
+     *
+     * @return array
+     */
+    public function getWriters()
+    {
+        return $this->writers;
+    }
+    
+    /**
+     * Get timestamp format
+     *
+     * @return string
+     */
+    public function getTimestampFormat()
+    {
+        return $this->timestampFormat;
+    }
+    
+    /**
+     * Set timestamp format
+     *
+     * @param  string $format
+     *
+     * @return Logger
+     */
+    public function setTimestampFormat($format = 'Y-m-d H:i:s')
+    {
+        $this->timestampFormat = $format;
+        
+        return $this;
+    }
+    
+    /**
+     * Add an EMERGENCY log entry
+     *
+     * @param  mixed $message
+     * @param  array $context
+     *
+     * @return Logger
+     */
+    public function emergency($message, array $context = [])
+    {
+        return $this->log(self::EMERGENCY, $message, $context);
+    }
+    
+    /**
+     * Add an ALERT log entry
+     *
+     * @param  mixed $message
+     * @param  array $context
+     *
+     * @return Logger
+     */
+    public function alert($message, array $context = [])
+    {
+        return $this->log(self::ALERT, $message, $context);
+    }
+    
+    /**
+     * Add a CRITICAL log entry
+     *
+     * @param  mixed $message
+     * @param  array $context
+     *
+     * @return Logger
+     */
+    public function critical($message, array $context = [])
+    {
+        return $this->log(self::CRITICAL, $message, $context);
+    }
+    
+    /**
+     * Add an ERROR log entry
+     *
+     * @param  mixed $message
+     * @param  array $context
+     *
+     * @return Logger
+     */
+    public function error($message, array $context = [])
+    {
+        return $this->log(self::ERROR, $message, $context);
+    }
+    
+    /**
+     * Add a WARNING log entry
+     *
+     * @param  mixed $message
+     * @param  array $context
+     *
+     * @return Logger
+     */
+    public function warning($message, array $context = [])
+    {
+        return $this->log(self::WARNING, $message, $context);
+    }
+    
+    /**
+     * Add a NOTICE log entry
+     *
+     * @param  mixed $message
+     * @param  array $context
+     *
+     * @return Logger
+     */
+    public function notice($message, array $context = [])
+    {
+        return $this->log(self::NOTICE, $message, $context);
+    }
+    
+    /**
+     * Add a DEBUG log entry
+     *
+     * @param  mixed $message
+     * @param  array $context
+     *
+     * @return Logger
+     */
+    public function debug($message, array $context = [])
+    {
+        return $this->log(self::DEBUG, $message, $context);
     }
 }

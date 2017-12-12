@@ -47,7 +47,7 @@ interface IContainer
     public function bindIf($abstract, $concrete = null, $shared = false);
     
     /**
-     * "Extend" an abstract type in the container.
+     * 扩展抽象类型
      *
      * @param  string   $abstract 抽象类型
      * @param  \Closure $closure  闭包函数

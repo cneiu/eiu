@@ -57,8 +57,8 @@ class File extends AbstractAdapter
      *
      * @param  string $dir
      *
+     * @throws Exception
      * @return File
-     * @throws CacheException
      */
     public function setDir($dir)
     {
