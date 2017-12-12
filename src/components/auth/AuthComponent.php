@@ -13,8 +13,6 @@ namespace eiu\components\auth;
 use eiu\components\auth\adapter\Jwt;
 use eiu\components\auth\adapter\Session;
 use eiu\components\Component;
-use eiu\components\cryptography\encryption\EncrypterComponent;
-use eiu\components\files\FilesComponent;
 use eiu\core\application\Application;
 use eiu\core\service\config\ConfigProvider;
 use eiu\core\service\logger\LoggerProvider;
@@ -68,13 +66,14 @@ class AuthComponent extends Component
     /**
      * SessionComponent constructor.
      *
-     * @param Application        $app
-     * @param ConfigProvider     $config
-     * @param LoggerProvider     $logger
-     * @param EncrypterComponent $encrypter
-     * @param FilesComponent     $filesComponent
+     * @param Application     $app
+     * @param RequestProvider $request
+     * @param ViewProvider    $view
+     * @param ConfigProvider  $config
+     * @param LoggerProvider  $logger
      *
      * @throws Exception
+     *
      */
     public function __construct(Application $app, RequestProvider $request, ViewProvider $view, ConfigProvider $config, LoggerProvider $logger)
     {
@@ -121,7 +120,7 @@ class AuthComponent extends Component
      */
     public function setLogined(array $data = [])
     {
-        return $this->adapter->createToken($data, $this->config['LIFETIME']);
+        return $this->adapter->create($data, $this->config['LIFETIME']);
     }
     
     /**
@@ -131,7 +130,17 @@ class AuthComponent extends Component
      */
     public function isLogined()
     {
-        return $this->adapter->verifyToken();
+        return $this->adapter->verify();
+    }
+    
+    /**
+     * 刷新当前登录状态
+     *
+     * @return mixed
+     */
+    public function refresh()
+    {
+        return $this->adapter->refresh();
     }
     
     /**
@@ -139,7 +148,7 @@ class AuthComponent extends Component
      */
     public function logout()
     {
-        $this->adapter->clearToken();
+        $this->adapter->clear();
     }
     
     /**
@@ -160,11 +169,11 @@ class AuthComponent extends Component
         {
             return true;
         }
-
-        if ($this->adapter->verifyToken())
+        
+        if ($this->adapter->verify())
         {
             // 获取登录数据
-            $this->loginData = $this->adapter->getData();
+            $this->loginData = $this->adapter->data();
             
             return true;
         }

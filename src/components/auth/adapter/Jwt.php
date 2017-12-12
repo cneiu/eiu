@@ -51,18 +51,19 @@ class Jwt extends Component implements IAuthAdapter
     /**
      * 创建令牌
      *
-     * @param   string $id
-     * @param array    $data
-     * @param int      $expiration
+     * @param array $data
+     * @param int   $expiration
+     * @param null  $clientIp
      *
-     * @return Token
+     * @return string
      */
-    public function createToken(array $data = [], int $expiration = 3600, $clientIp = null): string
+    public function create(array $data = [], int $expiration = 3600, $clientIp = null): string
     {
         $_data = [
             'id'   => $this->id,
             'data' => json_encode($data),
-            'exp'  => time() + $expiration,
+            'exp'  => $expiration,
+            'time' => time(),
             'ip'   => $clientIp,
         ];
         
@@ -75,7 +76,7 @@ class Jwt extends Component implements IAuthAdapter
      *
      * @return bool
      */
-    public function verifyToken(): bool
+    public function verify(): bool
     {
         if (!$token = $this->getToken())
         {
@@ -96,9 +97,19 @@ class Jwt extends Component implements IAuthAdapter
             return false;
         }
         
-        if (!isset($_data['exp']) or $_data['exp'] < time())
+        if (!isset($_data['time']) or !$_data['time'])
         {
             return false;
+        }
+        
+        if (isset($_data['exp']) and $_data['exp'])
+        {
+            $time = $_data['time'] + $_data['exp'];
+            
+            if ($time < time())
+            {
+                return false;
+            }
         }
         
         if (isset($_data['ip']) and $ip = $_data['ip'])
@@ -113,11 +124,38 @@ class Jwt extends Component implements IAuthAdapter
     }
     
     /**
-     * 删除令牌
+     * 刷新令牌
      *
-     * @param string $key
+     * @return mixed
      */
-    public function clearToken()
+    public function refresh()
+    {
+        if (!$this->verify())
+        {
+            return null;
+        }
+        
+        if (!$token = $this->getToken())
+        {
+            return null;
+        }
+        
+        try
+        {
+            $_data = json_decode($this->rsa->decode(base64_decode($token)), true);
+        }
+        catch (\Exception $e)
+        {
+            return null;
+        }
+        
+        return $this->create(json_decode($_data['data'], true), $_data['exp'], $_data['ip']);
+    }
+    
+    /**
+     * 删除令牌
+     */
+    public function clear()
     {
         //
     }
@@ -125,12 +163,10 @@ class Jwt extends Component implements IAuthAdapter
     /**
      * 获取数据
      *
-     * @param string      $id
-     * @param string|null $token
-     *
      * @return array|mixed
+     *
      */
-    public function getData()
+    public function data()
     {
         if (!$token = $this->getToken())
         {

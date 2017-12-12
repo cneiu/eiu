@@ -51,11 +51,16 @@ class Session extends Component implements IAuthAdapter
      * @param array $data
      * @param int   $expiration
      *
-     * @return Token
+     * @param null  $clientIp
+     *
+     * @return string
      */
-    public function createToken(array $data = [], int $expiration = 3600, $clientIp = null): string
+    public function create(array $data = [], int $expiration = 3600, $clientIp = null): string
     {
-        return $this->session->setTimedValue($this->id, json_encode($data))->getId();
+        $data['__exp__']       = $expiration;
+        $data['__client_ip__'] = $clientIp;
+        
+        return $this->session->setTimedValue($this->id, json_encode($data), $expiration)->getId();
     }
     
     /**
@@ -63,7 +68,7 @@ class Session extends Component implements IAuthAdapter
      *
      * @return bool
      */
-    public function verifyToken(): bool
+    public function verify(): bool
     {
         return isset($this->session[$this->id]);
     }
@@ -71,7 +76,7 @@ class Session extends Component implements IAuthAdapter
     /**
      * 删除令牌
      */
-    public function clearToken()
+    public function clear()
     {
         unset($this->session[$this->id]);
     }
@@ -79,13 +84,37 @@ class Session extends Component implements IAuthAdapter
     /**
      * 获取数据
      *
-     * @param string      $id
-     * @param string|null $token
-     *
      * @return array|mixed
      */
-    public function getData()
+    public function data()
     {
-        return $this->session[$this->id];
+        $data = $this->session[$this->id];
+        
+        unset($data['__exp__']);
+        unset($data['__client_ip__']);
+        
+        return $data;
+    }
+    
+    /**
+     * 刷新令牌
+     *
+     * @return mixed
+     */
+    public function refresh()
+    {
+        if (!$this->verify())
+        {
+            return null;
+        }
+        
+        $data = json_decode($this->session[$this->id], true);
+        $exp  = $data['__exp__'];
+        $ip   = $data['__client_ip__'];
+        
+        unset($data['__exp__']);
+        unset($data['__client_ip__']);
+        
+        return $this->create($data, $exp, $ip);
     }
 }

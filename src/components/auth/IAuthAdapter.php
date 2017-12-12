@@ -14,32 +14,40 @@ interface IAuthAdapter
     /**
      * 创建令牌
      *
-     * @param 
-     * @param array  $data
-     * @param int    $expiration
+     * @param array $data
+     * @param int   $expiration
+     *
+     * @param
      *
      * @return string
      */
-    public function createToken(array $data = [], int $expiration = 3600, $clientIp = null);
+    public function create(array $data = [], int $expiration = 3600, $clientIp = null);
+    
+    /**
+     * 刷新令牌
+     *
+     * @return string
+     */
+    public function refresh();
     
     /**
      * 验证令牌
      *
      * @return bool
      */
-    public function verifyToken();
+    public function verify();
     
     /**
      * 删除令牌
      *
      * @return mixed
      */
-    public function clearToken();
+    public function clear();
     
     /**
      * 获取令牌数据
      *
      * @return array
      */
-    public function getData();
+    public function data();
 }
