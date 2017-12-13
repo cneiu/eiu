@@ -39,18 +39,9 @@ class ExceptionProvider extends Provider
     /**
      *  日志对象
      *
-     * @var Logger
+     * @var LoggerProvider
      */
     private $logger;
-    
-    /**
-     * 服务注册
-     */
-    public function register()
-    {
-        $this->app->instance($this->alias(), $this);
-        $this->app->instance(__CLASS__, $this);
-    }
     
     /**
      * 服务启动
@@ -62,11 +53,9 @@ class ExceptionProvider extends Provider
         $this->logger = $logger;
         
         error_reporting(-1);
-        ini_set('display_errors', 0);
+        ini_set('display_errors', 1);
         set_error_handler([&$this, 'errorHandler']);
         set_exception_handler([&$this, 'exceptionHandler']);
-        
-        $this->logger->info($this->className() . " is booted");
     }
     
     /**

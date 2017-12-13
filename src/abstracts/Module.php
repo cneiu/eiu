@@ -23,6 +23,11 @@ abstract class Module
     protected $app;
     
     /**
+     * @var string
+     */
+    private $flash_message = null;
+    
+    /**
      * IModule constructor.
      *
      * @param Application $app
@@ -30,53 +35,6 @@ abstract class Module
     public function __construct(Application $app)
     {
         $this->app = $app;
-        
-        if (!$this->app->bound('message'))
-        {
-            $this->app->instance('message', null);
-        }
-    }
-    
-    /**
-     * to string
-     *
-     * @return string
-     */
-    public function __toString()
-    {
-        return __CLASS__;
-    }
-    
-    /**
-     * make an object use Container
-     *
-     * @param $abstract
-     *
-     * @return mixed
-     */
-    public function make($abstract)
-    {
-        return $this->app->make($abstract);
-    }
-    
-    /**
-     * 别名
-     *
-     * @return string
-     */
-    public function alias()
-    {
-        return strtolower(str_replace('Provider', '', trim(substr(static::class, strripos(static::class, '\\')), '\\')));
-    }
-    
-    /**
-     * 类名(不含命名空间)
-     *
-     * @return string
-     */
-    public function className()
-    {
-        return trim(substr(static::class, strripos(static::class, '\\')), '\\');
     }
     
     /**
@@ -88,9 +46,7 @@ abstract class Module
      */
     public function setMessage($message)
     {
-        $this->app->instance('message', $message);
-        
-        return false;
+        return $this->flash_message = $message;
     }
     
     /**
@@ -100,13 +56,8 @@ abstract class Module
      */
     public function getMessage()
     {
-        if (!isset($this->app['message']))
-        {
-            return null;
-        }
-        
-        $message = $this->app['message'];
-        unset($this->app['message']);
+        $message             = $this->flash_message;
+        $this->flash_message = null;
         
         return $message;
     }

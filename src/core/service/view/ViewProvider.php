@@ -11,7 +11,6 @@ namespace eiu\core\service\view;
 
 
 use eiu\core\service\config\ConfigProvider;
-use eiu\core\service\logger\LoggerProvider;
 use eiu\core\service\output\OutputProvider;
 use eiu\core\service\Provider;
 
@@ -24,19 +23,14 @@ use eiu\core\service\Provider;
 class ViewProvider extends Provider
 {
     /**
-     * @var Logger
-     */
-    private $logger;
-    
-    /**
      * @var OutputProvider
      */
     private $output;
     
     /**
-     * @var ConfigProvider
+     * @var string
      */
-    private $config;
+    private $charset;
     
     /**
      * 模板变量
@@ -46,26 +40,13 @@ class ViewProvider extends Provider
     private $_template_vars = [];
     
     /**
-     * 服务注册
-     */
-    public function register()
-    {
-        $this->app->instance($this->alias(), $this);
-        $this->app->instance(__CLASS__, $this);
-    }
-    
-    /**
      * 服务启动
      *
      * @param ConfigProvider $config
-     * @param LoggerProvider $logger
      */
-    public function boot(ConfigProvider $config, LoggerProvider $logger)
+    public function boot(ConfigProvider $config)
     {
-        $this->config = $config;
-        $this->logger = $logger;
-        
-        $this->logger->info($this->className() . " is booted");
+        $this->charset = $config['app']['CHARSET'] ?? 'utf8';
     }
     
     /**
@@ -104,6 +85,7 @@ class ViewProvider extends Provider
      * @param string $charset     字符集
      *
      * @return string
+     * @throws \Exception
      */
     public function display(string $page, bool $return = false, int $status_code = 200, string $header_type = 'html', string $charset = null)
     {
@@ -111,7 +93,7 @@ class ViewProvider extends Provider
         
         if (!is_file($page = $this->getPath($page)))
         {
-            throw new Exception("Template file $page does not exist.");
+            throw new \Exception("Template file $page does not exist.");
         }
         
         $html = (new TemplateEngine($this->app, $this->_template_vars))->render($page);
@@ -128,7 +110,7 @@ class ViewProvider extends Provider
             $this->output->setOutput($html ?: '');
         }
         
-        $this->text($text, $status_code, $header_type, $charset);
+        return $this->text($text, $status_code, $header_type, $charset);
     }
     
     /**
@@ -174,7 +156,7 @@ class ViewProvider extends Provider
         $this->output->setHeader('Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Authorization');
         $this->output->setHeaderStatus($status_code);
         $this->output->setHeaderType($header_type);
-        $this->output->setHeaderCharset($charset ?: $this->config['app']['CHARSET']);
+        $this->output->setHeaderCharset($charset ?: $this->charset);
         
         return $text;
     }

@@ -13,7 +13,6 @@ namespace eiu\abstracts\model;
 use eiu\abstracts\Module;
 use eiu\components\database\DatabaseComponent as db;
 use eiu\components\database\DatabaseException;
-use eiu\components\image\Draw\Exception;
 use eiu\components\util\UtilComponent;
 use eiu\core\application\Application as App;
 use eiu\core\service\event\EventProvider;
@@ -283,15 +282,11 @@ abstract class Model extends Module
             // 获取插入ID
             $insertId = $this->db->getInsertId();
         }
-        catch (Exception $e)
-        {
-            throw new ModelException($e->getMessage(), $e->getCode());
-        }
         catch (ModelException $e)
         {
             throw $e;
         }
-        catch (DatabaseException $e)
+        catch (DatabaseException | \Exception $e)
         {
             throw new ModelException($e->getMessage(), $e->getCode());
         }
@@ -360,15 +355,11 @@ abstract class Model extends Module
             // 提交事务
             $this->db()->commit();
         }
-        catch (Exception $e)
-        {
-            throw new ModelException($e->getMessage(), $e->getCode());
-        }
         catch (ModelException $e)
         {
             throw $e;
         }
-        catch (DatabaseException $e)
+        catch (DatabaseException | \Exception $e)
         {
             throw new ModelException($e->getMessage(), $e->getCode());
         }
@@ -406,15 +397,11 @@ abstract class Model extends Module
             // 提交事务
             $this->db()->commit();
         }
-        catch (Exception $e)
-        {
-            throw new ModelException($e->getMessage(), $e->getCode());
-        }
         catch (ModelException $e)
         {
             throw $e;
         }
-        catch (DatabaseException $e)
+        catch (DatabaseException | \Exception $e)
         {
             throw new ModelException($e->getMessage(), $e->getCode());
         }
@@ -471,15 +458,11 @@ abstract class Model extends Module
                 return [];
             }
         }
-        catch (Exception $e)
-        {
-            throw new ModelException($e->getMessage(), $e->getCode());
-        }
         catch (ModelException $e)
         {
             throw $e;
         }
-        catch (DatabaseException $e)
+        catch (DatabaseException | \Exception $e)
         {
             throw new ModelException($e->getMessage(), $e->getCode());
         }

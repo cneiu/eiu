@@ -11,7 +11,6 @@ namespace eiu\core\service\output;
 
 
 use eiu\core\service\config\ConfigProvider;
-use eiu\core\service\logger\LoggerProvider;
 use eiu\core\service\Provider;
 
 
@@ -22,12 +21,6 @@ use eiu\core\service\Provider;
  */
 class OutputProvider extends Provider
 {
-    /**
-     * @var LoggerProvider
-     */
-    private $logger;
-    
-    
     private $_outputs  = [];
     private $_headers  = [];
     private $_zlib_oc  = false;
@@ -43,28 +36,15 @@ class OutputProvider extends Provider
     private $_content_type = 'text/html';
     
     /**
-     * 服务注册
-     */
-    public function register()
-    {
-        $this->app->instance($this->alias(), $this);
-        $this->app->instance(__CLASS__, $this);
-    }
-    
-    /**
      * 服务启动
      *
      * @param ConfigProvider $config
-     * @param LoggerProvider $logger
      */
-    public function boot(ConfigProvider $config, LoggerProvider $logger)
+    public function boot(ConfigProvider $config)
     {
         // 输出压缩
         $this->_zlib_oc  = @ini_get('zlib.output_compression');
         $this->_compress = $config['app']['OUTPUT_COMPRESS'];
-        
-        $this->logger = $logger;
-        $this->logger->info($this->className() . " is booted");
     }
     
     /**

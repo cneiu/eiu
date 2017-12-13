@@ -31,50 +31,59 @@ class MySQLDriver implements IDatabaseDriver
      * @var null
      */
     static private $_query_str = null;
+    
     /**
      * PDO 描述
      *
      * @var \PDOStatement
      */
     static private $_PDOStatement = null;
+    
     /**
      * 事务计数
      *
      * @var int
      */
     static private $_trans_times = 0;
+    
     /**
      * 当前连接 ID
      *
      * @var int
      */
     static private $_linkID = 0;
+    
     /**
      * 连接池
      *
      * @var null
      */
     static private $_links = null;
+    
     /**
      * 连接切换
      *
      * @var bool
      */
     static private $_switch_connect = false;
+    
     /**
      * @var Application
      */
     private $app;
+    
     /**
      * @var LoggerProvider
      */
     private $logger;
+    
     /**
      * 当前连接池
      *
      * @var \PDO
      */
     private $_link;
+    
     /**
      * 服务器列表
      *
@@ -113,27 +122,23 @@ class MySQLDriver implements IDatabaseDriver
     /**
      * MySQLDriver constructor.
      *
-     * @param Application $app
-     *
-     * @throws DatabaseException
-     *
+     * @param Application    $app
+     * @param LoggerProvider $logger
+     * @param array          $servers
+     * @param bool           $isPconnect
+     * @param bool           $isDeploy
+     * @param bool           $is_rw_separate
+     * @param string         $charset
      */
-    public function __construct(Application $app)
+    public function __construct(Application $app, LoggerProvider $logger, array $servers, bool $isPconnect = false, bool $isDeploy = false, bool $is_rw_separate = false, string $charset = 'utf8')
     {
-        $this->app    = $app;
-        $this->logger = $app['logger'];
-        $config       = $app['config']['DB']['MYSQL_DRIVER'];
-        
-        if (empty($config['SERVERS']))
-        {
-            throw new DatabaseException("Servers list is undefined.");
-        }
-        
-        $this->_config_servers     = $config['SERVERS'];
-        $this->_config_pconnect    = $config['PCONNECT'];
-        $this->_config_deploy      = $config['DEPLOY'];
-        $this->_config_rw_separate = $config['RW_SEPARATE'];
-        $this->_config_charset     = $config['CHARSET'];
+        $this->app                 = $app;
+        $this->logger              = $logger;
+        $this->_config_servers     = $servers;
+        $this->_config_pconnect    = $isPconnect;
+        $this->_config_deploy      = $isDeploy;
+        $this->_config_rw_separate = $is_rw_separate;
+        $this->_config_charset     = $charset;
     }
     
     /**

@@ -11,17 +11,11 @@ namespace eiu\core\service\router;
 
 
 use eiu\core\service\config\ConfigProvider;
-use eiu\core\service\logger\LoggerProvider;
 use eiu\core\service\Provider;
 
 
 class RouterProvider extends Provider
 {
-    /**
-     * @var LoggerProvider
-     */
-    private $logger;
-    
     /**
      * 请求别名
      *
@@ -106,30 +100,17 @@ class RouterProvider extends Provider
      */
     private $requestController;
     
-    
-    /**
-     * 服务注册
-     */
-    public function register()
-    {
-        $this->app->instance($this->alias(), $this);
-        $this->app->instance(__CLASS__, $this);
-    }
-    
     /**
      * 服务启动
      *
      * @param ConfigProvider $config
-     * @param LoggerProvider $logger
      */
-    public function boot(ConfigProvider $config, LoggerProvider $logger)
+    public function boot(ConfigProvider $config)
     {
         $this->pathInfoAlias     = $config['router']['REQUEST_ALIAS'];
         $this->pathInfoSuffix    = $config['router']['URL_SUFFIX'];
         $this->defaultController = $config['router']['DEFAULT_CONTROLLER'];
         $this->defaultAction     = $config['router']['DEFAULT_ACTION'];
-        $this->logger            = $logger;
-        $this->logger->info($this->className() . " is booted");
     }
     
     /**
@@ -271,14 +252,6 @@ class RouterProvider extends Provider
         {
             throw new \Exception("Controller class \"$fullClassName\" isn't exist.", 404);
         }
-        
-        $this->logger->info("Parse router is \"$fullClassName\"");
-        
-        // check controller father class
-//        if ('eiu\abstracts\controller\Controller' != get_parent_class($fullClassName))
-//        {
-//            trigger_error("Controller class \"$fullClassName\" inherited error.", E_USER_ERROR);
-//        }
         
         // find action
         $method = $this->defaultAction;

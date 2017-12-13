@@ -18,7 +18,7 @@ use eiu\components\cache\CacheException;
  *
  * @package eiu\components\cache\adapter
  */
-class Apc extends AbstractAdapter
+class Apc extends AbstractICacheAdapter
 {
     
     /**
@@ -28,7 +28,7 @@ class Apc extends AbstractAdapter
      *
      * @param  int $ttl
      *
-     * @throws Exception
+     * @throws \Exception
      */
     public function __construct($ttl = 0)
     {

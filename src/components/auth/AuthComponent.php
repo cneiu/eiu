@@ -10,8 +10,6 @@
 namespace eiu\components\auth;
 
 
-use eiu\components\auth\adapter\Jwt;
-use eiu\components\auth\adapter\Session;
 use eiu\components\Component;
 use eiu\core\application\Application;
 use eiu\core\service\config\ConfigProvider;
@@ -71,11 +69,11 @@ class AuthComponent extends Component
      * @param ViewProvider    $view
      * @param ConfigProvider  $config
      * @param LoggerProvider  $logger
+     * @param IAuthAdapter    $adapter
      *
      * @throws Exception
-     *
      */
-    public function __construct(Application $app, RequestProvider $request, ViewProvider $view, ConfigProvider $config, LoggerProvider $logger)
+    public function __construct(Application $app, RequestProvider $request, ViewProvider $view, ConfigProvider $config, LoggerProvider $logger, IAuthAdapter $adapter)
     {
         parent::__construct($app);
         
@@ -85,26 +83,12 @@ class AuthComponent extends Component
         $this->view       = $view;
         $this->logger     = $logger;
         $this->config     = $config['auth'];
+        $this->adapter    = $adapter;
         
         if (!isset($config['auth']['KEY']) or !$config['auth']['KEY'])
         {
             throw new Exception("Undefined auth key");
         }
-        
-        switch ($config['auth']['MODE'])
-        {
-            case 'jwt':
-                $this->adapter = $this->app->make(Jwt::class);
-                break;
-            
-            case 'session':
-                $this->adapter = $this->app->make(Session::class);
-                break;
-            
-            default:
-                throw new Exception("Undefined auth adapter \"{$config['auth']['MODE']}\"");
-        }
-        
         
         $app->instance(__CLASS__, $this);
         
@@ -136,7 +120,7 @@ class AuthComponent extends Component
     /**
      * 刷新当前登录状态
      *
-     * @return mixed
+     * @return string
      */
     public function refresh()
     {
@@ -170,15 +154,59 @@ class AuthComponent extends Component
             return true;
         }
         
-        if ($this->adapter->verify())
+        return $this->adapter->verify();
+    }
+    
+    /**
+     * 检查当前访问是否具备权限
+     *
+     * @return bool
+     */
+    public function checkPermissible()
+    {
+        // 全局免登陆
+        if ($this->config['PERMISSION_EXEMPT'] === '*')
         {
-            // 获取登录数据
-            $this->loginData = $this->adapter->data();
-            
             return true;
         }
         
+        // 无需登录即无需权限认证
+        if (true === $this->checkByConfig($this->config['LOGIN_EXEMPT']))
+        {
+            return true;
+        }
+        
+        if (true === $this->checkByConfig($this->config['PERMISSION_EXEMPT']))
+        {
+            return true;
+        }
+        
+        // 缓存了用户身份标识才能进一步进行权限认证
+        if ($data = $this->data())
+        {
+        
+        }
+        
+        if ($this->loginKey)
+        {
+            if ($this->app->make(RBACService::class)
+                ->checkActionByUserId($this->loginKey, $this->request->router('controller'), $this->request->router('method')))
+            {
+                return true;
+            }
+        }
+        
         return false;
+    }
+    
+    /**
+     * 获取登录缓存数据
+     *
+     * @return array
+     */
+    public function data()
+    {
+        return $this->adapter->data();
     }
     
     /**

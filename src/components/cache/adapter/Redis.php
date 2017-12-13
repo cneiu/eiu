@@ -18,7 +18,7 @@ use eiu\components\cache\CacheException;
  *
  * @package eiu\components\cache\adapter
  */
-class Redis extends AbstractAdapter
+class Redis extends AbstractICacheAdapter
 {
     
     /**

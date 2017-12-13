@@ -53,7 +53,7 @@ class HttpKernel implements IKernel
     private $output;
     
     /**
-     * @var Logger
+     * @var LoggerProvider
      */
     private $logger;
     

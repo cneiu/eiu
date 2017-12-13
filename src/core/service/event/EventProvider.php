@@ -22,21 +22,15 @@ use eiu\core\service\Provider;
  */
 class EventProvider extends Provider
 {
-    static protected $events = [];
-    
     /**
-     * @var Logger
+     * @var LoggerProvider
      */
     private $logger;
     
     /**
-     * 服务注册
+     * @var array
      */
-    public function register()
-    {
-        $this->app->instance($this->alias(), $this);
-        $this->app->instance(__CLASS__, $this);
-    }
+    static protected $events = [];
     
     /**
      * 服务启动
@@ -46,6 +40,8 @@ class EventProvider extends Provider
      */
     public function boot(ConfigProvider $config, LoggerProvider $logger)
     {
+        $this->logger = $logger;
+        
         // 加载配置事件
         if ($events = $config['event'])
         {
@@ -57,9 +53,6 @@ class EventProvider extends Provider
                 }
             }
         }
-        
-        $this->logger = $logger;
-        $this->logger->info($this->className() . " is booted");
     }
     
     /**
@@ -72,10 +65,11 @@ class EventProvider extends Provider
     {
         if (isset(self::$events[$eventName]) and is_array(self::$events[$eventName]))
         {
+            $this->logger->info('Emit event: ' . $eventName);
+            
             foreach (self::$events[$eventName] as $event)
             {
                 $this->app->call($event, $params);
-                $this->logger->info('Call event ' . $eventName . ' over.');
             }
         }
     }

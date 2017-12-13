@@ -10,7 +10,6 @@
 namespace eiu\core\service\logger;
 
 
-use eiu\components\files\FilesComponent;
 use eiu\core\service\config\ConfigProvider;
 use eiu\core\service\Provider;
 
@@ -35,6 +34,27 @@ class LoggerProvider extends Provider
     const NOTICE    = 5;
     const INFO      = 6;
     const DEBUG     = 7;
+    
+    /**
+     * 开始序号
+     *
+     * @var int
+     */
+    private static $startNumber = 0;
+    
+    /**
+     * 开始时间
+     *
+     * @var int
+     */
+    private $startTimer = 0;
+    
+    /**
+     * 日志适配器未初始化时的临时缓冲区
+     *
+     * @var array
+     */
+    private $buffer = [];
     
     /**
      * Message level short codes
@@ -66,33 +86,23 @@ class LoggerProvider extends Provider
      */
     protected $timestampFormat = 'Y-m-d H:i:s';
     
-    
-    /**
-     * 服务注册
-     */
-    public function register()
-    {
-        $this->app->instance($this->alias(), $this);
-        $this->app->instance(__CLASS__, $this);
-    }
-    
     /**
      * 服务启动
      *
      * @param ConfigProvider $config
-     * @param FilesComponent $filesComponent
      *
      * @throws \Exception
      */
-    public function boot(ConfigProvider $config, FilesComponent $filesComponent)
+    public function boot(ConfigProvider $config)
     {
-        $path = $config['app']['LOG_PATH'];
-        $path = DS == substr($path, -1) ? $path : $path . DS;
-        $path .= date('Y-m-d') . $config['app']['LOG_FILE_EXTENSION'];
+        $this->startTimer = microtime(true);
+        $path             = $config['app']['LOG_PATH'];
+        $path             = DS == substr($path, -1) ? $path : $path . DS;
+        $path             .= date('Y-m-d') . $config['app']['LOG_FILE_EXTENSION'];
         
-        if (!$filesComponent->exists(dirname($path)))
+        if (!file_exists(dirname($path)))
         {
-            if (!$filesComponent->makeDirectory(dirname($path), 0755, true))
+            if (!mkdir(dirname($path), 0755, true))
             {
                 throw new \Exception('The log directory cannot be written.', 500);
             }
@@ -100,8 +110,6 @@ class LoggerProvider extends Provider
         
         $this->addWriter(new writer\File($path));
         $this->timestampFormat = $config['app']['LOG_DATE_FORMAT'];
-        
-        $this->info($this->className() . " is booted");
     }
     
     /**
@@ -109,7 +117,7 @@ class LoggerProvider extends Provider
      *
      * @param  writer\WriterInterface $writer
      *
-     * @return Logger
+     * @return LoggerProvider
      */
     public function addWriter(writer\WriterInterface $writer)
     {
@@ -124,7 +132,7 @@ class LoggerProvider extends Provider
      * @param  mixed $message
      * @param  array $context
      *
-     * @return Logger
+     * @return LoggerProvider
      */
     public function info($message, array $context = [])
     {
@@ -138,16 +146,44 @@ class LoggerProvider extends Provider
      * @param  mixed $message
      * @param  array $context
      *
-     * @return Logger
+     * @return LoggerProvider
      */
     public function log($level, $message, array $context = [])
     {
-        $context['timestamp'] = (new \DateTime())->format($this->timestampFormat . '.u');
+        if (!$this->startTimer)
+        {
+            $this->startTimer = microtime(true);
+        }
+        
+        static::$startNumber++;
+        
+        $number               = str_pad(static::$startNumber, 3, "0", STR_PAD_RIGHT);
+        $time                 = number_format((microtime(true) - $this->startTimer), 4);
+        $context['timestamp'] = "{$number}  " . (new \DateTime())->format($this->timestampFormat) . " {$time}";
         $context['name']      = $this->levels[$level];
+        $message              = (string)$message;
+        
+        // 写入缓冲区
+        if (empty($this->writers))
+        {
+            $this->buffer[] = [$level, $message, $context];
+        }
         
         foreach ($this->writers as $writer)
         {
-            $writer->writeLog($level, (string)$message, $context);
+            if (!empty($this->buffer))
+            {
+                foreach ($this->buffer as $buffer)
+                {
+                    $writer->writeLog($buffer[0], $buffer[1], $buffer[2]);
+                    $this->buffer = [];
+                }
+            }
+            else
+            {
+                $writer->writeLog($level, $message, $context);
+            }
+            
         }
         
         return $this;
@@ -158,7 +194,7 @@ class LoggerProvider extends Provider
      *
      * @param  array $writers
      *
-     * @return Logger
+     * @return LoggerProvider
      */
     public function addWriters(array $writers)
     {
@@ -195,7 +231,7 @@ class LoggerProvider extends Provider
      *
      * @param  string $format
      *
-     * @return Logger
+     * @return LoggerProvider
      */
     public function setTimestampFormat($format = 'Y-m-d H:i:s')
     {
@@ -210,7 +246,7 @@ class LoggerProvider extends Provider
      * @param  mixed $message
      * @param  array $context
      *
-     * @return Logger
+     * @return LoggerProvider
      */
     public function emergency($message, array $context = [])
     {
@@ -223,7 +259,7 @@ class LoggerProvider extends Provider
      * @param  mixed $message
      * @param  array $context
      *
-     * @return Logger
+     * @return LoggerProvider
      */
     public function alert($message, array $context = [])
     {
@@ -236,7 +272,7 @@ class LoggerProvider extends Provider
      * @param  mixed $message
      * @param  array $context
      *
-     * @return Logger
+     * @return LoggerProvider
      */
     public function critical($message, array $context = [])
     {
@@ -249,7 +285,7 @@ class LoggerProvider extends Provider
      * @param  mixed $message
      * @param  array $context
      *
-     * @return Logger
+     * @return LoggerProvider
      */
     public function error($message, array $context = [])
     {
@@ -262,7 +298,7 @@ class LoggerProvider extends Provider
      * @param  mixed $message
      * @param  array $context
      *
-     * @return Logger
+     * @return LoggerProvider
      */
     public function warning($message, array $context = [])
     {
@@ -275,7 +311,7 @@ class LoggerProvider extends Provider
      * @param  mixed $message
      * @param  array $context
      *
-     * @return Logger
+     * @return LoggerProvider
      */
     public function notice($message, array $context = [])
     {
@@ -288,7 +324,7 @@ class LoggerProvider extends Provider
      * @param  mixed $message
      * @param  array $context
      *
-     * @return Logger
+     * @return LoggerProvider
      */
     public function debug($message, array $context = [])
     {

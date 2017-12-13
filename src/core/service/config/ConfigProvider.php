@@ -12,7 +12,6 @@ namespace eiu\core\service\config;
 
 use ArrayAccess;
 use Dotenv\Dotenv;
-use eiu\core\service\logger\LoggerProvider;
 use eiu\core\service\Provider;
 
 
@@ -33,23 +32,11 @@ class ConfigProvider extends Provider implements ArrayAccess
     static protected $configs = [];
     
     /**
-     * 服务注册
-     */
-    public function register()
-    {
-        // 填充到容器
-        $this->app->instance($this->alias(), $this);
-        $this->app->instance(__CLASS__, $this);
-    }
-    
-    /**
      * 服务启动
-     *
-     * @param LoggerProvider $logger
      *
      * @throws \Exception
      */
-    public function boot(LoggerProvider $logger)
+    public function boot()
     {
         static::$path = APP_CONFIG;
         
@@ -87,8 +74,6 @@ class ConfigProvider extends Provider implements ArrayAccess
         
         // 无限时脚本
         set_time_limit(0);
-        
-        $logger->info($this->className() . " is booted");
     }
     
     /**

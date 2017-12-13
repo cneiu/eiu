@@ -22,6 +22,11 @@ abstract class Provider
      */
     protected $app;
     
+    /**
+     * Provider constructor.
+     *
+     * @param Application $app
+     */
     public function __construct(Application $app)
     {
         $this->app = $app;
@@ -32,7 +37,12 @@ abstract class Provider
      *
      * @return mixed
      */
-    abstract function register();
+    public function register()
+    {
+        $alias = strtolower(str_replace('Provider', '', trim(substr(static::class, strripos(static::class, '\\')), '\\')));
+        $this->app->instance(get_called_class(), $this);
+        $this->app->instance($alias, $this);
+    }
     
     /**
      * to string
@@ -42,25 +52,5 @@ abstract class Provider
     public function __toString()
     {
         return __CLASS__;
-    }
-    
-    /**
-     * 别名
-     *
-     * @return string
-     */
-    public function alias()
-    {
-        return strtolower(str_replace('Provider', '', trim(substr(static::class, strripos(static::class, '\\')), '\\')));
-    }
-    
-    /**
-     * 类名(不含命名空间)
-     *
-     * @return string
-     */
-    public function className()
-    {
-        return trim(substr(static::class, strripos(static::class, '\\')), '\\');
     }
 }

@@ -11,9 +11,7 @@ namespace eiu\core\service\security;
 
 
 use eiu\core\service\config\ConfigProvider;
-use eiu\core\service\logger\LoggerProvider;
 use eiu\core\service\Provider;
-use Exception;
 
 
 /**
@@ -24,14 +22,10 @@ use Exception;
 class SecurityProvider extends Provider
 {
     /**
-     * @var LoggerProvider | Logger
-     */
-    private $logger;
-    
-    /**
      * @var ConfigProvider
      */
     private $config;
+    
     /**
      * 过滤列表
      *
@@ -121,27 +115,14 @@ class SecurityProvider extends Provider
     ];
     
     /**
-     * 服务注册
-     */
-    public function register()
-    {
-        $this->app->instance($this->alias(), $this);
-        $this->app->instance(__CLASS__, $this);
-    }
-    
-    /**
      * 服务启动
      *
      * @param ConfigProvider $config
-     * @param LoggerProvider $logger
      */
-    public function boot(ConfigProvider $config, LoggerProvider $logger)
+    public function boot(ConfigProvider $config)
     {
         $this->config  = $config;
-        $this->logger  = $logger;
         $this->charset = $this->config['app']['CHARSET'];
-        
-        $this->logger->info($this->className() . " is booted");
     }
     
     /**
@@ -905,19 +886,7 @@ class SecurityProvider extends Provider
         
         if (function_exists('random_bytes'))
         {
-            try
-            {
-                // The cast is required to avoid TypeError
-                return random_bytes((int)$length);
-            }
-            catch (Exception $e)
-            {
-                // If random_bytes() can't do the job, we can't either ...
-                // There's no point in using fallbacks.
-                $this->logger->error($e->getMessage());
-                
-                return false;
-            }
+            return random_bytes((int)$length);
         }
         
         // Unfortunately, none of the following PRNGs is guaranteed to exist ...

@@ -245,16 +245,18 @@ class Application extends Container implements IApplication
      */
     public function boot()
     {
-        if ($this->booted)
+        if (!$this->booted)
         {
-            return;
+            foreach ($this->Providers as $provider)
+            {
+                $this->bootProvider($provider);
+                
+                if (isset($this['logger']))
+                {
+                    $this['logger']->info(get_class($provider) . ' is booted.');
+                }
+            }
         }
-        
-        array_walk(
-            $this->Providers, function ($p) {
-            $this->bootProvider($p);
-        }
-        );
         
         $this->booted = true;
     }

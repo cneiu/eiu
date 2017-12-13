@@ -18,7 +18,7 @@ use eiu\components\cache\CacheCacheException;
  *
  * @package eiu\components\cache\adapter
  */
-class Sqlite extends AbstractAdapter
+class Sqlite extends AbstractICacheAdapter
 {
     
     /**

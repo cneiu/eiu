@@ -39,25 +39,19 @@ class DatabaseComponent extends Component implements IDatabaseDriver
     /**
      * SessionComponent constructor.
      *
-     * @param Application    $app
-     * @param ConfigProvider $config
-     * @param LoggerProvider $logger
+     * @param Application     $app
+     * @param ConfigProvider  $config
+     * @param LoggerProvider  $logger
+     * @param IDatabaseDriver $driver
+     *
+     * @throws DatabaseException
      */
-    public function __construct(Application $app, ConfigProvider $config, LoggerProvider $logger)
+    public function __construct(Application $app, ConfigProvider $config, LoggerProvider $logger, IDatabaseDriver $driver)
     {
         parent::__construct($app);
-        
-        switch ($config['db']['DRIVER'])
-        {
-            case 'MYSQL':
-                $this->app->singleton(IDatabaseDriver::class, MySQLDriver::class, true);
-                $this->driver = $this->app[IDatabaseDriver::class];
-                break;
-            
-            default:
-                throw new DatabaseException("Undefined database driver \"{$config['db']['DRIVER']}\".");
-        }
-        
+    
+        $this->driver = $driver;
+
         $app->instance(__CLASS__, $this);
         
         $logger->info(__CLASS__ . " is called");

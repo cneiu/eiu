@@ -87,6 +87,7 @@ class CookieComponent extends Component implements ArrayAccess
      * @param ConfigProvider     $config
      * @param LoggerProvider     $logger
      * @param EncrypterComponent $encrypter
+     * @param RequestProvider    $request
      */
     public function __construct(Application $app, ConfigProvider $config, LoggerProvider $logger, EncrypterComponent $encrypter, RequestProvider $request)
     {

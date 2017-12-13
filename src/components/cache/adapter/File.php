@@ -18,7 +18,7 @@ use eiu\components\cache\CacheException;
  *
  * @package eiu\components\cache\adapter
  */
-class File extends AbstractAdapter
+class File extends AbstractICacheAdapter
 {
     
     /**
@@ -57,7 +57,7 @@ class File extends AbstractAdapter
      *
      * @param  string $dir
      *
-     * @throws Exception
+     * @throws \Exception
      * @return File
      */
     public function setDir($dir)
@@ -209,7 +209,7 @@ class File extends AbstractAdapter
     {
         if (!$dh = @opendir($this->dir))
         {
-            return;
+            return $this;
         }
         
         while (false !== ($obj = readdir($dh)))

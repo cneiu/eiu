@@ -15,7 +15,7 @@ namespace eiu\components\cache\adapter;
  *
  * @package eiu\components\cache\adapter
  */
-class Session extends AbstractAdapter
+class Session extends AbstractICacheAdapter
 {
     /**
      * Constructor

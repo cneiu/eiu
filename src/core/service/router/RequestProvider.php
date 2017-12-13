@@ -14,18 +14,12 @@ use ArrayAccess;
 use eiu\components\cookie\CookieComponent;
 use eiu\components\session\SessionComponent;
 use eiu\core\service\config\ConfigProvider;
-use eiu\core\service\logger\LoggerProvider;
 use eiu\core\service\Provider;
 use eiu\core\service\security\SecurityProvider;
 
 
 class RequestProvider extends Provider implements ArrayAccess
 {
-    /**
-     * @var LoggerProvider
-     */
-    private $logger;
-    
     /**
      * 请求数组
      *
@@ -54,28 +48,15 @@ class RequestProvider extends Provider implements ArrayAccess
     private $cookie = null;
     
     /**
-     * 服务注册
-     */
-    public function register()
-    {
-        // 填充到容器
-        $this->app->instance($this->alias(), $this);
-        $this->app->instance(__CLASS__, $this);
-    }
-    
-    /**
      * 服务启动
      *
      * @param ConfigProvider   $config
-     * @param LoggerProvider   $logger
      * @param SecurityProvider $security
      */
-    public function boot(ConfigProvider $config, LoggerProvider $logger, SecurityProvider $security)
+    public function boot(ConfigProvider $config, SecurityProvider $security)
     {
-        $this->config   = $config;
-        $this->logger   = $logger;
-        $this->security = $security;
-        
+        $this->config                  = $config;
+        $this->security                = $security;
         $this->requestData             = [];
         $this->requestData['router']   = [];
         $this->requestData['globals']  = [];
@@ -90,8 +71,6 @@ class RequestProvider extends Provider implements ArrayAccess
         $this->requestData['input']    = [];
         $this->requestData['header']   = [];
         $this->requestData['session']  = [];
-        
-        $this->logger->info($this->className() . " is booted");
     }
     
     /**

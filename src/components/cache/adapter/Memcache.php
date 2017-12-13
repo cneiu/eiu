@@ -18,7 +18,7 @@ use eiu\components\cache\CacheException;
  *
  * @package eiu\components\cache\adapter
  */
-class Memcache extends AbstractAdapter
+class Memcache extends AbstractICacheAdapter
 {
     
     /**

@@ -15,7 +15,7 @@ class ContextualBindingBuilder implements IContextualBindingBuilder
     /**
      * The underlying container instance.
      *
-     * @var \Illuminate\Container\Container
+     * @var Container
      */
     protected $container;
     
@@ -36,10 +36,9 @@ class ContextualBindingBuilder implements IContextualBindingBuilder
     /**
      * Create a new contextual binding builder.
      *
-     * @param  \Illuminate\Container\Container $container
-     * @param  string                          $concrete
+     * @param Container $container $container
+     * @param  string   $concrete
      *
-     * @return void
      */
     public function __construct(Container $container, $concrete)
     {

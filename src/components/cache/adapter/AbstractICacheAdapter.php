@@ -10,28 +10,55 @@
 namespace eiu\components\cache\adapter;
 
 /**
- * 缓存接口
+ * 抽象缓存适配器
  *
  * @package eiu\components\cache\adapter
  */
-interface AdapterInterface
+abstract class AbstractICacheAdapter implements ICacheAdapter
 {
     
     /**
-     * 设置全局过期时间
+     * Global time-to-live
+     *
+     * @var int
+     */
+    protected $ttl = 0;
+    
+    /**
+     * Constructor
+     *
+     * Instantiate the cache adapter object
      *
      * @param  int $ttl
-     *
-     * @return AdapterInterface
      */
-    public function setTtl($ttl);
+    public function __construct($ttl = 0)
+    {
+        $this->setTtl($ttl);
+    }
     
     /**
      * 获取全局过期时间
      *
      * @return int
      */
-    public function getTtl();
+    public function getTtl()
+    {
+        return $this->ttl;
+    }
+    
+    /**
+     * 设置全局过期时间
+     *
+     * @param  int $ttl
+     *
+     * @return AbstractICacheAdapter
+     */
+    public function setTtl($ttl)
+    {
+        $this->ttl = (int)$ttl;
+        
+        return $this;
+    }
     
     /**
      * 获取指定缓存过期时间
@@ -40,7 +67,7 @@ interface AdapterInterface
      *
      * @return int
      */
-    public function getItemTtl($id);
+    abstract public function getItemTtl($id);
     
     /**
      * 写入一个缓存
@@ -51,7 +78,7 @@ interface AdapterInterface
      *
      * @return void
      */
-    public function saveItem($id, $value, $ttl = null);
+    abstract public function saveItem($id, $value, $ttl = null);
     
     /**
      * 获取指定缓存
@@ -60,7 +87,7 @@ interface AdapterInterface
      *
      * @return mixed
      */
-    public function getItem($id);
+    abstract public function getItem($id);
     
     /**
      * 判断指定缓存是否存在
@@ -69,7 +96,7 @@ interface AdapterInterface
      *
      * @return boolean
      */
-    public function hasItem($id);
+    abstract public function hasItem($id);
     
     /**
      * 删除指定缓存
@@ -78,20 +105,20 @@ interface AdapterInterface
      *
      * @return void
      */
-    public function deleteItem($id);
+    abstract public function deleteItem($id);
     
     /**
      * 清除所有缓存
      *
      * @return void
      */
-    public function clear();
+    abstract public function clear();
     
     /**
      * 销毁缓存器
      *
      * @return void
      */
-    public function destroy();
+    abstract public function destroy();
     
 }
